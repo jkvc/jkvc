@@ -16,7 +16,7 @@ pnpm install
 pnpm dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:42096.
 
 ## Project Structure
 
