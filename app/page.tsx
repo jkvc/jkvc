@@ -1,65 +1,97 @@
-import Image from "next/image";
+import Hero from "./components/Hero";
+import ProjectCard from "./components/ProjectCard";
+import Footer from "./components/Footer";
+
+const projects = [
+  {
+    title: "Interactive Denoising Visualizer",
+    description:
+      "Step through the reverse diffusion process in real time. Drag a slider to control the noise schedule and watch images emerge from pure noise.",
+    tags: ["DDPM", "WebGL", "Interactive"],
+    status: "Demo",
+  },
+  {
+    title: "Guided Inpainting Canvas",
+    description:
+      "Paint masks directly on images and guide the diffusion model to fill regions with text prompts. Real-time inference with streaming previews.",
+    tags: ["Inpainting", "Canvas", "Streaming"],
+    status: "In Progress",
+  },
+  {
+    title: "Latent Space Explorer",
+    description:
+      "Navigate the latent space of a trained diffusion model. Interpolate between points, discover clusters, and understand what the model has learned.",
+    tags: ["Latent Space", "3D", "Exploration"],
+    status: "Planned",
+  },
+  {
+    title: "Controlnet Pose Playground",
+    description:
+      "Manipulate a 3D skeleton and see the diffusion model generate matching images in real time. Experiment with different control signals.",
+    tags: ["ControlNet", "Pose", "Real-time"],
+    status: "Planned",
+  },
+  {
+    title: "Sampling Algorithm Comparison",
+    description:
+      "Side-by-side comparison of DDPM, DDIM, DPM-Solver, and other sampling algorithms. Visualize how different schedulers affect generation quality and speed.",
+    tags: ["Sampling", "Comparison", "Education"],
+    status: "Planned",
+  },
+  {
+    title: "Attention Map Visualizer",
+    description:
+      "See where the model is looking at each denoising step. Overlay cross-attention maps on generated images to understand prompt-to-pixel relationships.",
+    tags: ["Attention", "Visualization", "Interpretability"],
+    status: "Planned",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+      <Hero />
+
+      <section id="projects" className="py-16 px-4 lg:px-8 max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold mb-8">Projects</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <ProjectCard key={project.title} {...project} />
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section id="about" className="py-16 px-4 lg:px-8 bg-base-200">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold mb-6">About</h2>
+          <div className="prose prose-lg max-w-none">
+            <p>
+              I work on diffusion model inference algorithms and build
+              interactive experiences that make generative AI more
+              understandable and controllable. My focus is on bridging the gap
+              between raw model capabilities and intuitive user interaction.
+            </p>
+            <p>
+              This site serves as a showcase for experiments, demos, and tools
+              that explore new ways to interact with diffusion models &mdash;
+              from real-time visualization of the denoising process to novel
+              control interfaces.
+            </p>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section id="contact" className="py-16 px-4 lg:px-8 max-w-3xl mx-auto">
+        <h2 className="text-3xl font-bold mb-6">Contact</h2>
+        <p className="text-base-content/70 mb-4">
+          Interested in collaborating or have questions about the work?
+        </p>
+        <a href="mailto:placeholder@example.com" className="btn btn-primary">
+          Get in Touch
+        </a>
+      </section>
+
+      <Footer />
+    </main>
   );
 }
