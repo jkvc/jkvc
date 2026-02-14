@@ -2,44 +2,37 @@ interface ProjectCardProps {
   title: string;
   description: string;
   tags: string[];
-  status?: string;
-  href?: string;
+  gradient: string;
 }
 
 export default function ProjectCard({
   title,
   description,
   tags,
-  status = "In Progress",
-  href,
+  gradient,
 }: ProjectCardProps) {
   return (
-    <div className="card bg-base-100 shadow-md border border-base-300">
-      <div className="card-body">
-        <div className="flex items-center justify-between">
-          <h3 className="card-title">{title}</h3>
-          <div className="badge badge-outline badge-sm">{status}</div>
-        </div>
-        <p className="text-base-content/70">{description}</p>
-        <div className="card-actions mt-2">
+    <div className="aspect-square relative overflow-hidden rounded-lg group cursor-pointer">
+      <div
+        className="absolute inset-0 transition-transform duration-300 group-hover:scale-105"
+        style={{ background: gradient }}
+      />
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors duration-300" />
+      <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <h3 className="text-white font-medium text-sm">{title}</h3>
+        <p className="text-white/70 text-xs mt-1 line-clamp-2">
+          {description}
+        </p>
+        <div className="flex flex-wrap gap-1 mt-2">
           {tags.map((tag) => (
-            <div key={tag} className="badge badge-primary badge-sm">
+            <span
+              key={tag}
+              className="text-[10px] text-white/60 border border-white/30 rounded-full px-2 py-0.5"
+            >
               {tag}
-            </div>
+            </span>
           ))}
         </div>
-        {href && (
-          <div className="card-actions justify-end mt-4">
-            <a
-              href={href}
-              className="btn btn-sm btn-outline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              View Demo
-            </a>
-          </div>
-        )}
       </div>
     </div>
   );
