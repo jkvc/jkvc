@@ -93,7 +93,7 @@ const ParallaxCanvas = forwardRef<ParallaxCanvasHandle, Props>(
         <label className="flex items-center gap-2 text-xs text-base-content/50 cursor-pointer w-fit">
           <input
             type="checkbox"
-            className="checkbox checkbox-xs"
+            className="toggle toggle-xs toggle-primary"
             checked={parallaxEnabled}
             onChange={(e) => setParallaxEnabled(e.target.checked)}
           />

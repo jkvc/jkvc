@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import TextImageClient from "./TextImageClient";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function TextImagePage() {
   return (
     <div className="min-h-screen bg-[#FCFCFC] text-base-content px-6 pt-4 pb-16 sm:px-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <Link
           href="/"
           className="text-sm opacity-50 hover:opacity-80 transition-opacity"
@@ -33,7 +34,9 @@ export default function TextImagePage() {
         </div>
 
         <div className="mt-12">
-          <TextImageClient />
+          <Suspense>
+            <TextImageClient />
+          </Suspense>
         </div>
       </div>
     </div>
