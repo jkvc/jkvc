@@ -148,27 +148,19 @@ function drawShape(
     }
     case "uppercase": {
       const fontSize = radius * 2.5;
-      ctx.font = `900 ${fontSize}px Arial Black, Arial, Helvetica, sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.font = `900 ${fontSize}px Arial Black,sans-serif`;
       ctx.fillText(char, x, y);
       break;
     }
     case "mono-uppercase": {
       const fontSize = radius * 2.8;
-      ctx.font = `900 ${fontSize}px "Courier New", Courier, monospace`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.lineWidth = fontSize * 0.08;
-      ctx.strokeText(char, x, y);
+      ctx.font = `900 ${fontSize}px Courier New,monospace`;
       ctx.fillText(char, x, y);
       break;
     }
     case "lowercase": {
       const fontSize = radius * 2.5;
-      ctx.font = `900 ${fontSize}px Georgia, "Times New Roman", serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.font = `900 ${fontSize}px Georgia,serif`;
       ctx.fillText(char.toLowerCase(), x, y);
       break;
     }
@@ -260,11 +252,19 @@ export default function DotParallaxViewer({ originalUrl, depthUrl }: Props) {
     canvas.width = width;
     canvas.height = height;
 
+    const isTextShape =
+      shape === "uppercase" || shape === "mono-uppercase" || shape === "lowercase";
+
     function animate() {
       const ctx = canvas!.getContext("2d")!;
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, width, height);
+
+      if (isTextShape) {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+      }
 
       const mx = mousePosRef.current.x;
       const my = mousePosRef.current.y;
