@@ -1,0 +1,1 @@
+CHECK_BUILD=1 npx pnpm run build
