@@ -5,6 +5,9 @@ import DotParallaxViewer from "./DotParallaxViewer";
 
 const TEST_IMAGES = [
   { name: "mactree", src: "/test_images/mactree.jpg" },
+  { name: "a", src: "/test_images/a.jpg" },
+  { name: "b", src: "/test_images/b.jpg" },
+  { name: "c", src: "/test_images/c.jpg" },
 ];
 
 export default function DebugDepth() {

@@ -22,11 +22,12 @@ Upload image
 
 | Param | What it does | Default |
 |-------|-------------|---------|
-| Dots/edge | Sample points along the image's longer dimension | 50 |
-| Base size | Min dot radius (furthest dots) | auto from spacing |
-| Depth multiplier | Extra radius at max depth | auto from spacing |
+| Dots/edge | Sample points along the image's longer dimension | 70 |
+| Depth multiplier | Extra radius at max depth | 2.0 (auto from spacing) |
 | Parallax strength | Max pixel shift for nearest dots | 20 |
 | Opacity | Dot opacity | 1.0 |
+
+Base size (min dot radius) is auto-computed from spacing and not user-adjustable.
 
 ## File Structure
 
