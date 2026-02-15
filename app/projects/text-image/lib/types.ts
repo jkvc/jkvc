@@ -38,3 +38,10 @@ export interface PreRenderedLayer {
   canvas: HTMLCanvasElement;
   region: SegmentRegion;
 }
+
+/** Raw segment from the Replicate segformer model */
+export interface SegmentResult {
+  label: string;
+  mask: string; // base64-encoded PNG
+  score: null;
+}
