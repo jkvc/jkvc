@@ -2,51 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import ProjectCard from "./components/ProjectCard";
+import { projects } from "./projects/data";
 
-const projects = [
-  {
-    title: "Interactive Denoising Visualizer",
-    description:
-      "Step through reverse diffusion in real time. Control the noise schedule and watch images emerge.",
-    tags: ["DDPM", "WebGL"],
-    gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  },
-  {
-    title: "Guided Inpainting Canvas",
-    description:
-      "Paint masks on images and guide diffusion to fill regions with text prompts.",
-    tags: ["Inpainting", "Streaming"],
-    gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-  },
-  {
-    title: "Latent Space Explorer",
-    description:
-      "Navigate latent space. Interpolate between points and discover clusters.",
-    tags: ["Latent Space", "3D"],
-    gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-  },
-  {
-    title: "ControlNet Pose Playground",
-    description:
-      "Manipulate a 3D skeleton and generate matching images in real time.",
-    tags: ["ControlNet", "Pose"],
-    gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-  },
-  {
-    title: "Sampling Algorithm Comparison",
-    description:
-      "Side-by-side comparison of DDPM, DDIM, DPM-Solver and other samplers.",
-    tags: ["Sampling", "Education"],
-    gradient: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-  },
-  {
-    title: "Attention Map Visualizer",
-    description:
-      "Overlay cross-attention maps on generated images at each denoising step.",
-    tags: ["Attention", "Interpretability"],
-    gradient: "linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)",
-  },
-];
+const isDev = process.env.NODE_ENV === "development";
+const visible = projects.filter((p) => isDev || p.ready);
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
@@ -95,8 +54,12 @@ export default function Home() {
             Projects
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {projects.map((project) => (
-              <ProjectCard key={project.title} {...project} />
+            {visible.map((project) => (
+              <ProjectCard
+                key={project.slug}
+                {...project}
+                draft={isDev && !project.ready}
+              />
             ))}
           </div>
         </section>
