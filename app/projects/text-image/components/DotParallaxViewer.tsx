@@ -1,5 +1,6 @@
 "use client";
 
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SegmentResult } from "../lib/types";
 
@@ -17,7 +18,10 @@ interface Dot {
   g: number;
   b: number;
   char: string;
+  charZh: string;
+  charIcon: string;
   label?: string;
+  rotation: number;
 }
 
 type Shape =
@@ -28,7 +32,9 @@ type Shape =
   | "uppercase"
   | "mono-uppercase"
   | "lowercase"
-  | "label";
+  | "label"
+  | "label-zh"
+  | "label-icon";
 
 const SHAPES: { id: Shape; label: string; title: string; fontClass?: string; needsSegments?: boolean }[] = [
   { id: "circle", label: "●", title: "Circle" },
@@ -38,8 +44,86 @@ const SHAPES: { id: Shape; label: string; title: string; fontClass?: string; nee
   { id: "uppercase", label: "A", title: "Random uppercase (sans-serif)", fontClass: "font-sans font-bold" },
   { id: "mono-uppercase", label: "M", title: "Random uppercase (monospace)", fontClass: "font-mono font-bold" },
   { id: "lowercase", label: "a", title: "Random lowercase (serif)", fontClass: "font-serif font-bold italic" },
-  { id: "label", label: "Seg", title: "Segmentation label (monospace)", fontClass: "font-mono font-bold", needsSegments: true },
+  { id: "label", label: "Seg", title: "Segmentation label (sans-serif)", fontClass: "font-sans font-bold", needsSegments: true },
+  { id: "label-zh", label: "文", title: "Segmentation label (Traditional Chinese)", needsSegments: true },
+  { id: "label-icon", label: "Ico", title: "Segmentation label (icons)", fontClass: "font-sans font-bold", needsSegments: true },
 ];
+
+const LABEL_ZH_MAP: Record<string, string> = {
+  wall: "壁", building: "樓", sky: "空", floor: "地", tree: "木",
+  ceiling: "頂", road: "路", bed: "床", windowpane: "窗", grass: "草",
+  cabinet: "櫃", sidewalk: "徑", person: "人", earth: "土", door: "門",
+  table: "桌", mountain: "山", plant: "卉", curtain: "簾", chair: "椅",
+  car: "車", water: "水", painting: "畫", sofa: "沙", shelf: "架",
+  house: "宅", sea: "海", mirror: "鏡", rug: "毯", field: "野",
+  armchair: "椅", seat: "座", fence: "籬", desk: "桌", rock: "岩",
+  wardrobe: "衣", lamp: "燈", bathtub: "浴", railing: "欄", cushion: "墊",
+  base: "基", box: "箱", column: "柱", signboard: "牌", chest: "箱",
+  counter: "檯", sand: "沙", sink: "池", skyscraper: "廈", fireplace: "爐",
+  refrigerator: "冰", grandstand: "臺", path: "徑", stairs: "梯", runway: "道",
+  screen: "幕", stairway: "階", river: "川", bridge: "橋", bookcase: "櫃",
+  blind: "簾", "coffee table": "几", toilet: "廁", flower: "花", book: "書",
+  hill: "丘", bench: "凳", countertop: "檯", stove: "灶", palm: "椰",
+  "kitchen island": "島", computer: "機", "swivel chair": "轉", boat: "舟",
+  bar: "酒", arcade: "廊", hovel: "舍", bus: "巴", towel: "巾",
+  light: "光", truck: "卡", tower: "塔", chandelier: "燭", awning: "篷",
+  streetlight: "燈", booth: "亭", television: "螢", airplane: "飛", "dirt track": "泥",
+  apparel: "衣", pole: "桿", land: "陸", bannister: "扶", escalator: "梯",
+  ottoman: "墩", bottle: "瓶", buffet: "餐", poster: "報", stage: "臺",
+  van: "廂", ship: "船", fountain: "泉", "conveyer belt": "帶", canopy: "幕",
+  washer: "洗", plaything: "玩", pool: "池", stool: "凳", barrel: "桶",
+  basket: "籃", waterfall: "瀑", tent: "帳", bag: "包", minibike: "摩",
+  cradle: "搖", oven: "烤", ball: "球", food: "食", step: "階",
+  tank: "罐", trade: "市", microwave: "微", pot: "壺", animal: "獸",
+  bicycle: "騎", lake: "湖", dishwasher: "碗", blanket: "被", sculpture: "雕",
+  hood: "罩", sconce: "燭", vase: "瓶", "traffic light": "燈", tray: "盤",
+  ashcan: "桶", fan: "扇", pier: "埠", "crt screen": "幕", plate: "碟",
+  monitor: "幕", "bulletin board": "榜", shower: "淋", radiator: "暖", glass: "杯",
+  clock: "鐘", flag: "旗",
+};
+
+function labelToZh(label: string): string {
+  return LABEL_ZH_MAP[label] ?? "文";
+}
+
+const LABEL_ICON_MAP: Record<string, string> = {
+  wall: "\uf0c8", building: "\uf1ad", sky: "\uf0c2", floor: "\uf0c8", tree: "\uf1bb",
+  ceiling: "\uf0c8", road: "\uf018", bed: "\uf236", windowpane: "\uf0c8", grass: "\uf4d8",
+  cabinet: "\uf0c8", sidewalk: "\uf018", person: "\uf183", earth: "\uf0ac", door: "\uf52b",
+  table: "\uf0ce", mountain: "\uf6fc", plant: "\uf4d8", curtain: "\uf0c8", chair: "\uf6c0",
+  car: "\uf1b9", water: "\uf043", painting: "\uf03e", sofa: "\uf4b8", shelf: "\uf0c8",
+  house: "\uf015", sea: "\uf773", mirror: "\uf0c8", rug: "\ue569", field: "\uf06c",
+  armchair: "\uf6c0", seat: "\uf6c0", fence: "\uf0c8", desk: "\uf0ce", rock: "\uf6fc",
+  wardrobe: "\uf0c8", lamp: "\uf0eb", bathtub: "\uf2cd", railing: "\uf0c8", cushion: "\uf0c8",
+  base: "\uf0c8", box: "\uf466", column: "\uf0c8", signboard: "\uf024", chest: "\uf466",
+  counter: "\uf0ce", sand: "\uf0c8", sink: "\ue06d", skyscraper: "\uf1ad", fireplace: "\uf06d",
+  refrigerator: "\uf2dc", grandstand: "\uf0c8", path: "\uf018", stairs: "\ue289", runway: "\uf018",
+  screen: "\uf26c", stairway: "\ue289", river: "\uf773", bridge: "\ue4c8", bookcase: "\uf02d",
+  blind: "\uf0c8", "coffee table": "\uf0ce", toilet: "\uf7d8", flower: "\uf4d8", book: "\uf02d",
+  hill: "\uf6fc", bench: "\uf6c0", countertop: "\uf0ce", stove: "\uf06d", palm: "\uf1bb",
+  "kitchen island": "\uf0ce", computer: "\uf390", "swivel chair": "\uf6c0", boat: "\uf21a",
+  bar: "\uf0ce", arcade: "\uf557", hovel: "\uf015", bus: "\uf207", towel: "\uf0c8",
+  light: "\uf0eb", truck: "\uf0d1", tower: "\uf66f", chandelier: "\uf0eb", awning: "\uf0c8",
+  streetlight: "\uf0eb", booth: "\uf54e", television: "\uf26c", airplane: "\uf072",
+  "dirt track": "\uf018", apparel: "\uf553", pole: "\uf0c8", land: "\uf0ac", bannister: "\uf0c8",
+  escalator: "\ue289", ottoman: "\uf4b8", bottle: "\uf0c8", buffet: "\uf0ce", poster: "\uf03e",
+  stage: "\uf0c8", van: "\uf0d1", ship: "\uf21a", fountain: "\uf043", "conveyer belt": "\uf0c8",
+  canopy: "\uf0c8", washer: "\uf0c8", plaything: "\uf0c8", pool: "\uf5c5", stool: "\uf6c0",
+  barrel: "\uf0c8", basket: "\uf0c8", waterfall: "\uf773", tent: "\ue57d", bag: "\uf0c8",
+  minibike: "\uf21c", cradle: "\uf236", oven: "\uf06d", ball: "\uf0c8", food: "\uf2e7",
+  step: "\ue289", tank: "\uf0c8", trade: "\uf54e", microwave: "\uf0c8", pot: "\uf7b6",
+  animal: "\uf1b0", bicycle: "\uf206", lake: "\uf773", dishwasher: "\uf0c8", blanket: "\uf236",
+  sculpture: "\uf5a6", hood: "\uf0c8", sconce: "\uf0eb", vase: "\uf0c8",
+  "traffic light": "\uf0eb", tray: "\uf0c8", ashcan: "\uf0c8", fan: "\uf863", pier: "\ue4c8",
+  "crt screen": "\uf26c", plate: "\uf0c8", monitor: "\uf390", "bulletin board": "\uf03e",
+  shower: "\uf2cc", radiator: "\uf0c8", glass: "\uf4e3", clock: "\uf017", flag: "\uf024",
+};
+
+const FA_FALLBACK_ICON = "\uf005"; // star
+
+function labelToIcon(label: string): string {
+  return LABEL_ICON_MAP[label] ?? FA_FALLBACK_ICON;
+}
 
 type Background = "black" | "white";
 
@@ -173,12 +257,16 @@ function computeDotsDepthWeighted(
     const green = origData.data[idx + 1];
     const blue = origData.data[idx + 2];
     const depth = depthData.data[idx] / 255;
-    const char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-
     const labelIdx = labelMap ? labelMap.map[py * width + px] : 0;
     const label = labelIdx > 0 ? labelMap!.labels[labelIdx - 1] : undefined;
+    const char = label
+      ? label.replace(/\s/g, "").charAt(0).toUpperCase()
+      : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    const charZh = label ? labelToZh(label) : "文";
+    const charIcon = label ? labelToIcon(label) : FA_FALLBACK_ICON;
+    const rotation = (Math.random() - 0.5) * (Math.PI / 2);
 
-    dots.push({ x: px, y: py, depth, r: red, g: green, b: blue, char, label });
+    dots.push({ x: px, y: py, depth, r: red, g: green, b: blue, char, charZh, charIcon, label, rotation });
   }
 
   dots.sort((a, b) => a.depth - b.depth);
@@ -247,10 +335,15 @@ function computeDots(
       const b = origData.data[idx + 2];
       const depth = depthData.data[idx] / 255;
 
-      const char = String.fromCharCode(65 + Math.floor(Math.random() * 26));
       const labelIdx = labelMap ? labelMap.map[py * width + px] : 0;
       const label = labelIdx > 0 ? labelMap!.labels[labelIdx - 1] : undefined;
-      dots.push({ x: px, y: py, depth, r, g, b, char, label });
+      const char = label
+        ? label.replace(/\s/g, "").charAt(0).toUpperCase()
+        : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      const charZh = label ? labelToZh(label) : "文";
+      const charIcon = label ? labelToIcon(label) : FA_FALLBACK_ICON;
+      const rotation = (Math.random() - 0.5) * (Math.PI / 2);
+      dots.push({ x: px, y: py, depth, r, g, b, char, charZh, charIcon, label, rotation });
     }
   }
 
@@ -274,7 +367,8 @@ function drawShape(
   y: number,
   radius: number,
   char: string,
-  label?: string
+  label?: string,
+  labelExpanded?: boolean
 ): void {
   switch (shape) {
     case "circle":
@@ -334,20 +428,29 @@ function drawShape(
       break;
     }
     case "label": {
-      const text = label ?? char;
-      const grid = labelToGrid(text);
-      const side = radius * 1.7;
-      const charWidthRatio = 0.6;
-      const fontSize = Math.min(
-        side / (grid.cols * charWidthRatio),
-        side / grid.rows
-      );
-      ctx.font = `900 ${fontSize}px Courier New,monospace`;
-      const totalH = grid.rows * fontSize;
-      const startY = y - totalH / 2 + fontSize / 2;
-      for (let r = 0; r < grid.rows; r++) {
-        ctx.fillText(grid.lines[r], x, startY + r * fontSize);
+      const fontSize = radius * 2.5;
+      ctx.font = `900 ${fontSize}px Arial Black,sans-serif`;
+      if (!labelExpanded) {
+        ctx.fillText(char, x, y);
+      } else {
+        const word = (label ?? char).replace(/\s/g, "").toUpperCase();
+        const firstCharW = ctx.measureText(char).width;
+        ctx.textAlign = "left";
+        ctx.fillText(word, x - firstCharW / 2, y);
+        ctx.textAlign = "center";
       }
+      break;
+    }
+    case "label-zh": {
+      const fontSize = radius * 2.5;
+      ctx.font = `900 ${fontSize}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+      ctx.fillText(char, x, y);
+      break;
+    }
+    case "label-icon": {
+      const fontSize = radius * 2.5;
+      ctx.font = `900 ${fontSize}px "Font Awesome 7 Free"`;
+      ctx.fillText(char, x, y);
       break;
     }
   }
@@ -362,10 +465,10 @@ export default function DotParallaxViewer({ originalUrl, depthUrl, segments }: P
   const imageSizeRef = useRef({ width: 0, height: 0 });
 
   const [shape, setShape] = useState<Shape>("circle");
-  const [background, setBackground] = useState<Background>("black");
+  const [background, setBackground] = useState<Background>("white");
   const [sampling, setSampling] = useState<Sampling>("grid");
   const [dotsPerLongEdge, setDotsPerLongEdge] = useState(45);
-  const [totalPoints, setTotalPoints] = useState(3000);
+  const [totalPoints, setTotalPoints] = useState(1800);
   const [depthBias, setDepthBias] = useState(0.7);
   const [baseSize, setBaseSize] = useState(4.0);
   const [depthMul, setDepthMul] = useState(7.0);
@@ -485,10 +588,40 @@ export default function DotParallaxViewer({ originalUrl, depthUrl, segments }: P
     canvas.height = height;
 
     const isTextShape =
-      shape === "uppercase" || shape === "mono-uppercase" || shape === "lowercase" || shape === "label";
+      shape === "uppercase" || shape === "mono-uppercase" || shape === "lowercase" || shape === "label" || shape === "label-zh" || shape === "label-icon";
+    const isLabel = shape === "label" || shape === "label-zh" || shape === "label-icon";
+    const isZh = shape === "label-zh";
+    const isIcon = shape === "label-icon";
+    const brightnessMul = background === "white" ? 0.8 : 1.2;
+    const proximityThresholdSq = (Math.max(width, height) * 0.1) ** 2;
+    const ctx = canvas.getContext("2d")!;
+
+    // Pre-allocate typed arrays once (reused across frames)
+    let oxArr = new Float32Array(0);
+    let oyArr = new Float32Array(0);
+    let distSqArr: Float32Array | null = null;
+
+    // Pre-build color LUT: brightness-adjusted RGB for each dot
+    // Rebuilt when dots change (via effect re-run)
+    const dots = dotsRef.current;
+    const len = dots.length;
+    const colorR = new Uint8Array(len);
+    const colorG = new Uint8Array(len);
+    const colorB = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      colorR[i] = Math.min(255, dots[i].r * brightnessMul) | 0;
+      colorG[i] = Math.min(255, dots[i].g * brightnessMul) | 0;
+      colorB[i] = Math.min(255, dots[i].b * brightnessMul) | 0;
+    }
+    // Pre-allocate offset/distance arrays
+    oxArr = new Float32Array(len);
+    oyArr = new Float32Array(len);
+    distSqArr = new Float32Array(len);
+
+    // Pre-cache font string (for non-proximity dots where radius is uniform-ish)
+    let lastFontSize = -1;
 
     function animate() {
-      const ctx = canvas!.getContext("2d")!;
       ctx.clearRect(0, 0, width, height);
       if (blurredBgRef.current) {
         ctx.drawImage(blurredBgRef.current, 0, 0);
@@ -503,20 +636,126 @@ export default function DotParallaxViewer({ originalUrl, depthUrl, segments }: P
 
       const mx = mousePosRef.current.x;
       const my = mousePosRef.current.y;
-      const dots = dotsRef.current;
 
-      for (let i = 0; i < dots.length; i++) {
+      const cursorActive = mx !== 0 || my !== 0;
+      const cursorX = cursorActive ? (mx + 1) / 2 * width : 0;
+      const cursorY = cursorActive ? (my + 1) / 2 * height : 0;
+
+      // Single pass: find closest + precompute offsets and squared distances
+      let closestIdx = -1;
+      let minDistSq = Infinity;
+
+      for (let i = 0; i < len; i++) {
         const d = dots[i];
         const ox = mx * parallaxStrength * d.depth;
         const oy = my * parallaxStrength * d.depth;
-        const radius = Math.max(0.5, baseSize + (d.depth - 0.5) * depthMul);
-        const color = `rgba(${d.r},${d.g},${d.b},${opacity})`;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = color;
-        drawShape(ctx, shape, d.x + ox, d.y + oy, radius, d.char, d.label);
+        oxArr[i] = ox;
+        oyArr[i] = oy;
+        if (cursorActive) {
+          const dx = cursorX - (d.x + ox);
+          const dy = cursorY - (d.y + oy);
+          const dSq = dx * dx + dy * dy;
+          distSqArr![i] = dSq;
+          if (dSq < minDistSq) {
+            minDistSq = dSq;
+            closestIdx = i;
+          }
+        }
+      }
+
+      // Draw all dots (skip closest, drawn last)
+      lastFontSize = -1;
+      for (let i = 0; i < len; i++) {
+        if (i === closestIdx) continue;
+        const d = dots[i];
+        let radius = Math.max(0.5, baseSize + (d.depth - 0.5) * depthMul);
+
+        if (cursorActive && distSqArr![i] < proximityThresholdSq) {
+          radius *= 1 + (1 - distSqArr![i] / proximityThresholdSq);
+        }
+
+        const drawX = d.x + oxArr[i];
+        const drawY = d.y + oyArr[i];
+        ctx.fillStyle = `rgba(${colorR[i]},${colorG[i]},${colorB[i]},${opacity})`;
+        ctx.strokeStyle = ctx.fillStyle;
+        const ch = isIcon ? d.charIcon : isZh ? d.charZh : d.char;
+        if (isLabel) {
+          ctx.translate(drawX, drawY);
+          ctx.rotate(d.rotation);
+          drawShapeInline(ctx, shape, radius, ch, d.label, false);
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+        } else {
+          drawShape(ctx, shape, drawX, drawY, radius, ch, d.label);
+        }
+      }
+
+      // Draw the closest dot last (on top), enlarged
+      if (closestIdx >= 0) {
+        const d = dots[closestIdx];
+        const drawX = d.x + oxArr[closestIdx];
+        const drawY = d.y + oyArr[closestIdx];
+        const radius = Math.max(0.5, baseSize + (d.depth - 0.5) * depthMul) * 3;
+        if (isLabel) {
+          ctx.shadowColor = background === "black" ? "rgba(0,0,0,0.7)" : "rgba(255,255,255,0.7)";
+          ctx.shadowBlur = radius * 1.5;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+        }
+        ctx.fillStyle = `rgba(${colorR[closestIdx]},${colorG[closestIdx]},${colorB[closestIdx]},${opacity})`;
+        ctx.strokeStyle = ctx.fillStyle;
+        const ch = isIcon ? d.charIcon : isZh ? d.charZh : d.char;
+        if (isLabel) {
+          ctx.translate(drawX, drawY);
+          ctx.rotate(d.rotation);
+          // Only "label" shape expands to full word; zh and icon just enlarge
+          drawShapeInline(ctx, shape, radius, ch, d.label, shape === "label");
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+        } else {
+          drawShape(ctx, shape, drawX, drawY, radius, ch, d.label);
+        }
       }
 
       rafRef.current = requestAnimationFrame(animate);
+    }
+
+    // Inlined text draw for label shapes -- avoids switch overhead and
+    // skips ctx.font set when fontSize hasn't changed
+    // Track last font type to avoid redundant font changes across shapes
+    let lastFontType: "label" | "label-zh" | "label-icon" | "" = "";
+
+    function drawShapeInline(
+      ctx2: CanvasRenderingContext2D,
+      sh: Shape,
+      radius: number,
+      ch: string,
+      label: string | undefined,
+      expanded: boolean
+    ) {
+      const fontSize = radius * 2.5;
+      const fontSizeRounded = fontSize | 0;
+      const fontType = sh as "label" | "label-zh" | "label-icon";
+      if (fontSizeRounded !== lastFontSize || fontType !== lastFontType) {
+        lastFontSize = fontSizeRounded;
+        lastFontType = fontType;
+        if (sh === "label-zh") {
+          ctx2.font = `900 ${fontSizeRounded}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+        } else if (sh === "label-icon") {
+          ctx2.font = `900 ${fontSizeRounded}px "Font Awesome 7 Free"`;
+        } else {
+          ctx2.font = `900 ${fontSizeRounded}px Arial Black,sans-serif`;
+        }
+      }
+      if (!expanded) {
+        ctx2.fillText(ch, 0, 0);
+      } else {
+        const word = (label ?? ch).replace(/\s/g, "").toUpperCase();
+        const firstCharW = ctx2.measureText(ch).width;
+        ctx2.textAlign = "left";
+        ctx2.fillText(word, -firstCharW / 2, 0);
+        ctx2.textAlign = "center";
+      }
     }
 
     rafRef.current = requestAnimationFrame(animate);
@@ -636,7 +875,7 @@ export default function DotParallaxViewer({ originalUrl, depthUrl, segments }: P
                 <input
                   type="range"
                   min={200}
-                  max={8000}
+                  max={3000}
                   step={100}
                   value={totalPoints}
                   onChange={(e) => setTotalPoints(Number(e.target.value))}
@@ -705,7 +944,7 @@ export default function DotParallaxViewer({ originalUrl, depthUrl, segments }: P
 
       <div
         ref={containerRef}
-        className="relative w-full cursor-crosshair"
+        className="relative w-full cursor-none"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
