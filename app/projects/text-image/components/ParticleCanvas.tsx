@@ -147,7 +147,7 @@ export default function ParticleCanvas({
   }, [originalUrl, depthUrl]);
 
   // -------------------------------------------------------------------------
-  // Build label map when segments arrive
+  // Build label map when segments arrive AND images are loaded
   // -------------------------------------------------------------------------
 
   useEffect(() => {
@@ -156,10 +156,13 @@ export default function ParticleCanvas({
       setLabelMapReady(false);
       return;
     }
+    // Need image dimensions from the load step; bail if not ready yet.
+    // The `loaded` dependency ensures we re-run once images finish loading.
     const { width, height } = imageSizeRef.current;
     if (width === 0 || height === 0) return;
 
     let cancelled = false;
+    setLabelMapReady(false);
     (async () => {
       const result = await decodeSegmentationMasks(segments, width, height);
       if (cancelled) return;
@@ -169,7 +172,7 @@ export default function ParticleCanvas({
     return () => {
       cancelled = true;
     };
-  }, [segments]);
+  }, [segments, loaded]);
 
   // -------------------------------------------------------------------------
   // Recompute particles when sampling params or label map change
