@@ -60,8 +60,8 @@ export interface ShapeConfig {
 export const SHAPES: ShapeConfig[] = [
   { id: "circle", label: "●", title: "Circle", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
   { id: "x", label: "✕", title: "X", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
-  { id: "rounded-square", label: "▢", title: "Rounded square", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
-  { id: "hexagon", label: "⬡", title: "Hexagon", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
+  { id: "rounded-square", label: "□", title: "Rounded square", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
+  { id: "hexagon", label: "◇", title: "Hexagon", isText: false, isLabelBased: false, charKey: "char", expandsOnHover: false },
   { id: "uppercase", label: "A", title: "Random uppercase (sans-serif)", fontClass: "font-sans font-bold", isText: true, isLabelBased: false, charKey: "char", expandsOnHover: false },
   { id: "mono-uppercase", label: "M", title: "Random uppercase (monospace)", fontClass: "font-mono font-bold", isText: true, isLabelBased: false, charKey: "char", expandsOnHover: false },
   { id: "lowercase", label: "a", title: "Random lowercase (serif)", fontClass: "font-serif font-bold italic", isText: true, isLabelBased: false, charKey: "char", expandsOnHover: false },

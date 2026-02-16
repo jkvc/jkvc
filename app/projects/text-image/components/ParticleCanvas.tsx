@@ -206,11 +206,31 @@ export default function ParticleCanvas({
   }, [config.sampling, config.dotsPerLongEdge, config.totalPoints, config.depthBias, labelMapReady, fixedConfig]);
 
   // -------------------------------------------------------------------------
+  // Ensure webfonts are loaded before canvas renders text glyphs
+  // -------------------------------------------------------------------------
+
+  const [fontsReady, setFontsReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Preload both FA and Chinese fonts so canvas draws never show tofu squares
+    const loads = [
+      document.fonts.load('900 16px "Font Awesome 7 Free"'),
+      document.fonts.load('900 16px "Noto Sans TC"'),
+    ];
+    Promise.all(loads).then(() => {
+      if (!cancelled) setFontsReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  // -------------------------------------------------------------------------
   // Animation loop
   // -------------------------------------------------------------------------
 
   useEffect(() => {
     if (!loaded) return;
+    if (!fontsReady) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -338,7 +358,7 @@ export default function ParticleCanvas({
 
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [loaded, baseSize, config.depthMul, config.parallaxStrength, config.opacity, config.shape, config.background]);
+  }, [loaded, fontsReady, baseSize, config.depthMul, config.parallaxStrength, config.opacity, config.shape, config.background]);
 
   // -------------------------------------------------------------------------
   // Mouse handlers
