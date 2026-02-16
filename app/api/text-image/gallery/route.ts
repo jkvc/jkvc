@@ -9,7 +9,7 @@ const GALLERY_KEY = "text-image:gallery";
 export async function GET() {
   try {
     const redis = getRedis();
-    const ids = await redis.lrange(GALLERY_KEY, 0, -1);
+    const ids = await redis.lrange(GALLERY_KEY, 0, 4); // max 5 items
     if (ids.length === 0) return NextResponse.json([]);
 
     const pipeline = redis.pipeline();

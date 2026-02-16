@@ -28,7 +28,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
     <>
       {/* Shape */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-base-content/50 font-medium">Shape</p>
+        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Shape</p>
         <div className="flex flex-wrap gap-1.5">
           {SHAPES.map((s) => {
             const disabled = !!(s.needsSegments && !hasSegments);
@@ -39,10 +39,10 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
                 disabled={disabled}
                 className={`h-8 min-w-8 px-2.5 rounded-md text-sm transition-all ${
                   disabled
-                    ? "bg-base-200/30 text-base-content/20 cursor-not-allowed"
+                    ? "bg-[#F5F5F5] text-[#DDD] cursor-not-allowed"
                     : shape === s.id
-                      ? "bg-base-content text-base-100"
-                      : "bg-base-200/60 text-base-content/40 hover:text-base-content/70 hover:bg-base-200"
+                      ? "bg-gold text-white shadow-sm"
+                      : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
                 } ${s.fontClass ?? ""}`}
                 title={disabled ? `${s.title} (needs segmentation data)` : s.title}
               >
@@ -55,7 +55,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Background */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-base-content/50 font-medium">Background</p>
+        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Background</p>
         <div className="flex flex-wrap gap-1.5">
           {BACKGROUNDS.map((bg) => (
             <button
@@ -63,8 +63,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
               onClick={() => onChange({ background: bg.id })}
               className={`h-8 px-3 rounded-md text-xs transition-all ${
                 background === bg.id
-                  ? "bg-base-content text-base-100"
-                  : "bg-base-200/60 text-base-content/40 hover:text-base-content/70 hover:bg-base-200"
+                  ? "bg-gold text-white shadow-sm"
+                  : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
               }`}
             >
               {bg.label}
@@ -75,7 +75,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Sampling */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-base-content/50 font-medium">Sampling</p>
+        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Sampling</p>
         <div className="flex flex-wrap gap-1.5">
           {SAMPLINGS.map((s) => (
             <button
@@ -83,15 +83,15 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
               onClick={() => onChange({ sampling: s.id })}
               className={`h-8 px-3 rounded-md text-xs transition-all ${
                 sampling === s.id
-                  ? "bg-base-content text-base-100"
-                  : "bg-base-200/60 text-base-content/40 hover:text-base-content/70 hover:bg-base-200"
+                  ? "bg-gold text-white shadow-sm"
+                  : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
               }`}
             >
               {s.label}
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-base-content/60 mt-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-[#999] mt-1">
           {sampling === "grid" ? (
             <label className="flex flex-col gap-1">
               <span>Dots/edge: {dotsPerLongEdge}</span>
@@ -102,7 +102,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
                 step={1}
                 value={dotsPerLongEdge}
                 onChange={(e) => onChange({ dotsPerLongEdge: Number(e.target.value) })}
-                className="range range-xs range-primary"
+                className="range range-xs"
+                style={{ accentColor: "#8A8578" }}
               />
             </label>
           ) : (
@@ -116,7 +117,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
                   step={100}
                   value={totalPoints}
                   onChange={(e) => onChange({ totalPoints: Number(e.target.value) })}
-                  className="range range-xs range-primary"
+                  className="range range-xs"
+                  style={{ accentColor: "#8A8578" }}
                 />
               </label>
               <label className="flex flex-col gap-1">
@@ -128,7 +130,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
                   step={0.1}
                   value={depthBias}
                   onChange={(e) => onChange({ depthBias: Number(e.target.value) })}
-                  className="range range-xs range-primary"
+                  className="range range-xs"
+                  style={{ accentColor: "#8A8578" }}
                 />
               </label>
             </>
@@ -138,8 +141,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Options */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-base-content/50 font-medium">Options</p>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs text-base-content/60">
+        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Options</p>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-[#999]">
           <label className="flex flex-col gap-1">
             <span>Depth mul: {depthMul.toFixed(1)}</span>
             <input
@@ -149,7 +152,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
               step={0.1}
               value={depthMul}
               onChange={(e) => onChange({ depthMul: Number(e.target.value) })}
-              className="range range-xs range-primary"
+              className="range range-xs"
+              style={{ accentColor: "#8A8578" }}
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -161,7 +165,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
               step={1}
               value={parallaxStrength}
               onChange={(e) => onChange({ parallaxStrength: Number(e.target.value) })}
-              className="range range-xs range-primary"
+              className="range range-xs"
+              style={{ accentColor: "#8A8578" }}
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -173,7 +178,8 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
               step={0.1}
               value={opacity}
               onChange={(e) => onChange({ opacity: Number(e.target.value) })}
-              className="range range-xs range-primary"
+              className="range range-xs"
+              style={{ accentColor: "#8A8578" }}
             />
           </label>
         </div>

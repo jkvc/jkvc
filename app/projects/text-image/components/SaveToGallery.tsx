@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { SegmentResult } from "../lib/types";
 import type { ParticleConfig } from "./ParticleControls";
+import DevOnlyButton from "@/app/components/DevOnlyButton";
 
 interface Props {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -24,7 +25,6 @@ export default function SaveToGallery({
   config,
 }: Props) {
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSave = useCallback(async () => {
@@ -33,7 +33,6 @@ export default function SaveToGallery({
 
     setSaving(true);
     setError(null);
-    setSaved(false);
 
     try {
       // Capture canvas snapshot as PNG blob
@@ -85,9 +84,6 @@ export default function SaveToGallery({
         const data = await res.json();
         throw new Error(data.error || "Save failed");
       }
-
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
@@ -97,26 +93,13 @@ export default function SaveToGallery({
 
   return (
     <div className="flex items-center justify-center gap-3">
-      <button
+      <DevOnlyButton
+        text="Save to Gallery"
         onClick={handleSave}
-        disabled={saving || !config}
-        className={`btn btn-sm rounded-full transition-all ${
-          saved
-            ? "btn-success text-success-content"
-            : "btn-ghost text-base-content/50 hover:text-base-content/80"
-        }`}
-      >
-        {saving ? (
-          <>
-            <span className="loading loading-spinner loading-xs" />
-            Saving&hellip;
-          </>
-        ) : saved ? (
-          "Saved!"
-        ) : (
-          "Save to Gallery"
-        )}
-      </button>
+        loading={saving}
+        loadingText="Saving…"
+        disabled={!config}
+      />
       {error && <span className="text-error text-xs">{error}</span>}
     </div>
   );

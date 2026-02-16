@@ -1,6 +1,5 @@
 "use client";
 
-import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SegmentResult } from "../lib/types";
 import type { Particle, LabelMap } from "../lib/particle-types";
@@ -392,7 +391,7 @@ export default function ParticleCanvas({
   if (!loaded) {
     return (
       <div className="flex justify-center py-8">
-        <span className="loading loading-spinner text-base-content/30" />
+        <span className="loading loading-spinner text-gold" />
       </div>
     );
   }
@@ -403,7 +402,7 @@ export default function ParticleCanvas({
     <div className="flex flex-col gap-6">
       {showControls && (
         <>
-          <p className="text-xs text-base-content/40 uppercase tracking-widest">
+          <p className="text-[10px] text-[#BBB] uppercase tracking-widest">
             Particle Parallax
           </p>
           <ParticleControls
@@ -426,7 +425,7 @@ export default function ParticleCanvas({
       >
         <canvas
           ref={canvasRef}
-          className="w-full h-auto rounded-lg border border-base-300"
+          className="w-full h-auto rounded-2xl border border-[#E8E8E8]"
         />
       </div>
     </div>

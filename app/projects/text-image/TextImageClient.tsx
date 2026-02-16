@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { SegmentResult, GalleryItem } from "./lib/types";
-import Gallery from "./components/Gallery";
 import InferenceExplorer from "./components/InferenceExplorer";
 import PresentationView from "./components/PresentationView";
 
@@ -12,7 +11,6 @@ import PresentationView from "./components/PresentationView";
 // ---------------------------------------------------------------------------
 
 type ViewMode = "presentation" | "expert";
-type Phase = "view" | "gallery";
 
 /** Shared inference state lifted from InferenceExplorer */
 export interface InferenceState {
@@ -25,22 +23,41 @@ export interface InferenceState {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers — derive phase + mode from the single ?mode= search param
+// Helpers
 // ---------------------------------------------------------------------------
 
-function getInitialPhase(param: string | null): Phase {
-  if (param === "gallery") return "gallery";
-  return "view";
-}
+/** Resize an image file so its longest edge is at most `maxEdge` px. */
+function resizeImage(file: File, maxEdge: number): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const { naturalWidth: w, naturalHeight: h } = img;
+      if (w <= maxEdge && h <= maxEdge) {
+        resolve(file);
+        return;
+      }
+      const scale = maxEdge / Math.max(w, h);
+      const nw = Math.round(w * scale);
+      const nh = Math.round(h * scale);
 
-function getInitialMode(param: string | null): ViewMode {
-  if (param === "expert") return "expert";
-  return "presentation";
-}
+      const canvas = document.createElement("canvas");
+      canvas.width = nw;
+      canvas.height = nh;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, nw, nh);
 
-function modeToParam(phase: Phase, viewMode: ViewMode): string {
-  if (phase === "gallery") return "gallery";
-  return viewMode; // "presentation" | "expert"
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("Resize failed"));
+          resolve(new File([blob], file.name, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.92
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image for resizing"));
+    img.src = URL.createObjectURL(file);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -52,8 +69,9 @@ export default function TextImageClient() {
   const router = useRouter();
 
   const modeParam = searchParams.get("mode");
-  const [phase, setPhase] = useState<Phase>(() => getInitialPhase(modeParam));
-  const [mode, setMode] = useState<ViewMode>(() => getInitialMode(modeParam));
+  const [mode, setMode] = useState<ViewMode>(
+    modeParam === "expert" ? "expert" : "presentation"
+  );
 
   // Shared inference state — persists across mode switches
   const [inference, setInference] = useState<InferenceState>({
@@ -65,15 +83,34 @@ export default function TextImageClient() {
     error: null,
   });
 
-  // Gallery viewer state — when viewing a saved gallery item
+  // Gallery items shown as examples in the upload area
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [viewingItem, setViewingItem] = useState<GalleryItem | null>(null);
+
+  // Fetch gallery items on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/text-image/gallery");
+        if (res.ok) {
+          const data: GalleryItem[] = await res.json();
+          setGalleryItems(data.slice(0, 5));
+        }
+      } catch {
+        // gallery fetch error — non-critical
+      }
+    })();
+  }, []);
 
   // -------------------------------------------------------------------------
   // File upload handler (shared between modes)
   // -------------------------------------------------------------------------
 
   const handleFile = useCallback(async (file: File) => {
-    const previewUrl = URL.createObjectURL(file);
+    // Resize to 720px longest edge before inference
+    const resizedFile = await resizeImage(file, 720);
+
+    const previewUrl = URL.createObjectURL(resizedFile);
     setInference({
       previewUrl,
       depthUrl: null,
@@ -85,7 +122,7 @@ export default function TextImageClient() {
     setViewingItem(null);
 
     const formData = new FormData();
-    formData.append("image", file);
+    formData.append("image", resizedFile);
 
     const depthPromise = (async () => {
       try {
@@ -110,7 +147,7 @@ export default function TextImageClient() {
     const segPromise = (async () => {
       try {
         const segFormData = new FormData();
-        segFormData.append("image", file);
+        segFormData.append("image", resizedFile);
         const res = await fetch("/api/text-image/segmentation", {
           method: "POST",
           body: segFormData,
@@ -133,43 +170,36 @@ export default function TextImageClient() {
   }, []);
 
   // -------------------------------------------------------------------------
-  // Navigation
+  // Reset — clear inference state to go back to upload view
   // -------------------------------------------------------------------------
 
-  const switchPhase = useCallback(
-    (p: Phase) => {
-      setPhase(p);
-      const param = modeToParam(p, mode);
-      router.replace(`?mode=${param}`, { scroll: false });
-    },
-    [router, mode]
-  );
-
-  const switchMode = useCallback(
-    (m: ViewMode) => {
-      setMode(m);
-      setPhase("view");
-      router.replace(`?mode=${m}`, { scroll: false });
-    },
-    [router]
-  );
+  const handleReset = useCallback(() => {
+    setInference({
+      previewUrl: null,
+      depthUrl: null,
+      segments: null,
+      depthLoading: false,
+      segLoading: false,
+      error: null,
+    });
+    setViewingItem(null);
+  }, []);
 
   // -------------------------------------------------------------------------
-  // Gallery item viewer
+  // Gallery item selection — load a saved example
   // -------------------------------------------------------------------------
 
-  const handleViewGalleryItem = useCallback(
+  const handleSelectGalleryItem = useCallback(
     (item: GalleryItem) => {
       setViewingItem(item);
       setInference({
         previewUrl: item.originalUrl,
         depthUrl: item.depthUrl,
-        segments: null, // will be loaded from segmentsUrl
+        segments: null,
         depthLoading: false,
         segLoading: true,
         error: null,
       });
-      // Fetch segments JSON from blob
       (async () => {
         try {
           const res = await fetch(item.segmentsUrl);
@@ -183,11 +213,26 @@ export default function TextImageClient() {
           }));
         }
       })();
+    },
+    []
+  );
 
-      const viewMode = item.mode === "expert" ? "expert" : "presentation";
-      setMode(viewMode);
-      setPhase("view");
-      router.replace(`?mode=${viewMode}`, { scroll: false });
+  const handleDeleteGalleryItem = useCallback(
+    async (id: string) => {
+      await fetch(`/api/text-image/gallery/${id}`, { method: "DELETE" });
+      setGalleryItems((prev) => prev.filter((item) => item.id !== id));
+    },
+    []
+  );
+
+  // -------------------------------------------------------------------------
+  // Navigation
+  // -------------------------------------------------------------------------
+
+  const switchMode = useCallback(
+    (m: ViewMode) => {
+      setMode(m);
+      router.replace(`?mode=${m}`, { scroll: false });
     },
     [router]
   );
@@ -200,69 +245,31 @@ export default function TextImageClient() {
 
   return (
     <div>
-      {/* Top navigation: Phase tabs */}
-      <div className="flex items-center gap-1.5 mb-8">
-        <button
-          className={`btn btn-sm rounded-full ${phase === "view" ? "btn-primary" : "btn-ghost"}`}
-          onClick={() => switchPhase("view")}
-        >
-          Canvas
-        </button>
-        <button
-          className={`btn btn-sm rounded-full ${phase === "gallery" ? "btn-primary" : "btn-ghost"}`}
-          onClick={() => switchPhase("gallery")}
-        >
-          Gallery
-        </button>
-
-        {/* Mode toggle (only visible on view phase) */}
-        {phase === "view" && (
-          <div className="ml-auto flex items-center gap-1 bg-base-200/60 rounded-full p-0.5">
-            <button
-              className={`px-3 py-1 text-xs rounded-full transition-all ${
-                mode === "presentation"
-                  ? "bg-base-content text-base-100"
-                  : "text-base-content/40 hover:text-base-content/70"
-              }`}
-              onClick={() => switchMode("presentation")}
-            >
-              Presentation
-            </button>
-            <button
-              className={`px-3 py-1 text-xs rounded-full transition-all ${
-                mode === "expert"
-                  ? "bg-base-content text-base-100"
-                  : "text-base-content/40 hover:text-base-content/70"
-              }`}
-              onClick={() => switchMode("expert")}
-            >
-              Expert
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* View phase */}
-      {phase === "view" && mode === "presentation" && (
+      {mode === "presentation" && (
         <PresentationView
           inference={inference}
           onFile={handleFile}
+          onReset={handleReset}
+          onSwitchToExpert={() => switchMode("expert")}
           isLoading={isLoading}
           viewingItem={viewingItem}
+          galleryItems={galleryItems}
+          onSelectGalleryItem={handleSelectGalleryItem}
+          onDeleteGalleryItem={handleDeleteGalleryItem}
         />
       )}
 
-      {phase === "view" && mode === "expert" && (
+      {mode === "expert" && (
         <InferenceExplorer
           inference={inference}
           onFile={handleFile}
+          onReset={handleReset}
+          onSwitchToPresentation={() => switchMode("presentation")}
           viewingItem={viewingItem}
+          galleryItems={galleryItems}
+          onSelectGalleryItem={handleSelectGalleryItem}
+          onDeleteGalleryItem={handleDeleteGalleryItem}
         />
-      )}
-
-      {/* Gallery phase */}
-      {phase === "gallery" && (
-        <Gallery onViewItem={handleViewGalleryItem} />
       )}
     </div>
   );

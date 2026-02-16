@@ -24,3 +24,6 @@ This file is for stable rules and conventions. Use code comments or README for i
 
 ### 4. Package Manager
 This project uses **pnpm**. Never use `npm` or `yarn` commands.
+
+### 5. Icons
+Use **Font Awesome 7** (`@fortawesome/fontawesome-free`) for all icons. Do **not** hand-draw inline SVG paths unless an absolutely custom icon is needed that Font Awesome does not provide. The CSS is imported globally in `app/globals.css`.

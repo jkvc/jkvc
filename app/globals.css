@@ -1,7 +1,23 @@
 @import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
 @plugin "daisyui";
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-serif: Georgia, "Times New Roman", serif;
+
+  /* Accent palette — warm slate */
+  --color-gold: #8A8578;
+  --color-gold-dark: #6B6860;
+  --color-gold-light: #A8A196;
+
+  /* Surface & text tokens */
+  --color-surface: #FAFAF8;
+  --color-text: #2C2C2C;
+  --color-text-heading: #1A1A1A;
+  --color-text-muted: #999;
+  --color-text-faint: #CCC;
+  --color-border: #E0E0E0;
+  --color-border-dashed: #DDD;
 }

@@ -13,7 +13,10 @@ export interface Preset {
   id: string;
   labelEn: string;
   labelZh: string;
-  emoji: string;
+  /** Short glyph/character shown in the segmented pill selector */
+  glyph: string;
+  /** Optional CSS font-family for the glyph (e.g. Font Awesome) */
+  glyphFont?: string;
   config: ParticleConfig;
 }
 
@@ -27,7 +30,7 @@ export const PRESETS: Preset[] = [
     id: "label-en",
     labelEn: "Labels",
     labelZh: "標籤",
-    emoji: "🔤",
+    glyph: "A",
     config: {
       shape: "label",
       background: "black",
@@ -44,7 +47,7 @@ export const PRESETS: Preset[] = [
     id: "label-zh",
     labelEn: "Chinese",
     labelZh: "漢字",
-    emoji: "文",
+    glyph: "文",
     config: {
       shape: "label-zh",
       background: "black",
@@ -61,7 +64,8 @@ export const PRESETS: Preset[] = [
     id: "label-icon",
     labelEn: "Icons",
     labelZh: "圖標",
-    emoji: "✨",
+    glyph: "\u{f1bb}",
+    glyphFont: "'Font Awesome 7 Free'",
     config: {
       shape: "label-icon",
       background: "black",
@@ -78,7 +82,7 @@ export const PRESETS: Preset[] = [
     id: "dots",
     labelEn: "Dots",
     labelZh: "圓點",
-    emoji: "●",
+    glyph: "●",
     config: {
       shape: "circle",
       background: "black",
