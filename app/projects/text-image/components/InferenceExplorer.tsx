@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import type { SegmentResult } from "../lib/types";
-import DotParallaxViewer from "./DotParallaxViewer";
+import ParticleCanvas from "./ParticleCanvas";
 import SegmentationMap from "./SegmentationMap";
 
 const TEST_IMAGES = [
@@ -12,7 +12,7 @@ const TEST_IMAGES = [
   { name: "c", src: "/test_images/c.jpg" },
 ];
 
-export default function DebugDepth() {
+export default function InferenceExplorer() {
   const [depthUrl, setDepthUrl] = useState<string | null>(null);
   const [segments, setSegments] = useState<SegmentResult[] | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -192,7 +192,7 @@ export default function DebugDepth() {
 
       {/* Row 3: Particle parallax */}
       {depthUrl && previewUrl && (
-        <DotParallaxViewer originalUrl={previewUrl} depthUrl={depthUrl} segments={segments ?? undefined} />
+        <ParticleCanvas originalUrl={previewUrl} depthUrl={depthUrl} segments={segments ?? undefined} />
       )}
     </div>
   );

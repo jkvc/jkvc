@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { SegmentResult } from "../lib/types";
+import { loadImage } from "../lib/image-utils";
 
 // Distinct colors for segmentation classes
 const PALETTE: [number, number, number][] = [
@@ -32,16 +33,6 @@ interface Props {
   segments: SegmentResult[];
 }
 
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
 export default function SegmentationMap({ originalUrl, segments }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -53,7 +44,7 @@ export default function SegmentationMap({ originalUrl, segments }: Props) {
       if (!canvas || segments.length === 0) return;
 
       // Load original image to get dimensions
-      const origImg = await loadImage(originalUrl);
+      const origImg = await loadImage(originalUrl, "anonymous");
       if (cancelled) return;
 
       const w = origImg.naturalWidth;
