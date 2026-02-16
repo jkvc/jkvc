@@ -1,84 +1,26 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import type { SegmentResult } from "../lib/types";
+import { useCallback, useRef, useState } from "react";
+import type { InferenceState } from "../TextImageClient";
+import type { GalleryItem } from "../lib/types";
+import type { ParticleConfig } from "./ParticleControls";
+import { TEST_IMAGES } from "../lib/test-images";
 import ParticleCanvas from "./ParticleCanvas";
 import SegmentationMap from "./SegmentationMap";
+import SaveToGallery from "./SaveToGallery";
 
-const TEST_IMAGES = [
-  { name: "mactree", src: "/test_images/mactree.jpg" },
-  { name: "a", src: "/test_images/a.jpg" },
-  { name: "b", src: "/test_images/b.jpg" },
-  { name: "c", src: "/test_images/c.jpg" },
-];
+interface Props {
+  inference: InferenceState;
+  onFile: (file: File) => void;
+  viewingItem: GalleryItem | null;
+}
 
-export default function InferenceExplorer() {
-  const [depthUrl, setDepthUrl] = useState<string | null>(null);
-  const [segments, setSegments] = useState<SegmentResult[] | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [depthLoading, setDepthLoading] = useState(false);
-  const [segLoading, setSegLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
+export default function InferenceExplorer({ inference, onFile, viewingItem }: Props) {
+  const { previewUrl, depthUrl, segments, depthLoading, segLoading, error } = inference;
   const loading = depthLoading || segLoading;
-
-  const handleFile = useCallback(async (file: File) => {
-    setPreviewUrl(URL.createObjectURL(file));
-    setDepthUrl(null);
-    setSegments(null);
-    setError(null);
-    setDepthLoading(true);
-    setSegLoading(true);
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    // Fire depth and segmentation concurrently
-    const depthPromise = (async () => {
-      try {
-        const res = await fetch("/api/text-image/depth", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Depth request failed");
-        setDepthUrl(data.depthUrl);
-      } catch (e) {
-        setError((prev) =>
-          prev
-            ? `${prev}; Depth: ${e instanceof Error ? e.message : "Unknown"}`
-            : `Depth: ${e instanceof Error ? e.message : "Unknown error"}`
-        );
-      } finally {
-        setDepthLoading(false);
-      }
-    })();
-
-    const segPromise = (async () => {
-      try {
-        // Need a separate FormData since the body stream can only be read once
-        const segFormData = new FormData();
-        segFormData.append("image", file);
-        const res = await fetch("/api/text-image/segmentation", {
-          method: "POST",
-          body: segFormData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Segmentation request failed");
-        setSegments(data.segments);
-      } catch (e) {
-        setError((prev) =>
-          prev
-            ? `${prev}; Seg: ${e instanceof Error ? e.message : "Unknown"}`
-            : `Seg: ${e instanceof Error ? e.message : "Unknown error"}`
-        );
-      } finally {
-        setSegLoading(false);
-      }
-    })();
-
-    await Promise.all([depthPromise, segPromise]);
-  }, []);
+  const ready = !!(previewUrl && depthUrl && segments && !loading);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [currentConfig, setCurrentConfig] = useState<ParticleConfig | null>(null);
 
   const handleTestImage = useCallback(
     async (src: string) => {
@@ -87,13 +29,14 @@ export default function InferenceExplorer() {
       const file = new File([blob], src.split("/").pop() || "test.jpg", {
         type: blob.type,
       });
-      handleFile(file);
+      onFile(file);
     },
-    [handleFile]
+    [onFile]
   );
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Upload */}
       <div className="border-2 border-dashed border-base-300 hover:border-base-content/30 rounded-lg p-8 text-center transition-colors">
         <p className="text-base-content/50 text-sm mb-3">
           Upload an image to estimate depth &amp; segmentation
@@ -104,11 +47,12 @@ export default function InferenceExplorer() {
           className="file-input file-input-sm file-input-bordered rounded-full"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) handleFile(f);
+            if (f) onFile(f);
           }}
         />
       </div>
 
+      {/* Test images */}
       <div>
         <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
           Test images
@@ -133,66 +77,76 @@ export default function InferenceExplorer() {
 
       {error && <div className="text-error text-sm">{error}</div>}
 
-      {/* Row 1: Original */}
-      {previewUrl && (
-        <div>
-          <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-            Original
+      {/* Loading state */}
+      {previewUrl && !ready && (
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <p className="text-xs text-base-content/30">
+            {depthLoading && segLoading
+              ? "Running depth estimation & segmentation"
+              : depthLoading
+                ? "Running depth estimation\u2026"
+                : "Running segmentation\u2026"}
           </p>
-          <img
-            src={previewUrl}
-            alt="Original"
-            className="w-full rounded-lg border border-base-300"
-          />
         </div>
       )}
 
-      {/* Row 2: Depth + Segmentation side by side */}
-      {previewUrl && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Results — only shown when both depth and segmentation are ready */}
+      {ready && (
+        <>
+          {/* Original */}
           <div>
             <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-              Depth Map
+              Original
             </p>
-            {depthLoading ? (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30">
-                <span className="loading loading-spinner loading-lg text-primary" />
-              </div>
-            ) : depthUrl ? (
+            <img
+              src={previewUrl}
+              alt="Original"
+              className="w-full rounded-lg border border-base-300"
+            />
+          </div>
+
+          {/* Depth + Segmentation side by side */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+                Depth Map
+              </p>
               <img
                 src={depthUrl}
                 alt="Depth map"
                 className="w-full rounded-lg border border-base-300"
               />
-            ) : (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30 text-base-content/30 text-sm">
-                No depth data
-              </div>
-            )}
-          </div>
-
-          <div>
-            <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-              Segmentation
-            </p>
-            {segLoading ? (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30">
-                <span className="loading loading-spinner loading-lg text-primary" />
-              </div>
-            ) : segments && previewUrl ? (
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+                Segmentation
+              </p>
               <SegmentationMap originalUrl={previewUrl} segments={segments} />
-            ) : (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30 text-base-content/30 text-sm">
-                No segmentation data
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Row 3: Particle parallax */}
-      {depthUrl && previewUrl && (
-        <ParticleCanvas originalUrl={previewUrl} depthUrl={depthUrl} segments={segments ?? undefined} />
+          {/* Particle parallax */}
+          <ParticleCanvas
+            originalUrl={previewUrl}
+            depthUrl={depthUrl}
+            segments={segments}
+            canvasRefOut={canvasRef}
+            onConfigChange={setCurrentConfig}
+            initialConfig={viewingItem?.mode === "expert" ? viewingItem.config : undefined}
+          />
+
+          {/* Save to Gallery */}
+          <SaveToGallery
+            canvasRef={canvasRef}
+            originalUrl={previewUrl}
+            depthUrl={depthUrl}
+            segments={segments}
+            mode="expert"
+            presetId={null}
+            config={currentConfig}
+          />
+        </>
       )}
     </div>
   );

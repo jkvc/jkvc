@@ -1,15 +1,46 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
 import { projects } from "./projects/data";
 
-const isDev = process.env.NODE_ENV === "development";
-const visible = projects.filter((p) => isDev || p.ready);
+const STORAGE_KEY = "jkvc:show-drafts";
+
+function subscribeToStorage(cb: () => void) {
+  const handler = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) cb();
+  };
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
+
+function getShowDrafts() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function getShowDraftsServer() {
+  return false;
+}
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
+  const [, forceRender] = useState(0);
   const heroRef = useRef<HTMLHeadingElement>(null);
+
+  const toggleDrafts = useCallback(() => {
+    try {
+      const next = !getShowDrafts();
+      localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+    } catch {
+      // localStorage unavailable
+    }
+    forceRender((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -19,6 +50,8 @@ export default function Home() {
     if (heroRef.current) observer.observe(heroRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const visible = projects.filter((p) => showDrafts || p.ready);
 
   return (
     <div className="min-h-screen bg-[#FCFCFC] text-base-content px-6 pt-4 pb-16 sm:px-8">
@@ -50,15 +83,28 @@ export default function Home() {
 
         {/* Projects */}
         <section id="projects" className="mt-16">
-          <h2 className="text-xs font-medium uppercase tracking-widest text-base-content/40 mb-6">
-            Projects
-          </h2>
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-xs font-medium uppercase tracking-widest text-base-content/40">
+              Projects
+            </h2>
+            <button
+              onClick={toggleDrafts}
+              className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
+                showDrafts
+                  ? "border-base-content/30 text-base-content/60 bg-base-content/5"
+                  : "border-transparent text-base-content/20 hover:text-base-content/40 hover:border-base-content/15"
+              }`}
+              title={showDrafts ? "Hide work-in-progress projects" : "Show work-in-progress projects"}
+            >
+              {showDrafts ? "wip on" : "wip"}
+            </button>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {visible.map((project) => (
               <ProjectCard
                 key={project.slug}
                 {...project}
-                draft={isDev && !project.ready}
+                draft={showDrafts && !project.ready}
               />
             ))}
           </div>
