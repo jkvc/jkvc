@@ -2,12 +2,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { projects } from "../data";
 
-const isDev = process.env.NODE_ENV === "development";
-
 export function generateStaticParams() {
-  return projects
-    .filter((p) => isDev || p.ready)
-    .map((p) => ({ slug: p.slug }));
+  // Generate pages for all projects so they're reachable when the
+  // client-side "show drafts" toggle is enabled, even in production.
+  return projects.map((p) => ({ slug: p.slug }));
 }
 
 export default async function ProjectPage({
@@ -18,7 +16,7 @@ export default async function ProjectPage({
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
 
-  if (!project || (!isDev && !project.ready)) {
+  if (!project) {
     notFound();
   }
 
@@ -35,7 +33,7 @@ export default async function ProjectPage({
         <div className="mt-12">
           {!project.ready && (
             <div className="inline-block bg-black/5 text-base-content/50 text-xs font-medium uppercase tracking-wider px-3 py-1.5 rounded mb-4">
-              Under construction &mdash; dev only
+              Under construction
             </div>
           )}
           <h1 className="text-3xl font-bold tracking-tight">
