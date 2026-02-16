@@ -1,5 +1,5 @@
 import { del } from "@vercel/blob";
-import { Redis } from "@upstash/redis";
+import { getRedis } from "@/app/projects/text-image/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import type { GalleryItem } from "@/app/projects/text-image/lib/types";
 
@@ -12,12 +12,13 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const redis = Redis.fromEnv();
+    const redis = getRedis();
 
-    const item = await redis.get<GalleryItem>(`text-image:item:${id}`);
-    if (!item) {
+    const raw = await redis.get(`text-image:item:${id}`);
+    if (!raw) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+    const item = JSON.parse(raw) as GalleryItem;
 
     // Delete all blob assets
     const blobUrls = [item.imageUrl, item.originalUrl];

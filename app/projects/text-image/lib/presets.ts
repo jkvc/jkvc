@@ -30,7 +30,7 @@ export const PRESETS: Preset[] = [
     emoji: "🔤",
     config: {
       shape: "label",
-      background: "white",
+      background: "black",
       sampling: "grid",
       dotsPerLongEdge: 45,
       totalPoints: 1800,
@@ -81,7 +81,7 @@ export const PRESETS: Preset[] = [
     emoji: "●",
     config: {
       shape: "circle",
-      background: "white",
+      background: "black",
       sampling: "grid",
       dotsPerLongEdge: 45,
       totalPoints: 1800,

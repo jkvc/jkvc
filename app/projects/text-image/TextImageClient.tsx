@@ -25,17 +25,22 @@ export interface InferenceState {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Helpers — derive phase + mode from the single ?mode= search param
 // ---------------------------------------------------------------------------
 
-function getInitialPhase(tab: string | null): Phase {
-  if (tab === "gallery") return "gallery";
+function getInitialPhase(param: string | null): Phase {
+  if (param === "gallery") return "gallery";
   return "view";
 }
 
-function getInitialMode(tab: string | null): ViewMode {
-  if (tab === "expert") return "expert";
+function getInitialMode(param: string | null): ViewMode {
+  if (param === "expert") return "expert";
   return "presentation";
+}
+
+function modeToParam(phase: Phase, viewMode: ViewMode): string {
+  if (phase === "gallery") return "gallery";
+  return viewMode; // "presentation" | "expert"
 }
 
 // ---------------------------------------------------------------------------
@@ -46,12 +51,9 @@ export default function TextImageClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [phase, setPhase] = useState<Phase>(() =>
-    getInitialPhase(searchParams.get("tab"))
-  );
-  const [mode, setMode] = useState<ViewMode>(() =>
-    getInitialMode(searchParams.get("tab"))
-  );
+  const modeParam = searchParams.get("mode");
+  const [phase, setPhase] = useState<Phase>(() => getInitialPhase(modeParam));
+  const [mode, setMode] = useState<ViewMode>(() => getInitialMode(modeParam));
 
   // Shared inference state — persists across mode switches
   const [inference, setInference] = useState<InferenceState>({
@@ -137,24 +139,17 @@ export default function TextImageClient() {
   const switchPhase = useCallback(
     (p: Phase) => {
       setPhase(p);
-      if (p === "gallery") {
-        router.replace("?tab=gallery", { scroll: false });
-      } else {
-        router.replace(window.location.pathname, { scroll: false });
-      }
+      const param = modeToParam(p, mode);
+      router.replace(`?mode=${param}`, { scroll: false });
     },
-    [router]
+    [router, mode]
   );
 
   const switchMode = useCallback(
     (m: ViewMode) => {
       setMode(m);
-      // Stay on "view" phase when switching modes
       setPhase("view");
-      router.replace(
-        m === "expert" ? "?tab=expert" : window.location.pathname,
-        { scroll: false }
-      );
+      router.replace(`?mode=${m}`, { scroll: false });
     },
     [router]
   );
@@ -192,7 +187,7 @@ export default function TextImageClient() {
       const viewMode = item.mode === "expert" ? "expert" : "presentation";
       setMode(viewMode);
       setPhase("view");
-      router.replace(window.location.pathname, { scroll: false });
+      router.replace(`?mode=${viewMode}`, { scroll: false });
     },
     [router]
   );

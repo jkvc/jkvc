@@ -1,26 +1,33 @@
 import { put } from "@vercel/blob";
-import { Redis } from "@upstash/redis";
+import { getRedis } from "@/app/projects/text-image/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import type { GalleryItem } from "@/app/projects/text-image/lib/types";
 import type { ParticleConfig } from "@/app/projects/text-image/components/ParticleControls";
 
 const GALLERY_KEY = "text-image:gallery";
 
-function getRedis() {
-  return Redis.fromEnv();
-}
-
 export async function GET() {
   try {
     const redis = getRedis();
-    const ids: string[] = (await redis.lrange(GALLERY_KEY, 0, -1)) ?? [];
+    const ids = await redis.lrange(GALLERY_KEY, 0, -1);
     if (ids.length === 0) return NextResponse.json([]);
 
-    const items = await Promise.all(
-      ids.map((id) => redis.get<GalleryItem>(`text-image:item:${id}`))
-    );
+    const pipeline = redis.pipeline();
+    for (const id of ids) {
+      pipeline.get(`text-image:item:${id}`);
+    }
+    const results = await pipeline.exec();
 
-    return NextResponse.json(items.filter(Boolean));
+    const items: GalleryItem[] = [];
+    if (results) {
+      for (const [err, raw] of results) {
+        if (!err && typeof raw === "string") {
+          items.push(JSON.parse(raw) as GalleryItem);
+        }
+      }
+    }
+
+    return NextResponse.json(items);
   } catch {
     return NextResponse.json([]);
   }
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const redis = getRedis();
-    await redis.set(`text-image:item:${id}`, item);
+    await redis.set(`text-image:item:${id}`, JSON.stringify(item));
     await redis.lpush(GALLERY_KEY, id);
   } catch {
     // Redis not configured — blob was still uploaded successfully

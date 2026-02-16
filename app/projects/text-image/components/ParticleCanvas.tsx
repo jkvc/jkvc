@@ -69,7 +69,6 @@ export default function ParticleCanvas({
   );
   const [baseSize, setBaseSize] = useState(4.0);
   const [loaded, setLoaded] = useState(false);
-  const [labelMapReady, setLabelMapReady] = useState(false);
 
   const origDataRef = useRef<ImageData | null>(null);
   const depthDataRef = useRef<ImageData | null>(null);
@@ -102,7 +101,9 @@ export default function ParticleCanvas({
   }, []);
 
   // -------------------------------------------------------------------------
-  // Load images once
+  // Load images + decode segmentation masks in one shot.
+  // Canvas only renders once `loaded` is true, so we never show particles
+  // with missing label data.
   // -------------------------------------------------------------------------
 
   useEffect(() => {
@@ -112,7 +113,7 @@ export default function ParticleCanvas({
     (async () => {
       try {
         const [origImg, depthImg] = await Promise.all([
-          loadImage(originalUrl),
+          loadImage(originalUrl, "anonymous"),
           loadImage(depthUrl, "anonymous"),
         ]);
 
@@ -126,13 +127,25 @@ export default function ParticleCanvas({
         depthDataRef.current = getImageData(depthImg, w, h);
         blurredBgRef.current = createBlurredBackground(origImg, w, h);
 
+        // Decode segmentation masks (if provided) before first particle sample
+        if (segments && segments.length > 0) {
+          labelMapRef.current = await decodeSegmentationMasks(segments, w, h);
+        } else {
+          labelMapRef.current = null;
+        }
+
+        if (cancelled) return;
+
         const spacing = Math.max(w, h) / config.dotsPerLongEdge;
         setBaseSize(defaultBaseSize(spacing));
         setConfig((prev) => ({ ...prev, depthMul: fixedConfig ? prev.depthMul : defaultDepthMul(spacing) }));
+
+        // Initial particles are computed WITH the label map
         particlesRef.current = sampleParticlesGrid(
           origDataRef.current,
           depthDataRef.current,
-          config.dotsPerLongEdge
+          config.dotsPerLongEdge,
+          labelMapRef.current
         );
         setLoaded(true);
       } catch {
@@ -144,35 +157,7 @@ export default function ParticleCanvas({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [originalUrl, depthUrl]);
-
-  // -------------------------------------------------------------------------
-  // Build label map when segments arrive AND images are loaded
-  // -------------------------------------------------------------------------
-
-  useEffect(() => {
-    if (!segments || segments.length === 0) {
-      labelMapRef.current = null;
-      setLabelMapReady(false);
-      return;
-    }
-    // Need image dimensions from the load step; bail if not ready yet.
-    // The `loaded` dependency ensures we re-run once images finish loading.
-    const { width, height } = imageSizeRef.current;
-    if (width === 0 || height === 0) return;
-
-    let cancelled = false;
-    setLabelMapReady(false);
-    (async () => {
-      const result = await decodeSegmentationMasks(segments, width, height);
-      if (cancelled) return;
-      labelMapRef.current = result;
-      setLabelMapReady(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [segments, loaded]);
+  }, [originalUrl, depthUrl, segments]);
 
   // -------------------------------------------------------------------------
   // Recompute particles when sampling params or label map change
@@ -206,7 +191,7 @@ export default function ParticleCanvas({
         setConfig((prev) => ({ ...prev, depthMul: 0.0 }));
       }
     }
-  }, [config.sampling, config.dotsPerLongEdge, config.totalPoints, config.depthBias, labelMapReady, fixedConfig]);
+  }, [config.sampling, config.dotsPerLongEdge, config.totalPoints, config.depthBias, fixedConfig]);
 
   // -------------------------------------------------------------------------
   // Ensure webfonts are loaded before canvas renders text glyphs
