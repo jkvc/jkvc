@@ -18,6 +18,7 @@ interface Props {
 export default function InferenceExplorer({ inference, onFile, viewingItem }: Props) {
   const { previewUrl, depthUrl, segments, depthLoading, segLoading, error } = inference;
   const loading = depthLoading || segLoading;
+  const ready = !!(previewUrl && depthUrl && segments && !loading);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [currentConfig, setCurrentConfig] = useState<ParticleConfig | null>(null);
 
@@ -35,6 +36,7 @@ export default function InferenceExplorer({ inference, onFile, viewingItem }: Pr
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Upload */}
       <div className="border-2 border-dashed border-base-300 hover:border-base-content/30 rounded-lg p-8 text-center transition-colors">
         <p className="text-base-content/50 text-sm mb-3">
           Upload an image to estimate depth &amp; segmentation
@@ -50,6 +52,7 @@ export default function InferenceExplorer({ inference, onFile, viewingItem }: Pr
         />
       </div>
 
+      {/* Test images */}
       <div>
         <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
           Test images
@@ -74,86 +77,76 @@ export default function InferenceExplorer({ inference, onFile, viewingItem }: Pr
 
       {error && <div className="text-error text-sm">{error}</div>}
 
-      {/* Row 1: Original */}
-      {previewUrl && (
-        <div>
-          <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-            Original
+      {/* Loading state */}
+      {previewUrl && !ready && (
+        <div className="flex flex-col items-center justify-center py-16 gap-4">
+          <span className="loading loading-spinner loading-lg text-primary" />
+          <p className="text-xs text-base-content/30">
+            {depthLoading && segLoading
+              ? "Running depth estimation & segmentation"
+              : depthLoading
+                ? "Running depth estimation\u2026"
+                : "Running segmentation\u2026"}
           </p>
-          <img
-            src={previewUrl}
-            alt="Original"
-            className="w-full rounded-lg border border-base-300"
-          />
         </div>
       )}
 
-      {/* Row 2: Depth + Segmentation side by side */}
-      {previewUrl && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Results — only shown when both depth and segmentation are ready */}
+      {ready && (
+        <>
+          {/* Original */}
           <div>
             <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-              Depth Map
+              Original
             </p>
-            {depthLoading ? (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30">
-                <span className="loading loading-spinner loading-lg text-primary" />
-              </div>
-            ) : depthUrl ? (
+            <img
+              src={previewUrl}
+              alt="Original"
+              className="w-full rounded-lg border border-base-300"
+            />
+          </div>
+
+          {/* Depth + Segmentation side by side */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+                Depth Map
+              </p>
               <img
                 src={depthUrl}
                 alt="Depth map"
                 className="w-full rounded-lg border border-base-300"
               />
-            ) : (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30 text-base-content/30 text-sm">
-                No depth data
-              </div>
-            )}
-          </div>
-
-          <div>
-            <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
-              Segmentation
-            </p>
-            {segLoading ? (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30">
-                <span className="loading loading-spinner loading-lg text-primary" />
-              </div>
-            ) : segments && previewUrl ? (
+            </div>
+            <div>
+              <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+                Segmentation
+              </p>
               <SegmentationMap originalUrl={previewUrl} segments={segments} />
-            ) : (
-              <div className="flex items-center justify-center aspect-video rounded-lg border border-base-300 bg-base-200/30 text-base-content/30 text-sm">
-                No segmentation data
-              </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Row 3: Particle parallax */}
-      {depthUrl && previewUrl && (
-        <ParticleCanvas
-          originalUrl={previewUrl}
-          depthUrl={depthUrl}
-          segments={segments ?? undefined}
-          canvasRefOut={canvasRef}
-          onConfigChange={setCurrentConfig}
-          initialConfig={viewingItem?.mode === "expert" ? viewingItem.config : undefined}
-        />
-      )}
+          {/* Particle parallax */}
+          <ParticleCanvas
+            originalUrl={previewUrl}
+            depthUrl={depthUrl}
+            segments={segments}
+            canvasRefOut={canvasRef}
+            onConfigChange={setCurrentConfig}
+            initialConfig={viewingItem?.mode === "expert" ? viewingItem.config : undefined}
+          />
 
-      {/* Save to Gallery */}
-      {depthUrl && previewUrl && segments && !depthLoading && !segLoading && (
-        <SaveToGallery
-          canvasRef={canvasRef}
-          originalUrl={previewUrl}
-          depthUrl={depthUrl}
-          segments={segments}
-          mode="expert"
-          presetId={null}
-          config={currentConfig}
-        />
+          {/* Save to Gallery */}
+          <SaveToGallery
+            canvasRef={canvasRef}
+            originalUrl={previewUrl}
+            depthUrl={depthUrl}
+            segments={segments}
+            mode="expert"
+            presetId={null}
+            config={currentConfig}
+          />
+        </>
       )}
     </div>
   );
