@@ -24,13 +24,29 @@ interface Props {
   originalUrl: string;
   depthUrl: string;
   segments?: SegmentResult[];
+  /** If provided, use this config and hide controls (presentation mode). */
+  fixedConfig?: ParticleConfig;
+  /** Expose the canvas element ref for snapshot capture. */
+  canvasRefOut?: React.MutableRefObject<HTMLCanvasElement | null>;
+  /** Report current config whenever it changes (for save-to-gallery). */
+  onConfigChange?: (config: ParticleConfig) => void;
+  /** Pre-populate config (e.g. when restoring from gallery). */
+  initialConfig?: ParticleConfig;
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Props) {
+export default function ParticleCanvas({
+  originalUrl,
+  depthUrl,
+  segments,
+  fixedConfig,
+  canvasRefOut,
+  onConfigChange,
+  initialConfig,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -38,17 +54,19 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
   const rafRef = useRef(0);
   const imageSizeRef = useRef({ width: 0, height: 0 });
 
-  const [config, setConfig] = useState<ParticleConfig>({
-    shape: "circle",
-    background: "white",
-    sampling: "grid",
-    dotsPerLongEdge: 45,
-    totalPoints: 1800,
-    depthBias: 0.7,
-    depthMul: 7.0,
-    parallaxStrength: 70,
-    opacity: 1.0,
-  });
+  const [config, setConfig] = useState<ParticleConfig>(
+    initialConfig ?? fixedConfig ?? {
+      shape: "circle",
+      background: "white",
+      sampling: "grid",
+      dotsPerLongEdge: 45,
+      totalPoints: 1800,
+      depthBias: 0.7,
+      depthMul: 7.0,
+      parallaxStrength: 70,
+      opacity: 1.0,
+    }
+  );
   const [baseSize, setBaseSize] = useState(4.0);
   const [loaded, setLoaded] = useState(false);
   const [labelMapReady, setLabelMapReady] = useState(false);
@@ -59,6 +77,25 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
   const labelMapRef = useRef<LabelMap | null>(null);
 
   const hasSegments = !!(segments && segments.length > 0);
+
+  // Apply fixedConfig whenever it changes (presentation mode preset switches)
+  useEffect(() => {
+    if (fixedConfig) {
+      setConfig(fixedConfig);
+    }
+  }, [fixedConfig]);
+
+  // Report config changes upstream
+  useEffect(() => {
+    onConfigChange?.(config);
+  }, [config, onConfigChange]);
+
+  // Expose canvas ref
+  useEffect(() => {
+    if (canvasRefOut) {
+      canvasRefOut.current = canvasRef.current;
+    }
+  });
 
   const handleConfigChange = useCallback((patch: Partial<ParticleConfig>) => {
     setConfig((prev) => ({ ...prev, ...patch }));
@@ -89,14 +126,13 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
         depthDataRef.current = getImageData(depthImg, w, h);
         blurredBgRef.current = createBlurredBackground(origImg, w, h);
 
-        // Compute initial particles (grid default)
-        const spacing = Math.max(w, h) / 45;
+        const spacing = Math.max(w, h) / config.dotsPerLongEdge;
         setBaseSize(defaultBaseSize(spacing));
-        setConfig((prev) => ({ ...prev, depthMul: defaultDepthMul(spacing) }));
+        setConfig((prev) => ({ ...prev, depthMul: fixedConfig ? prev.depthMul : defaultDepthMul(spacing) }));
         particlesRef.current = sampleParticlesGrid(
           origDataRef.current,
           depthDataRef.current,
-          45
+          config.dotsPerLongEdge
         );
         setLoaded(true);
       } catch {
@@ -107,6 +143,7 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [originalUrl, depthUrl]);
 
   // -------------------------------------------------------------------------
@@ -151,7 +188,9 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
         Math.max(imageSizeRef.current.width, imageSizeRef.current.height) /
         config.dotsPerLongEdge;
       setBaseSize(defaultBaseSize(spacing));
-      setConfig((prev) => ({ ...prev, depthMul: defaultDepthMul(spacing) }));
+      if (!fixedConfig) {
+        setConfig((prev) => ({ ...prev, depthMul: defaultDepthMul(spacing) }));
+      }
     } else {
       particlesRef.current = sampleParticlesWeighted(
         origDataRef.current,
@@ -160,9 +199,11 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
         config.depthBias,
         labelMapRef.current
       );
-      setConfig((prev) => ({ ...prev, depthMul: 0.0 }));
+      if (!fixedConfig) {
+        setConfig((prev) => ({ ...prev, depthMul: 0.0 }));
+      }
     }
-  }, [config.sampling, config.dotsPerLongEdge, config.totalPoints, config.depthBias, labelMapReady]);
+  }, [config.sampling, config.dotsPerLongEdge, config.totalPoints, config.depthBias, labelMapReady, fixedConfig]);
 
   // -------------------------------------------------------------------------
   // Animation loop
@@ -183,7 +224,6 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
     const proximityThresholdSq = (Math.max(width, height) * 0.1) ** 2;
     const ctx = canvas.getContext("2d")!;
 
-    // Pre-build color LUT: brightness-adjusted RGB for each particle
     const particles = particlesRef.current;
     const len = particles.length;
     const colorR = new Uint8Array(len);
@@ -195,7 +235,6 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
       colorB[i] = Math.min(255, particles[i].b * brightnessMul) | 0;
     }
 
-    // Pre-allocate offset/distance arrays
     const oxArr = new Float32Array(len);
     const oyArr = new Float32Array(len);
     const distSqArr = new Float32Array(len);
@@ -222,7 +261,6 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
       const cursorX = cursorActive ? (mx + 1) / 2 * width : 0;
       const cursorY = cursorActive ? (my + 1) / 2 * height : 0;
 
-      // Single pass: find closest + precompute offsets and squared distances
       let closestIdx = -1;
       let minDistSq = Infinity;
 
@@ -244,7 +282,6 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
         }
       }
 
-      // Draw all particles (skip closest, drawn last)
       labelState.lastFontSize = -1;
       for (let i = 0; i < len; i++) {
         if (i === closestIdx) continue;
@@ -270,7 +307,6 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
         }
       }
 
-      // Draw the closest particle last (on top), enlarged
       if (closestIdx >= 0) {
         const p = particles[closestIdx];
         const drawX = p.x + oxArr[closestIdx];
@@ -333,17 +369,22 @@ export default function ParticleCanvas({ originalUrl, depthUrl, segments }: Prop
     );
   }
 
+  const showControls = !fixedConfig;
+
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-xs text-base-content/40 uppercase tracking-widest">
-        Particle Parallax
-      </p>
-
-      <ParticleControls
-        config={config}
-        onChange={handleConfigChange}
-        hasSegments={hasSegments}
-      />
+      {showControls && (
+        <>
+          <p className="text-xs text-base-content/40 uppercase tracking-widest">
+            Particle Parallax
+          </p>
+          <ParticleControls
+            config={config}
+            onChange={handleConfigChange}
+            hasSegments={hasSegments}
+          />
+        </>
+      )}
 
       <div
         ref={containerRef}

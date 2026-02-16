@@ -4,7 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import type { GalleryItem } from "../lib/types";
 import GalleryCard from "./GalleryCard";
 
-export default function Gallery() {
+interface Props {
+  onViewItem: (item: GalleryItem) => void;
+}
+
+export default function Gallery({ onViewItem }: Props) {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -16,7 +20,7 @@ export default function Gallery() {
         setItems(data);
       }
     } catch {
-      // TODO: handle gallery fetch error
+      // gallery fetch error
     } finally {
       setLoading(false);
     }
@@ -53,7 +57,12 @@ export default function Gallery() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
       {items.map((item) => (
-        <GalleryCard key={item.id} item={item} onDelete={handleDelete} />
+        <GalleryCard
+          key={item.id}
+          item={item}
+          onDelete={handleDelete}
+          onView={onViewItem}
+        />
       ))}
     </div>
   );

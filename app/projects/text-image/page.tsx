@@ -21,9 +21,6 @@ export default function TextImagePage() {
         </Link>
 
         <div className="mt-12">
-          <div className="inline-block bg-black/5 text-base-content/50 text-xs font-medium uppercase tracking-wider px-3 py-1.5 rounded-full mb-4">
-            Under construction &mdash; dev only
-          </div>
           <h1 className="text-3xl font-bold tracking-tight">
             Text Image Canvas
           </h1>

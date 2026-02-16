@@ -1,9 +1,12 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import type { SegmentResult } from "../lib/types";
+import { useCallback, useRef, useState } from "react";
+import type { InferenceState } from "../TextImageClient";
+import type { GalleryItem } from "../lib/types";
+import type { ParticleConfig } from "./ParticleControls";
 import ParticleCanvas from "./ParticleCanvas";
 import SegmentationMap from "./SegmentationMap";
+import SaveToGallery from "./SaveToGallery";
 
 const TEST_IMAGES = [
   { name: "mactree", src: "/test_images/mactree.jpg" },
@@ -12,73 +15,17 @@ const TEST_IMAGES = [
   { name: "c", src: "/test_images/c.jpg" },
 ];
 
-export default function InferenceExplorer() {
-  const [depthUrl, setDepthUrl] = useState<string | null>(null);
-  const [segments, setSegments] = useState<SegmentResult[] | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [depthLoading, setDepthLoading] = useState(false);
-  const [segLoading, setSegLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+interface Props {
+  inference: InferenceState;
+  onFile: (file: File) => void;
+  viewingItem: GalleryItem | null;
+}
 
+export default function InferenceExplorer({ inference, onFile, viewingItem }: Props) {
+  const { previewUrl, depthUrl, segments, depthLoading, segLoading, error } = inference;
   const loading = depthLoading || segLoading;
-
-  const handleFile = useCallback(async (file: File) => {
-    setPreviewUrl(URL.createObjectURL(file));
-    setDepthUrl(null);
-    setSegments(null);
-    setError(null);
-    setDepthLoading(true);
-    setSegLoading(true);
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    // Fire depth and segmentation concurrently
-    const depthPromise = (async () => {
-      try {
-        const res = await fetch("/api/text-image/depth", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Depth request failed");
-        setDepthUrl(data.depthUrl);
-      } catch (e) {
-        setError((prev) =>
-          prev
-            ? `${prev}; Depth: ${e instanceof Error ? e.message : "Unknown"}`
-            : `Depth: ${e instanceof Error ? e.message : "Unknown error"}`
-        );
-      } finally {
-        setDepthLoading(false);
-      }
-    })();
-
-    const segPromise = (async () => {
-      try {
-        // Need a separate FormData since the body stream can only be read once
-        const segFormData = new FormData();
-        segFormData.append("image", file);
-        const res = await fetch("/api/text-image/segmentation", {
-          method: "POST",
-          body: segFormData,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Segmentation request failed");
-        setSegments(data.segments);
-      } catch (e) {
-        setError((prev) =>
-          prev
-            ? `${prev}; Seg: ${e instanceof Error ? e.message : "Unknown"}`
-            : `Seg: ${e instanceof Error ? e.message : "Unknown error"}`
-        );
-      } finally {
-        setSegLoading(false);
-      }
-    })();
-
-    await Promise.all([depthPromise, segPromise]);
-  }, []);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [currentConfig, setCurrentConfig] = useState<ParticleConfig | null>(null);
 
   const handleTestImage = useCallback(
     async (src: string) => {
@@ -87,9 +34,9 @@ export default function InferenceExplorer() {
       const file = new File([blob], src.split("/").pop() || "test.jpg", {
         type: blob.type,
       });
-      handleFile(file);
+      onFile(file);
     },
-    [handleFile]
+    [onFile]
   );
 
   return (
@@ -104,7 +51,7 @@ export default function InferenceExplorer() {
           className="file-input file-input-sm file-input-bordered rounded-full"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) handleFile(f);
+            if (f) onFile(f);
           }}
         />
       </div>
@@ -192,7 +139,27 @@ export default function InferenceExplorer() {
 
       {/* Row 3: Particle parallax */}
       {depthUrl && previewUrl && (
-        <ParticleCanvas originalUrl={previewUrl} depthUrl={depthUrl} segments={segments ?? undefined} />
+        <ParticleCanvas
+          originalUrl={previewUrl}
+          depthUrl={depthUrl}
+          segments={segments ?? undefined}
+          canvasRefOut={canvasRef}
+          onConfigChange={setCurrentConfig}
+          initialConfig={viewingItem?.mode === "expert" ? viewingItem.config : undefined}
+        />
+      )}
+
+      {/* Save to Gallery */}
+      {depthUrl && previewUrl && segments && !depthLoading && !segLoading && (
+        <SaveToGallery
+          canvasRef={canvasRef}
+          originalUrl={previewUrl}
+          depthUrl={depthUrl}
+          segments={segments}
+          mode="expert"
+          presetId={null}
+          config={currentConfig}
+        />
       )}
     </div>
   );

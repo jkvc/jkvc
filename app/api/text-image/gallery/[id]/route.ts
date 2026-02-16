@@ -12,8 +12,6 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    // TODO: Requires UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN,
-    // and BLOB_READ_WRITE_TOKEN env vars.
     const redis = Redis.fromEnv();
 
     const item = await redis.get<GalleryItem>(`text-image:item:${id}`);
@@ -21,7 +19,11 @@ export async function DELETE(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    await Promise.all([del(item.imageUrl), del(item.originalUrl)]);
+    // Delete all blob assets
+    const blobUrls = [item.imageUrl, item.originalUrl];
+    if (item.depthUrl) blobUrls.push(item.depthUrl);
+    if (item.segmentsUrl) blobUrls.push(item.segmentsUrl);
+    await Promise.all(blobUrls.map((url) => del(url)));
 
     await redis.del(`text-image:item:${id}`);
     await redis.lrem(GALLERY_KEY, 1, id);
