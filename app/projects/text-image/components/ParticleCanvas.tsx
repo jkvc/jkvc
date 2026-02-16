@@ -197,6 +197,7 @@ export default function ParticleCanvas({
   // -------------------------------------------------------------------------
 
   const [fontsReady, setFontsReady] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -368,21 +369,13 @@ export default function ParticleCanvas({
     updatePointerPos(e.clientX, e.clientY);
   }, [updatePointerPos]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      e.preventDefault();
-      const t = e.touches[0];
-      updatePointerPos(t.clientX, t.clientY);
-    }
-  }, [updatePointerPos]);
+  const handleMouseDown = useCallback(() => {
+    setShowOriginal(true);
+  }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
-      e.preventDefault();
-      const t = e.touches[0];
-      updatePointerPos(t.clientX, t.clientY);
-    }
-  }, [updatePointerPos]);
+  const handleMouseUp = useCallback(() => {
+    setShowOriginal(false);
+  }, []);
 
   // -------------------------------------------------------------------------
   // Render
@@ -415,17 +408,21 @@ export default function ParticleCanvas({
 
       <div
         ref={containerRef}
-        className="relative w-full cursor-none touch-none"
+        className="relative w-full cursor-none"
         onMouseMove={handleMouseMove}
         onMouseLeave={resetPointerPos}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={resetPointerPos}
-        onTouchCancel={resetPointerPos}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
       >
         <canvas
           ref={canvasRef}
           className="w-full h-auto rounded-2xl border border-[#E8E8E8]"
+        />
+        <img
+          src={originalUrl}
+          alt="Original"
+          className="absolute inset-0 w-full h-full rounded-2xl object-cover transition-opacity duration-500 pointer-events-none"
+          style={{ opacity: showOriginal ? 1 : 0 }}
         />
       </div>
     </div>
