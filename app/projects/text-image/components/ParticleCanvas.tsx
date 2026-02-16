@@ -361,21 +361,41 @@ export default function ParticleCanvas({
   }, [loaded, fontsReady, baseSize, config.depthMul, config.parallaxStrength, config.opacity, config.shape, config.background]);
 
   // -------------------------------------------------------------------------
-  // Mouse handlers
+  // Pointer handlers (mouse + touch)
   // -------------------------------------------------------------------------
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const updatePointerPos = useCallback((clientX: number, clientY: number) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     mousePosRef.current = {
-      x: ((e.clientX - rect.left) / rect.width) * 2 - 1,
-      y: ((e.clientY - rect.top) / rect.height) * 2 - 1,
+      x: ((clientX - rect.left) / rect.width) * 2 - 1,
+      y: ((clientY - rect.top) / rect.height) * 2 - 1,
     };
   }, []);
 
-  const handleMouseLeave = useCallback(() => {
+  const resetPointerPos = useCallback(() => {
     mousePosRef.current = { x: 0, y: 0 };
   }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    updatePointerPos(e.clientX, e.clientY);
+  }, [updatePointerPos]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const t = e.touches[0];
+      updatePointerPos(t.clientX, t.clientY);
+    }
+  }, [updatePointerPos]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const t = e.touches[0];
+      updatePointerPos(t.clientX, t.clientY);
+    }
+  }, [updatePointerPos]);
 
   // -------------------------------------------------------------------------
   // Render
@@ -408,9 +428,13 @@ export default function ParticleCanvas({
 
       <div
         ref={containerRef}
-        className="relative w-full cursor-none"
+        className="relative w-full cursor-none touch-none"
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={resetPointerPos}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={resetPointerPos}
+        onTouchCancel={resetPointerPos}
       >
         <canvas
           ref={canvasRef}

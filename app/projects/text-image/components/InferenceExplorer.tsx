@@ -4,16 +4,10 @@ import { useCallback, useRef, useState } from "react";
 import type { InferenceState } from "../TextImageClient";
 import type { GalleryItem } from "../lib/types";
 import type { ParticleConfig } from "./ParticleControls";
+import { TEST_IMAGES } from "../lib/test-images";
 import ParticleCanvas from "./ParticleCanvas";
 import SegmentationMap from "./SegmentationMap";
 import SaveToGallery from "./SaveToGallery";
-
-const TEST_IMAGES = [
-  { name: "mactree", src: "/test_images/mactree.jpg" },
-  { name: "a", src: "/test_images/a.jpg" },
-  { name: "b", src: "/test_images/b.jpg" },
-  { name: "c", src: "/test_images/c.jpg" },
-];
 
 interface Props {
   inference: InferenceState;

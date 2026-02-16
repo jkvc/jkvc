@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import type { InferenceState } from "../TextImageClient";
 import type { GalleryItem } from "../lib/types";
 import { PRESETS, type Preset } from "../lib/presets";
+import { TEST_IMAGES } from "../lib/test-images";
 import ParticleCanvas from "./ParticleCanvas";
 import SaveToGallery from "./SaveToGallery";
 import type { ParticleConfig } from "./ParticleControls";
@@ -37,31 +38,67 @@ export default function PresentationView({ inference, onFile, isLoading, viewing
     [onFile]
   );
 
+  const handleTestImage = useCallback(
+    async (src: string) => {
+      const res = await fetch(src);
+      const blob = await res.blob();
+      const file = new File([blob], src.split("/").pop() || "test.jpg", {
+        type: blob.type,
+      });
+      onFile(file);
+    },
+    [onFile]
+  );
+
   // -------------------------------------------------------------------------
-  // Empty state — upload prompt
+  // Empty state — upload prompt + test images
   // -------------------------------------------------------------------------
 
   if (!previewUrl) {
     return (
-      <div
-        className="border-2 border-dashed border-base-300 hover:border-base-content/30 rounded-2xl p-16 text-center transition-colors"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-4xl text-base-content/20">✦</div>
-          <p className="text-base-content/50 text-sm">
-            Drop an image to get started
+      <div className="flex flex-col gap-6">
+        <div
+          className="border-2 border-dashed border-base-300 hover:border-base-content/30 rounded-2xl p-16 text-center transition-colors"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-4xl text-base-content/20">✦</div>
+            <p className="text-base-content/50 text-sm">
+              Drop an image to get started
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              className="file-input file-input-sm file-input-bordered rounded-full"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) onFile(f);
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Test images */}
+        <div>
+          <p className="text-xs text-base-content/40 uppercase tracking-widest mb-2">
+            Examples
           </p>
-          <input
-            type="file"
-            accept="image/*"
-            className="file-input file-input-sm file-input-bordered rounded-full"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onFile(f);
-            }}
-          />
+          <div className="flex gap-2">
+            {TEST_IMAGES.map((img) => (
+              <button
+                key={img.name}
+                className="rounded-lg overflow-hidden border border-base-300 hover:border-base-content/40 transition-colors w-20 h-20 p-0 cursor-pointer"
+                onClick={() => handleTestImage(img.src)}
+              >
+                <img
+                  src={img.src}
+                  alt={img.name}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -137,8 +174,8 @@ export default function PresentationView({ inference, onFile, isLoading, viewing
         initialConfig={viewingItem?.mode === "presentation" ? viewingItem.config : undefined}
       />
 
-      {/* Upload a different image */}
-      <div className="flex items-center justify-center gap-4">
+      {/* Change image: file picker + test thumbnails */}
+      <div className="flex flex-col items-center gap-3">
         <label className="btn btn-ghost btn-sm rounded-full text-base-content/40 hover:text-base-content/60">
           <span>Change image</span>
           <input
@@ -151,6 +188,22 @@ export default function PresentationView({ inference, onFile, isLoading, viewing
             }}
           />
         </label>
+        <div className="flex gap-1.5">
+          {TEST_IMAGES.map((img) => (
+            <button
+              key={img.name}
+              className="rounded-md overflow-hidden border border-base-300 hover:border-base-content/40 transition-colors w-10 h-10 p-0 cursor-pointer"
+              onClick={() => handleTestImage(img.src)}
+              title={img.name}
+            >
+              <img
+                src={img.src}
+                alt={img.name}
+                className="w-full h-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Save to Gallery */}
