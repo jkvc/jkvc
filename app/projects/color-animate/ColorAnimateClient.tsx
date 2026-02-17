@@ -168,45 +168,19 @@ export default function ColorAnimateClient() {
       });
 
       const data = await response.json();
-      if (data.predictionId) {
-        pollAnimationStatus(data.predictionId);
+      if (data.videoUrl && session) {
+        // Update session with video URL
+        session.animationResult = {
+          videoUrl: data.videoUrl,
+          status: "completed",
+          timestamp: getCurrentTimestamp(),
+        };
+        setSession({ ...session });
+        await saveSession(session);
       }
     } catch (error) {
       console.error("Error starting animation:", error);
     }
-  };
-
-  const pollAnimationStatus = async (predictionId: string) => {
-    const checkStatus = async () => {
-      try {
-        const response = await fetch(
-          `/api/color-animate/animate?id=${predictionId}`
-        );
-        const data = await response.json();
-
-        if (data.status === "succeeded" && data.output) {
-          // Update session with video URL
-          if (session) {
-            session.animationResult = {
-              videoUrl: data.output,
-              status: "completed",
-              timestamp: getCurrentTimestamp(),
-            };
-            setSession({ ...session });
-            await saveSession(session);
-          }
-        } else if (data.status === "failed") {
-          console.error("Animation failed:", data.error);
-        } else if (data.status === "starting" || data.status === "processing") {
-          // Poll again in 3 seconds
-          setTimeout(checkStatus, 3000);
-        }
-      } catch (error) {
-        console.error("Error polling animation status:", error);
-      }
-    };
-
-    checkStatus();
   };
 
   const generateRemovalPrompt = (regions: ColorRegion[]): string => {
