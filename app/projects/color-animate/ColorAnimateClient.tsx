@@ -251,9 +251,10 @@ export default function ColorAnimateClient() {
       {/* Dev-only gallery button */}
       {viewMode !== "gallery" && (
         <div className="flex justify-center">
-          <DevOnlyButton onClick={() => setViewMode("gallery")}>
-            View Gallery
-          </DevOnlyButton>
+          <DevOnlyButton
+            text="View Gallery"
+            onClick={() => setViewMode("gallery")}
+          />
         </div>
       )}
 
