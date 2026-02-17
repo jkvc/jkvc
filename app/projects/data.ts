@@ -19,4 +19,13 @@ export const projects: Project[] = [
     thumbnail: "/thumnails/image-labelifier.jpg",
     ready: true,
   },
+  {
+    title: "Color Animate",
+    slug: "color-animate",
+    description:
+      "Watch color drain away.\nThen flow back to life.",
+    tags: ["Vision", "Animation", "Replicate"],
+    gradient: "linear-gradient(135deg, #E8B4B8 0%, #9B6B6E 100%)",
+    ready: false,
+  },
 ];
