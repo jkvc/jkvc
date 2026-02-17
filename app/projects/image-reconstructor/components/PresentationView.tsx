@@ -3,6 +3,7 @@
 import { useCallback, useRef } from "react";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import PlaybackPlayer from "./PlaybackPlayer";
+import SaveToGallery from "./SaveToGallery";
 
 interface Props {
   state: ProcessingState;
@@ -12,6 +13,7 @@ interface Props {
   galleryItems: GalleryItem[];
   onSelectGalleryItem: (item: GalleryItem) => void;
   onDeleteGalleryItem: (id: string) => void;
+  onGallerySaved: () => void;
 }
 
 type StatusKey = "sketchStatus" | "segStatus" | "promptStatus" | "animationStatus";
@@ -31,6 +33,7 @@ export default function PresentationView({
   galleryItems,
   onSelectGalleryItem,
   onDeleteGalleryItem,
+  onGallerySaved,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -199,6 +202,11 @@ export default function PresentationView({
 
       {frameUrls.length > 0 && (
         <PlaybackPlayer stepImageUrls={frameUrls} videoUrl={state.videoUrl} />
+      )}
+
+      {/* Save to gallery (dev only) */}
+      {frameUrls.length > 0 && (
+        <SaveToGallery state={state} onSaved={onGallerySaved} />
       )}
 
       {state.error && <p className="text-red-500 text-xs">{state.error}</p>}

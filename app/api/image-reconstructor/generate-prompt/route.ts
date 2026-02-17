@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 300,
-    system: `You are an animation prompt generator for image-to-video AI models. Given an image, write a single detailed animation prompt that describes natural, cinematic movement for the scene. Include camera motion, subject movement, lighting shifts, and atmospheric details. The prompt should be 2-3 sentences, vivid and specific. Output ONLY the prompt text, nothing else.`,
+    system: `You are an animation prompt generator for image-to-video AI models. Given an image, write a single detailed animation prompt that describes natural, subtle movement for the scene. Focus on subject movement, lighting shifts, and atmospheric details such as wind, water ripples, swaying foliage, or breathing. The camera must remain perfectly static — no panning, tilting, zooming, tracking, or any camera movement whatsoever. The prompt should be 2-3 sentences, vivid and specific. Output ONLY the prompt text, nothing else.`,
     messages: [
       {
         role: "user",

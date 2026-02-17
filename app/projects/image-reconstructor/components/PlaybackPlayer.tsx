@@ -3,32 +3,22 @@
 import { useRef, useState, useEffect, type CSSProperties } from "react";
 import { PLAYBACK } from "../lib/playback-config";
 
-type Phase =
-  | "color-in"
-  | "video"
-  | "pause-forward"
-  | "video-reverse"
-  | "color-out"
-  | "pause-reverse"
-  | "idle";
+type Phase = "intro" | "color-in" | "video" | "reset" | "idle";
 
 const PHASE_INFO: Record<Phase, { icon: string; label: string } | null> = {
+  intro: { icon: "fa-image", label: "Original" },
   "color-in": { icon: "fa-palette", label: "Reconstructing" },
   video: { icon: "fa-film", label: "Animation" },
-  "pause-forward": { icon: "fa-pause", label: "Paused" },
-  "video-reverse": { icon: "fa-backward", label: "Rewinding" },
-  "color-out": { icon: "fa-palette", label: "Deconstructing" },
-  "pause-reverse": { icon: "fa-pause", label: "Paused" },
+  reset: null,
   idle: null,
 };
 
-const PAUSE_MS = 3000;
-const REVERSE_SPEED = 3;
+const RESET_FADE_MS = 200;
 
 interface Props {
-  /** Frame URLs in order: sketch → gradually colored → full original. */
+  /** Frame URLs in order: sketch -> gradually colored -> full original. */
   stepImageUrls: string[];
-  /** i2v video URL. Null = skip video phases. */
+  /** i2v video URL. Null = skip video phase. */
   videoUrl: string | null;
   /** Auto-start playback loop on mount. */
   autoPlay?: boolean;
@@ -45,7 +35,6 @@ export default function PlaybackPlayer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const rafRef = useRef<number>(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
 
   const [phase, setPhase] = useState<Phase>("idle");
@@ -87,12 +76,8 @@ export default function PlaybackPlayer({
 
   // ---- Animation helpers ----
 
-  /** Run crossfade frame sequence on canvas. */
-  function animateFrames(
-    imgs: HTMLImageElement[],
-    speed: number,
-    reverse: boolean
-  ): Promise<void> {
+  /** Run crossfade frame sequence on canvas (forward only). */
+  function animateFrames(imgs: HTMLImageElement[]): Promise<void> {
     return new Promise((resolve) => {
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
@@ -101,12 +86,11 @@ export default function PlaybackPlayer({
         return;
       }
 
-      const ordered = reverse ? [...imgs].reverse() : imgs;
-      const holdMs = PLAYBACK.holdMs / speed;
-      const crossfadeMs = PLAYBACK.crossfadeMs / speed;
+      const holdMs = PLAYBACK.holdMs;
+      const crossfadeMs = PLAYBACK.crossfadeMs;
       const totalPerFrame = holdMs + crossfadeMs;
       const totalDuration =
-        ordered.length * holdMs + (ordered.length - 1) * crossfadeMs;
+        imgs.length * holdMs + (imgs.length - 1) * crossfadeMs;
       let start: number | null = null;
 
       const tick = (ts: number) => {
@@ -117,7 +101,7 @@ export default function PlaybackPlayer({
         if (elapsed >= totalDuration) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(
-            ordered[ordered.length - 1],
+            imgs[imgs.length - 1],
             0,
             0,
             canvas.width,
@@ -129,31 +113,25 @@ export default function PlaybackPlayer({
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (ordered.length === 1) {
-          ctx.drawImage(ordered[0], 0, 0, canvas.width, canvas.height);
+        if (imgs.length === 1) {
+          ctx.drawImage(imgs[0], 0, 0, canvas.width, canvas.height);
         } else {
           const frameIdx = Math.min(
             Math.floor(elapsed / totalPerFrame),
-            ordered.length - 1
+            imgs.length - 1
           );
           const frameElapsed = elapsed - frameIdx * totalPerFrame;
 
-          ctx.drawImage(
-            ordered[frameIdx],
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
+          ctx.drawImage(imgs[frameIdx], 0, 0, canvas.width, canvas.height);
 
-          if (frameIdx < ordered.length - 1 && frameElapsed > holdMs) {
+          if (frameIdx < imgs.length - 1 && frameElapsed > holdMs) {
             const fadeProgress = Math.min(
               (frameElapsed - holdMs) / crossfadeMs,
               1
             );
             ctx.globalAlpha = fadeProgress;
             ctx.drawImage(
-              ordered[frameIdx + 1],
+              imgs[frameIdx + 1],
               0,
               0,
               canvas.width,
@@ -194,47 +172,95 @@ export default function PlaybackPlayer({
     });
   }
 
-  /** Reverse the video at 3x by seeking backward and drawing to canvas. */
-  function playVideoReverse(): Promise<void> {
+  /**
+   * Fade current canvas -> white -> targetImg over RESET_FADE_MS total.
+   */
+  function fadeViaWhite(targetImg: HTMLImageElement): Promise<void> {
     return new Promise((resolve) => {
-      const video = videoRef.current;
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
-      if (!video || !canvas || !ctx) {
+      if (!canvas || !ctx) {
         resolve();
         return;
       }
 
-      video.pause();
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const currentSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const snapCanvas = document.createElement("canvas");
+      snapCanvas.width = canvas.width;
+      snapCanvas.height = canvas.height;
+      snapCanvas.getContext("2d")!.putImageData(currentSnapshot, 0, 0);
 
-      let currentTime = video.duration;
-      let lastTs: number | null = null;
-      let resolved = false;
-
-      const done = () => {
-        if (resolved) return;
-        resolved = true;
-        resolve();
-      };
+      const halfMs = RESET_FADE_MS / 2;
+      let start: number | null = null;
 
       const tick = (ts: number) => {
-        if (cancelledRef.current || resolved) return;
-        if (lastTs === null) lastTs = ts;
-        const dt = ts - lastTs;
-        lastTs = ts;
+        if (cancelledRef.current) return;
+        if (start === null) start = ts;
+        const elapsed = ts - start;
 
-        currentTime -= (REVERSE_SPEED * dt) / 1000;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (currentTime <= 0) {
-          video.currentTime = 0;
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          done();
+        if (elapsed < halfMs) {
+          const t = elapsed / halfMs;
+          ctx.drawImage(snapCanvas, 0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = `rgba(255,255,255,${t})`;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        } else if (elapsed < RESET_FADE_MS) {
+          const t = (elapsed - halfMs) / halfMs;
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = t;
+          ctx.drawImage(targetImg, 0, 0, canvas.width, canvas.height);
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.drawImage(targetImg, 0, 0, canvas.width, canvas.height);
+          resolve();
           return;
         }
 
-        video.currentTime = currentTime;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        rafRef.current = requestAnimationFrame(tick);
+      };
+
+      rafRef.current = requestAnimationFrame(tick);
+    });
+  }
+
+  /** Crossfade from current canvas content to targetImg over durationMs. */
+  function crossfadeTo(
+    targetImg: HTMLImageElement,
+    durationMs: number
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) {
+        resolve();
+        return;
+      }
+
+      const currentSnapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const snapCanvas = document.createElement("canvas");
+      snapCanvas.width = canvas.width;
+      snapCanvas.height = canvas.height;
+      snapCanvas.getContext("2d")!.putImageData(currentSnapshot, 0, 0);
+
+      let start: number | null = null;
+
+      const tick = (ts: number) => {
+        if (cancelledRef.current) return;
+        if (start === null) start = ts;
+        const t = Math.min((ts - start) / durationMs, 1);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(snapCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = t;
+        ctx.drawImage(targetImg, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+
+        if (t >= 1) {
+          resolve();
+          return;
+        }
         rafRef.current = requestAnimationFrame(tick);
       };
 
@@ -245,7 +271,16 @@ export default function PlaybackPlayer({
   /** Wait for a duration. */
   function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
-      timerRef.current = setTimeout(resolve, ms);
+      const id = setTimeout(resolve, ms);
+      // Store so cleanup can clear it
+      const prev = cancelledRef.current;
+      const check = setInterval(() => {
+        if (cancelledRef.current && !prev) {
+          clearTimeout(id);
+          clearInterval(check);
+        }
+      }, 50);
+      setTimeout(() => clearInterval(check), ms + 100);
     });
   }
 
@@ -256,43 +291,45 @@ export default function PlaybackPlayer({
     if (imgs.length === 0) return;
 
     const hasVideo = !!videoUrl && !!videoRef.current;
+    const sketchImg = imgs[0];
+    const originalImg = imgs[imgs.length - 1];
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       if (cancelledRef.current) break;
 
-      // Forward: sketch → color
-      setPhase("color-in");
-      await animateFrames(imgs, 1, false);
+      // 1. Show original image, pause 1s
+      setPhase("intro");
+      if (canvas && ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(originalImg, 0, 0, canvas.width, canvas.height);
+      }
+      await sleep(1000);
       if (cancelledRef.current) break;
 
-      // Forward video
+      // 2. Crossfade original -> sketch over 500ms, pause 1s
+      await crossfadeTo(sketchImg, 500);
+      if (cancelledRef.current) break;
+      setPhase("color-in");
+      await sleep(1000);
+      if (cancelledRef.current) break;
+
+      // 3. Color-in: sketch -> full color
+      await animateFrames(imgs);
+      if (cancelledRef.current) break;
+
+      // 4. Video
       if (hasVideo) {
         setPhase("video");
         await playVideoForward();
         if (cancelledRef.current) break;
       }
 
-      // Pause 3s
-      setPhase("pause-forward");
-      await sleep(PAUSE_MS);
-      if (cancelledRef.current) break;
-
-      // Reverse video at 3x
-      if (hasVideo) {
-        setPhase("video-reverse");
-        await playVideoReverse();
-        if (cancelledRef.current) break;
-      }
-
-      // Reverse: color → sketch at 3x
-      setPhase("color-out");
-      await animateFrames(imgs, REVERSE_SPEED, true);
-      if (cancelledRef.current) break;
-
-      // Pause 3s
-      setPhase("pause-reverse");
-      await sleep(PAUSE_MS);
+      // 5. Flash to white then fade to original image
+      setPhase("reset");
+      await fadeViaWhite(originalImg);
       if (cancelledRef.current) break;
     }
   }
@@ -306,7 +343,6 @@ export default function PlaybackPlayer({
     return () => {
       cancelledRef.current = true;
       cancelAnimationFrame(rafRef.current);
-      if (timerRef.current) clearTimeout(timerRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imagesLoaded, autoPlay]);
@@ -317,8 +353,8 @@ export default function PlaybackPlayer({
       ? { aspectRatio: `${dimensions.w} / ${dimensions.h}` }
       : { aspectRatio: "1 / 1" };
 
-  const showCanvas = phase !== "video" && phase !== "pause-forward";
-  const showVideo = phase === "video" || phase === "pause-forward";
+  const showCanvas = phase !== "video";
+  const showVideo = phase === "video";
   const phaseInfo = PHASE_INFO[phase];
 
   return (

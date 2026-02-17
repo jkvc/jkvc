@@ -4,6 +4,7 @@ import { useRef } from "react";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import StepTimeline from "./StepTimeline";
 import PlaybackPlayer from "./PlaybackPlayer";
+import SaveToGallery from "./SaveToGallery";
 
 interface Props {
   state: ProcessingState;
@@ -13,6 +14,7 @@ interface Props {
   galleryItems: GalleryItem[];
   onSelectGalleryItem: (item: GalleryItem) => void;
   onDeleteGalleryItem: (id: string) => void;
+  onGallerySaved: () => void;
 }
 
 export default function ExpertView({
@@ -23,6 +25,7 @@ export default function ExpertView({
   galleryItems,
   onSelectGalleryItem,
   onDeleteGalleryItem,
+  onGallerySaved,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -252,6 +255,11 @@ export default function ExpertView({
             showPhasePill
           />
         </div>
+      )}
+
+      {/* Save to gallery (dev only) */}
+      {isComplete && frameUrls.length > 0 && (
+        <SaveToGallery state={state} onSaved={onGallerySaved} />
       )}
     </div>
   );

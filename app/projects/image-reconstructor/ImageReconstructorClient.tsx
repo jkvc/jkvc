@@ -498,6 +498,18 @@ export default function ImageReconstructorClient() {
     setGalleryItems((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
+  const refreshGallery = useCallback(async () => {
+    try {
+      const res = await fetch("/api/image-reconstructor/gallery");
+      if (res.ok) {
+        const data: GalleryItem[] = await res.json();
+        setGalleryItems(data.slice(0, 5));
+      }
+    } catch {
+      // non-critical
+    }
+  }, []);
+
   // ---- Mode switch ----
   const switchMode = useCallback(
     (m: ViewMode) => {
@@ -519,6 +531,7 @@ export default function ImageReconstructorClient() {
           galleryItems={galleryItems}
           onSelectGalleryItem={handleSelectGalleryItem}
           onDeleteGalleryItem={handleDeleteGalleryItem}
+          onGallerySaved={refreshGallery}
         />
       )}
 
@@ -531,6 +544,7 @@ export default function ImageReconstructorClient() {
           galleryItems={galleryItems}
           onSelectGalleryItem={handleSelectGalleryItem}
           onDeleteGalleryItem={handleDeleteGalleryItem}
+          onGallerySaved={refreshGallery}
         />
       )}
     </div>
