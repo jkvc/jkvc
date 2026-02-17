@@ -19,8 +19,7 @@ export default function TextImagePage() {
             Image Labelifier
           </h1>
           <p className="mt-2.5 text-[13px] leading-relaxed text-text-muted">
-            Every pixel has a name.<br />
-            Watch the image dissolve into words.
+            Every pixel has a name
           </p>
         </div>
 
