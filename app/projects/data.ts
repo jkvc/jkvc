@@ -19,4 +19,13 @@ export const projects: Project[] = [
     thumbnail: "/thumnails/image-labelifier.jpg",
     ready: true,
   },
+  {
+    title: "Image Reconstructor",
+    slug: "image-reconstructor",
+    description:
+      "Photos are built from scratch",
+    tags: ["Vision", "Image-to-Image", "Video"],
+    gradient: "linear-gradient(135deg, #B8C6DB 0%, #6B7B8D 100%)",
+    ready: false,
+  },
 ];

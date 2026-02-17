@@ -10,6 +10,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "@vercel/blob": "^2.2.0",
     "daisyui": "^5.5.18",
@@ -18,6 +19,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "replicate": "^1.4.0",
+    "sharp": "^0.34.5",
     "vercel": "^50.17.1"
   },
   "devDependencies": {

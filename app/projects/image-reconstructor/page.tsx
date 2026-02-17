@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import TextImageClient from "./TextImageClient";
+import ImageReconstructorClient from "./ImageReconstructorClient";
 import { projects } from "../data";
 
-const project = projects.find((p) => p.slug === "text-image")!;
+const project = projects.find((p) => p.slug === "image-reconstructor")!;
 
 export const metadata: Metadata = {
   title: `${project.title} | jkvc`,
   description: project.description,
 };
 
-export default function TextImagePage() {
+export default function ImageReconstructorPage() {
   return (
     <div className="min-h-screen bg-surface text-text px-6 pt-20 pb-20 sm:px-8">
       <div className="max-w-2xl mx-auto">
@@ -27,7 +27,7 @@ export default function TextImagePage() {
 
         <div className="mt-10">
           <Suspense>
-            <TextImageClient />
+            <ImageReconstructorClient />
           </Suspense>
         </div>
 
