@@ -37,12 +37,12 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
                 key={s.id}
                 onClick={() => !disabled && onChange({ shape: s.id })}
                 disabled={disabled}
-                className={`h-8 min-w-8 px-2.5 rounded-md text-sm transition-all ${
+                className={`h-9 min-w-9 px-3 rounded-full text-[13px] transition-all ${
                   disabled
-                    ? "bg-[#F5F5F5] text-[#DDD] cursor-not-allowed"
+                    ? "border border-[#EBEBEB] text-[#DDD] cursor-not-allowed"
                     : shape === s.id
-                      ? "bg-gold text-white shadow-sm"
-                      : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
+                      ? "border border-gold bg-gold text-white shadow-sm"
+                      : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
                 } ${s.fontClass ?? ""}`}
                 title={disabled ? `${s.title} (needs segmentation data)` : s.title}
               >
@@ -61,10 +61,10 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
             <button
               key={bg.id}
               onClick={() => onChange({ background: bg.id })}
-              className={`h-8 px-3 rounded-md text-xs transition-all ${
+              className={`h-9 px-3.5 rounded-full text-[12px] transition-all ${
                 background === bg.id
-                  ? "bg-gold text-white shadow-sm"
-                  : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
+                  ? "border border-gold bg-gold text-white shadow-sm"
+                  : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
               }`}
             >
               {bg.label}
@@ -81,10 +81,10 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
             <button
               key={s.id}
               onClick={() => onChange({ sampling: s.id })}
-              className={`h-8 px-3 rounded-md text-xs transition-all ${
+              className={`h-9 px-3.5 rounded-full text-[12px] transition-all ${
                 sampling === s.id
-                  ? "bg-gold text-white shadow-sm"
-                  : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-gold-light/20"
+                  ? "border border-gold bg-gold text-white shadow-sm"
+                  : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
               }`}
             >
               {s.label}

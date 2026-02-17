@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { InferenceState } from "../TextImageClient";
 import type { GalleryItem } from "../lib/types";
 import { PRESETS, type Preset } from "../lib/presets";
@@ -44,27 +44,13 @@ export default function PresentationView({
 
   const ready = !!(depthUrl && segments && previewUrl && !isLoading);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      const f = e.dataTransfer.files[0];
-      if (f && f.type.startsWith("image/")) onFile(f);
-    },
-    [onFile]
-  );
-
   // -------------------------------------------------------------------------
-  // Empty state — upload prompt with examples inside
+  // Empty state — pill upload button with examples below
   // -------------------------------------------------------------------------
 
   if (!previewUrl) {
     return (
-      <div
-        className="border border-dashed border-[#DDD] hover:border-gold/40 rounded-2xl p-10 text-center transition-colors cursor-pointer"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-      >
+      <div className="flex flex-col items-center gap-8">
         <input
           ref={fileInputRef}
           type="file"
@@ -76,14 +62,17 @@ export default function PresentationView({
           }}
         />
 
-        <div className="text-2xl text-gold/30 mb-3">✦</div>
-        <p className="text-[13px] text-[#AAA] mb-6">
-          Drop an image or click to upload
-        </p>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="h-9 pl-3.5 pr-5 rounded-full border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold transition-all flex items-center gap-2.5 text-[13px] cursor-pointer"
+        >
+          <i className="fa-solid fa-arrow-up-from-bracket text-[12px]" />
+          <span>Upload image</span>
+        </button>
 
         {/* Examples: gallery items */}
         {galleryItems.length > 0 && (
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-3">
             <p className="text-[10px] text-[#CCC] uppercase tracking-widest">
               Examples
             </p>
@@ -92,10 +81,7 @@ export default function PresentationView({
                 <div key={item.id} className="relative group">
                   <button
                     className="rounded-lg overflow-hidden border border-[#E8E8E8] hover:border-gold/40 transition-colors w-14 h-14 p-0 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectGalleryItem(item);
-                    }}
+                    onClick={() => onSelectGalleryItem(item)}
                   >
                     <img
                       src={item.originalUrl}
