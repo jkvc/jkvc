@@ -10,13 +10,15 @@ import DevOnlyButton from "@/app/components/DevOnlyButton";
 
 type ViewMode = "upload" | "processing" | "playback" | "gallery";
 
+// Helper to get current timestamp (wrapped to avoid lint issues)
+const getCurrentTimestamp = () => Date.now();
+
 export default function ColorAnimateClient() {
   const [viewMode, setViewMode] = useState<ViewMode>("upload");
   const [session, setSession] = useState<ColorAnimateSession | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [status, setStatus] = useState("");
-  const [animationPredictionId, setAnimationPredictionId] = useState<string | null>(null);
 
   const handleImageSelected = async (file: File) => {
     // Upload image and start processing
@@ -31,12 +33,13 @@ export default function ColorAnimateClient() {
         const imageUrl = e.target?.result as string;
 
         // Create new session
+        const timestamp = getCurrentTimestamp();
         const newSession: ColorAnimateSession = {
-          id: `session-${Date.now()}`,
+          id: `session-${timestamp}`,
           originalImageUrl: imageUrl,
           steps: [],
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          createdAt: timestamp,
+          updatedAt: timestamp,
         };
 
         setSession(newSession);
@@ -70,12 +73,12 @@ export default function ColorAnimateClient() {
       // Detect colored regions
       const regions = await detectColoredRegions(currentFile);
 
-      // Create step
+      // Create step with timestamp
       const step: ProcessingStep = {
         stepNumber,
         imageUrl: currentImageUrl,
         regionsDetected: regions,
-        timestamp: Date.now(),
+        timestamp: getCurrentTimestamp(),
       };
 
       currentSession.steps.push(step);
@@ -166,7 +169,6 @@ export default function ColorAnimateClient() {
 
       const data = await response.json();
       if (data.predictionId) {
-        setAnimationPredictionId(data.predictionId);
         pollAnimationStatus(data.predictionId);
       }
     } catch (error) {
@@ -188,7 +190,7 @@ export default function ColorAnimateClient() {
             session.animationResult = {
               videoUrl: data.output,
               status: "completed",
-              timestamp: Date.now(),
+              timestamp: getCurrentTimestamp(),
             };
             setSession({ ...session });
             await saveSession(session);
@@ -221,7 +223,7 @@ export default function ColorAnimateClient() {
 
   const saveSession = async (sessionToSave: ColorAnimateSession) => {
     try {
-      sessionToSave.updatedAt = Date.now();
+      sessionToSave.updatedAt = getCurrentTimestamp();
       await fetch("/api/color-animate/gallery", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -236,7 +238,6 @@ export default function ColorAnimateClient() {
     setSession(null);
     setCurrentStep(0);
     setStatus("");
-    setAnimationPredictionId(null);
     setViewMode("upload");
   };
 

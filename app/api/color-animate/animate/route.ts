@@ -1,8 +1,6 @@
 import Replicate from "replicate";
 import { NextRequest, NextResponse } from "next/server";
 
-const WAN_I2V_MODEL = "wan-video/wan-2.5-i2v-fast";
-
 export async function POST(request: NextRequest) {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {

@@ -93,7 +93,7 @@ Only respond with the JSON array or "NO_COLOR_FOUND", nothing else.`,
     try {
       const regions = JSON.parse(content);
       return NextResponse.json({ regions });
-    } catch (parseError) {
+    } catch {
       console.error("Failed to parse Claude response:", content);
       return NextResponse.json(
         { error: "Failed to parse response", rawResponse: content },
