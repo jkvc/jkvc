@@ -172,12 +172,6 @@ export default function PresentationView({
             })}
           </div>
 
-          {state.currentStepLabel && (
-            <p className="text-[12px] text-text-muted">
-              {state.currentStepLabel}
-            </p>
-          )}
-
           {state.error && (
             <p className="text-red-500 text-xs mt-3">{state.error}</p>
           )}
