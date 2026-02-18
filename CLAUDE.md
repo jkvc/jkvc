@@ -27,3 +27,6 @@ This project uses **pnpm**. Never use `npm` or `yarn` commands.
 
 ### 5. Icons
 Use **Font Awesome 7** (`@fortawesome/fontawesome-free`) for all icons. Do **not** hand-draw inline SVG paths unless an absolutely custom icon is needed that Font Awesome does not provide. The CSS is imported globally in `app/globals.css`.
+
+### 6. Style Guide
+All visual design decisions (palette, typography, border radii, button patterns, layout conventions) are documented in `STYLE.md` at the project root. Read and follow it when creating or modifying UI.

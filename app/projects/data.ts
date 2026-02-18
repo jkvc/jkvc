@@ -28,4 +28,12 @@ export const projects: Project[] = [
     gradient: "linear-gradient(135deg, #B8C6DB 0%, #6B7B8D 100%)",
     ready: false,
   },
+  {
+    title: "Magic Crankie",
+    slug: "magic-crankie",
+    description: "A never-ending scroll through a state machine",
+    tags: ["Animation", "State Machine", "Canvas"],
+    gradient: "linear-gradient(135deg, #E8B4B8 0%, #7B6B8D 100%)",
+    ready: false,
+  },
 ];
