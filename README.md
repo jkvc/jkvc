@@ -22,11 +22,35 @@ Open http://localhost:42096.
 
 ```
 app/
-  layout.tsx          # Root layout, metadata, fonts, light theme
-  page.tsx            # Single-page site (client component, scroll-triggered navbar)
-  globals.css         # Tailwind + daisyUI imports
+  layout.tsx                         # Root layout, metadata, fonts, light theme
+  page.tsx                           # Home page (projects grid + draft toggle)
+  globals.css                        # Tailwind + daisyUI + Font Awesome imports
   components/
-    ProjectCard.tsx   # Reusable thumbnail card with hover overlay
+    ProjectCard.tsx                  # Reusable project thumbnail card
+    DevOnlyButton.tsx                # Dev-only action button
+    gallery/
+      SaveActionPanel.tsx            # Shared save-to-gallery button/error shell
+    project/
+      ProjectPageFrame.tsx           # Shared project page wrapper
+    ui/
+      IconCircleButton.tsx           # Shared circular icon button/link
+      ExampleGalleryStrip.tsx        # Shared examples/gallery thumbnails strip
+      UploadDropZone.tsx             # Shared drag-drop/click upload container
+      StatusPillRow.tsx              # Shared pipeline status pill row
+
+  lib/
+    client/
+      blob-files.ts                  # Client helpers for blob/file payloads
+    server/
+      redis.ts                       # Shared Redis singleton
+      gallery-store.ts               # Shared Redis gallery CRUD helpers
+
+  projects/
+    data.ts                          # Project metadata for home + pages
+    [slug]/page.tsx                  # Generic fallback project page
+    text-image/
+    image-reconstructor/
+    magic-crankie/
 ```
 
 ## Build
@@ -34,6 +58,12 @@ app/
 ```bash
 # Safe build that won't conflict with a running dev server
 CHECK_BUILD=1 pnpm run build
+```
+
+## Lint
+
+```bash
+pnpm lint
 ```
 
 ## Conventions

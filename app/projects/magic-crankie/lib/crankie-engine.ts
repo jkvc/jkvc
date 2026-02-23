@@ -34,7 +34,15 @@ export interface CrankieEngine {
 }
 
 export function useCrankieEngine(): CrankieEngine {
-  const [renderTick, setRenderTick] = useState(0);
+  const [viewState, setViewState] = useState<{
+    segments: Segment[];
+    scrollOffset: number;
+    currentStateId: string;
+  }>({
+    segments: [],
+    scrollOffset: 0,
+    currentStateId: STATES[0].id,
+  });
 
   const stateRef = useRef<EngineState>({
     segments: [],
@@ -225,7 +233,11 @@ export function useCrankieEngine(): CrankieEngine {
       // GC
       garbageCollect();
 
-      setRenderTick((t) => t + 1);
+      setViewState({
+        segments: [...s.segments],
+        scrollOffset: s.scrollOffset,
+        currentStateId: s.currentStateId,
+      });
       rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -237,13 +249,10 @@ export function useCrankieEngine(): CrankieEngine {
     };
   }, [getTotalWidth, appendGroup, garbageCollect]);
 
-  // Suppress unused warning -- renderTick drives re-renders
-  void renderTick;
-
   return {
-    segments: stateRef.current.segments,
-    scrollOffset: stateRef.current.scrollOffset,
-    currentStateId: stateRef.current.currentStateId,
+    segments: viewState.segments,
+    scrollOffset: viewState.scrollOffset,
+    currentStateId: viewState.currentStateId,
     requestState,
   };
 }

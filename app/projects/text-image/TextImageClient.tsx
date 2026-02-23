@@ -262,7 +262,6 @@ export default function TextImageClient() {
       {mode === "expert" && (
         <InferenceExplorer
           inference={inference}
-          onFile={handleFile}
           onReset={handleReset}
           onSwitchToPresentation={() => switchMode("presentation")}
           viewingItem={viewingItem}

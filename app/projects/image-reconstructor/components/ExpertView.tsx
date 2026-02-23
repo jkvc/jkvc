@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef } from "react";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import StepTimeline from "./StepTimeline";
 import PlaybackPlayer from "./PlaybackPlayer";
 import SaveToGallery from "./SaveToGallery";
+import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
+import UploadDropZone from "@/app/components/ui/UploadDropZone";
 
 interface Props {
   state: ProcessingState;
@@ -27,8 +29,6 @@ export default function ExpertView({
   onDeleteGalleryItem,
   onGallerySaved,
 }: Props) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const isComplete =
     state.compositingStatus === "complete" &&
     (state.animationStatus === "complete" || state.animationStatus === "idle");
@@ -39,86 +39,40 @@ export default function ExpertView({
     <div className="flex flex-col gap-6">
       {/* Top row: back (left) + reset (right) */}
       <div className="flex items-center justify-between">
-        <button
+        <IconCircleButton
           onClick={onSwitchToPresentation}
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold transition-all cursor-pointer"
+          icon="fa-arrow-left"
           title="Back to Presentation"
-        >
-          <i className="fa-solid fa-arrow-left text-[13px]" />
-        </button>
+        />
 
-        <button
+        <IconCircleButton
           onClick={onReset}
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold transition-all cursor-pointer"
+          icon="fa-rotate"
           title="New image"
-        >
-          <i className="fa-solid fa-rotate text-[13px]" />
-        </button>
+        />
       </div>
 
       {/* Gallery examples */}
-      {galleryItems.length > 0 && (
-        <div>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-            Examples
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {galleryItems.map((item) => (
-              <div key={item.id} className="relative group">
-                <button
-                  className="rounded-lg overflow-hidden border border-[#E8E8E8] hover:border-gold/40 transition-colors w-10 h-10 p-0 cursor-pointer"
-                  onClick={() => onSelectGalleryItem(item)}
-                >
-                  <img
-                    src={item.thumbnailUrl}
-                    alt="Example"
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-                {process.env.NODE_ENV === "development" && (
-                  <button
-                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#E0E0E0] text-[#999] hover:bg-red-400 hover:text-white text-[9px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onDeleteGalleryItem(item.id)}
-                    title="Delete"
-                  >
-                    &times;
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <ExampleGalleryStrip
+        items={galleryItems.map((item) => ({
+          id: item.id,
+          imageUrl: item.thumbnailUrl,
+          alt: "Example",
+        }))}
+        onSelect={(id) => {
+          const item = galleryItems.find((g) => g.id === id);
+          if (item) onSelectGalleryItem(item);
+        }}
+        onDelete={onDeleteGalleryItem}
+      />
 
       {/* Upload prompt if no image yet */}
       {!state.originalImageUrl && (
-        <div
-          className="border border-dashed border-[#DDD] hover:border-gold/40 rounded-2xl p-10 text-center transition-colors cursor-pointer"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const f = e.dataTransfer.files[0];
-            if (f && f.type.startsWith("image/")) onFile(f);
-          }}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onFile(f);
-            }}
-          />
-          <div className="text-2xl text-gold/30 mb-3">
-            <i className="fa-solid fa-wand-magic-sparkles" />
-          </div>
-          <p className="text-[13px] text-[#AAA]">
-            Drop an image or click to upload
-          </p>
-        </div>
+        <UploadDropZone
+          onFile={onFile}
+          prompt="Drop an image or click to upload"
+          className="mb-0"
+        />
       )}
 
       {/* Row 1: Original (full width) */}

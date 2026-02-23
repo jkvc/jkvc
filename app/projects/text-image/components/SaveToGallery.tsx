@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import type { SegmentResult } from "../lib/types";
-import type { ParticleConfig } from "./ParticleControls";
-import DevOnlyButton from "@/app/components/DevOnlyButton";
+import type { ParticleConfig } from "../lib/particle-config";
+import SaveActionPanel from "@/app/components/gallery/SaveActionPanel";
+import { appendJsonFile, fetchAsFile } from "@/app/lib/client/blob-files";
 
 interface Props {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -24,83 +25,53 @@ export default function SaveToGallery({
   presetId,
   config,
 }: Props) {
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const handleSave = useCallback(async () => {
     const canvas = canvasRef.current;
-    if (!canvas || !config) return;
+    if (!canvas || !config) {
+      throw new Error("Canvas is not ready yet");
+    }
 
-    setSaving(true);
-    setError(null);
+    // Capture canvas snapshot as PNG blob
+    const snapshotBlob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error("Failed to capture canvas"));
+      }, "image/png");
+    });
 
-    try {
-      // Capture canvas snapshot as PNG blob
-      const snapshotBlob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) resolve(blob);
-          else reject(new Error("Failed to capture canvas"));
-        }, "image/png");
-      });
+    const originalFile = await fetchAsFile(originalUrl, "original.png", "image/png");
+    const depthFile = await fetchAsFile(depthUrl, "depth.png", "image/png");
 
-      // Fetch original image as blob
-      const origRes = await fetch(originalUrl);
-      const origBlob = await origRes.blob();
+    // Build labels list from segments
+    const labels = segments.map((s) => s.label);
 
-      // Build labels list from segments
-      const labels = segments.map((s) => s.label);
+    const formData = new FormData();
+    formData.append("snapshot", new File([snapshotBlob], "snapshot.png", { type: "image/png" }));
+    formData.append("original", originalFile);
+    formData.append("width", String(canvas.width));
+    formData.append("height", String(canvas.height));
+    formData.append("labels", JSON.stringify(labels));
+    formData.append("mode", mode);
+    formData.append("presetId", presetId ?? "");
+    formData.append("config", JSON.stringify(config));
+    appendJsonFile(formData, "segments", "segments.json", segments);
+    formData.append("depth", depthFile);
 
-      const formData = new FormData();
-      formData.append("snapshot", new File([snapshotBlob], "snapshot.png", { type: "image/png" }));
-      formData.append("original", new File([origBlob], "original.png", { type: origBlob.type }));
-      formData.append("width", String(canvas.width));
-      formData.append("height", String(canvas.height));
-      formData.append("labels", JSON.stringify(labels));
-      formData.append("mode", mode);
-      formData.append("presetId", presetId ?? "");
-      formData.append("config", JSON.stringify(config));
+    const res = await fetch("/api/text-image/gallery", {
+      method: "POST",
+      body: formData,
+    });
 
-      // Segments JSON (for restoring without re-inference)
-      formData.append(
-        "segments",
-        new File(
-          [JSON.stringify(segments)],
-          "segments.json",
-          { type: "application/json" }
-        )
-      );
-
-      // Depth map image as blob
-      const depthRes = await fetch(depthUrl);
-      const depthBlob = await depthRes.blob();
-      formData.append("depth", new File([depthBlob], "depth.png", { type: depthBlob.type }));
-
-      const res = await fetch("/api/text-image/gallery", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Save failed");
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
-    } finally {
-      setSaving(false);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Save failed");
     }
   }, [canvasRef, originalUrl, depthUrl, segments, mode, presetId, config]);
 
   return (
-    <div className="flex items-center justify-center gap-3">
-      <DevOnlyButton
-        text="Save to Gallery"
-        onClick={handleSave}
-        loading={saving}
-        loadingText="Saving…"
-        disabled={!config}
-      />
-      {error && <span className="text-error text-xs">{error}</span>}
-    </div>
+    <SaveActionPanel
+      canSave={!!config}
+      onSave={handleSave}
+    />
   );
 }

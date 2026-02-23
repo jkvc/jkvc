@@ -1,31 +1,12 @@
 import { put } from "@vercel/blob";
-import { getRedis } from "@/app/projects/image-reconstructor/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import type { GalleryItem } from "@/app/projects/image-reconstructor/lib/types";
-
-const GALLERY_KEY = "image-reconstructor:gallery";
+import { listGalleryItems, saveGalleryItem } from "@/app/lib/server/gallery-store";
+import { IMAGE_RECON_GALLERY_NS } from "./storage";
 
 export async function GET() {
   try {
-    const redis = getRedis();
-    const ids = await redis.lrange(GALLERY_KEY, 0, 4);
-    if (ids.length === 0) return NextResponse.json([]);
-
-    const pipeline = redis.pipeline();
-    for (const id of ids) {
-      pipeline.get(`image-reconstructor:item:${id}`);
-    }
-    const results = await pipeline.exec();
-
-    const items: GalleryItem[] = [];
-    if (results) {
-      for (const [err, raw] of results) {
-        if (!err && typeof raw === "string") {
-          items.push(JSON.parse(raw) as GalleryItem);
-        }
-      }
-    }
-
+    const items = await listGalleryItems<GalleryItem>(IMAGE_RECON_GALLERY_NS, 5);
     return NextResponse.json(items);
   } catch {
     return NextResponse.json([]);
@@ -99,9 +80,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const redis = getRedis();
-    await redis.set(`image-reconstructor:item:${id}`, JSON.stringify(item));
-    await redis.lpush(GALLERY_KEY, id);
+    await saveGalleryItem(IMAGE_RECON_GALLERY_NS, id, item);
   } catch {
     // Redis not configured — blobs still uploaded
   }

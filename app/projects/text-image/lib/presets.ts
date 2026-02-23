@@ -7,7 +7,7 @@
  * To add or reorder presets, edit the PRESETS array below.
  */
 
-import type { ParticleConfig } from "../components/ParticleControls";
+import type { ParticleConfig } from "./particle-config";
 
 export interface Preset {
   id: string;

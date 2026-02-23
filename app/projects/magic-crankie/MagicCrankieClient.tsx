@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCrankieEngine } from "./lib/crankie-engine";
 import CrankieViewport from "./components/CrankieViewport";
 import StateButtons from "./components/StateButtons";
+import IconCircleButton from "@/app/components/ui/IconCircleButton";
 
 export default function MagicCrankieClient() {
   const { segments, scrollOffset, currentStateId, requestState } =
@@ -26,19 +27,13 @@ export default function MagicCrankieClient() {
 
         <div className="w-px h-5 bg-[#E0E0E0]" />
 
-        <button
+        <IconCircleButton
           onClick={() => setShowDebug((d) => !d)}
-          className={`flex items-center justify-center w-9 h-9 rounded-full border transition-all cursor-pointer ${
-            showDebug
-              ? "border-gold/50 text-gold"
-              : "border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
-          }`}
+          icon={showDebug ? "fa-eye" : "fa-eye-slash"}
           title="Toggle debug overlay"
-        >
-          <i
-            className={`fa-solid ${showDebug ? "fa-eye" : "fa-eye-slash"} text-[12px]`}
-          />
-        </button>
+          active={showDebug}
+          iconClassName="text-[12px]"
+        />
       </div>
     </div>
   );

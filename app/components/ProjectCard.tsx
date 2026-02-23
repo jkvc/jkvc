@@ -4,7 +4,6 @@ interface ProjectCardProps {
   title: string;
   slug: string;
   description: string;
-  tags: string[];
   gradient: string;
   thumbnail?: string;
   draft?: boolean;
@@ -14,7 +13,6 @@ export default function ProjectCard({
   title,
   slug,
   description,
-  tags,
   gradient,
   thumbnail,
   draft,
