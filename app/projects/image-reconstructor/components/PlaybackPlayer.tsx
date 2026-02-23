@@ -296,7 +296,6 @@ export default function PlaybackPlayer({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (cancelledRef.current) break;
 

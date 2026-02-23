@@ -15,12 +15,17 @@ export default function CrankieViewport({
   scrollOffset,
   showDebug,
 }: CrankieViewportProps) {
-  let cumulativeLeft = 0;
-  const positioned = segments.map((seg) => {
-    const left = cumulativeLeft;
-    cumulativeLeft += seg.width * SCALE;
-    return { ...seg, displayLeft: left, displayWidth: seg.width * SCALE };
-  });
+  const positioned = segments.reduce<
+    Array<Segment & { displayLeft: number; displayWidth: number }>
+  >((acc, seg) => {
+    const previous = acc[acc.length - 1];
+    const displayLeft = previous
+      ? previous.displayLeft + previous.displayWidth
+      : 0;
+    const displayWidth = seg.width * SCALE;
+    acc.push({ ...seg, displayLeft, displayWidth });
+    return acc;
+  }, []);
 
   return (
     <div

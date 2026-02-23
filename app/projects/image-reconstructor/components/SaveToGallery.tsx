@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import type { ProcessingState } from "../lib/types";
-import DevOnlyButton from "@/app/components/DevOnlyButton";
+import SaveActionPanel from "@/app/components/gallery/SaveActionPanel";
+import { fetchAsFile } from "@/app/lib/client/blob-files";
 
 interface Props {
   state: ProcessingState;
@@ -10,96 +11,72 @@ interface Props {
 }
 
 export default function SaveToGallery({ state, onSaved }: Props) {
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const canSave =
+  const canSave = Boolean(
     state.compositingStatus === "complete" &&
     state.originalImageUrl &&
-    state.frames.length > 0;
+    state.frames.length > 0
+  );
 
   const handleSave = useCallback(async () => {
-    if (!canSave) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-
-      // Original image
-      const origRes = await fetch(state.originalImageUrl!);
-      const origBlob = await origRes.blob();
-      formData.append(
-        "original",
-        new File([origBlob], "original.jpg", { type: "image/jpeg" })
-      );
-
-      // Sketch image
-      if (state.sketchUrl) {
-        const sketchRes = await fetch(state.sketchUrl);
-        const sketchBlob = await sketchRes.blob();
-        formData.append(
-          "sketch",
-          new File([sketchBlob], "sketch.jpg", { type: "image/jpeg" })
-        );
-      }
-
-      // Video
-      if (state.videoUrl) {
-        const videoRes = await fetch(state.videoUrl);
-        const videoBlob = await videoRes.blob();
-        formData.append(
-          "video",
-          new File([videoBlob], "video.mp4", { type: "video/mp4" })
-        );
-      }
-
-      // Frames
-      for (let i = 0; i < state.frames.length; i++) {
-        const frameRes = await fetch(state.frames[i].compositeUrl);
-        const frameBlob = await frameRes.blob();
-        formData.append(
-          `frame_${i}`,
-          new File([frameBlob], `frame_${i}.jpg`, { type: "image/jpeg" })
-        );
-      }
-
-      // Segment labels
-      const labels = state.frames.map((f) => f.label);
-      formData.append("segmentLabels", JSON.stringify(labels));
-
-      // Animation prompt
-      formData.append("animationPrompt", state.animationPrompt || "");
-
-      const res = await fetch("/api/image-reconstructor/gallery", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Save failed");
-      }
-
-      onSaved?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unknown error");
-    } finally {
-      setSaving(false);
+    if (!canSave || !state.originalImageUrl) {
+      throw new Error("Cannot save yet");
     }
-  }, [canSave, state, onSaved]);
+
+    const formData = new FormData();
+
+    // Original image
+    formData.append(
+      "original",
+      await fetchAsFile(state.originalImageUrl, "original.jpg", "image/jpeg")
+    );
+
+    // Sketch image
+    if (state.sketchUrl) {
+      formData.append(
+        "sketch",
+        await fetchAsFile(state.sketchUrl, "sketch.jpg", "image/jpeg")
+      );
+    }
+
+    // Video
+    if (state.videoUrl) {
+      formData.append(
+        "video",
+        await fetchAsFile(state.videoUrl, "video.mp4", "video/mp4")
+      );
+    }
+
+    // Frames
+    for (let i = 0; i < state.frames.length; i++) {
+      formData.append(
+        `frame_${i}`,
+        await fetchAsFile(state.frames[i].compositeUrl, `frame_${i}.jpg`, "image/jpeg")
+      );
+    }
+
+    // Segment labels
+    const labels = state.frames.map((f) => f.label);
+    formData.append("segmentLabels", JSON.stringify(labels));
+
+    // Animation prompt
+    formData.append("animationPrompt", state.animationPrompt || "");
+
+    const res = await fetch("/api/image-reconstructor/gallery", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || "Save failed");
+    }
+  }, [canSave, state]);
 
   return (
-    <div className="flex items-center justify-center gap-3">
-      <DevOnlyButton
-        text="Save to Gallery"
-        onClick={handleSave}
-        loading={saving}
-        loadingText="Saving…"
-        disabled={!canSave}
-      />
-      {error && <span className="text-error text-xs">{error}</span>}
-    </div>
+    <SaveActionPanel
+      canSave={canSave}
+      onSave={handleSave}
+      onSaved={onSaved}
+    />
   );
 }

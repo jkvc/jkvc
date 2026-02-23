@@ -13,7 +13,8 @@ import {
   defaultDepthMul,
 } from "../lib/sampling";
 import { renderParticle, renderLabelParticle, createLabelRendererState } from "../lib/shape-renderer";
-import ParticleControls, { type ParticleConfig } from "./ParticleControls";
+import type { ParticleConfig } from "../lib/particle-config";
+import ParticleControls from "./ParticleControls";
 
 // ---------------------------------------------------------------------------
 // Props

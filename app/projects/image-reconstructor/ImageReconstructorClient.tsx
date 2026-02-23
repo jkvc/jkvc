@@ -526,7 +526,6 @@ export default function ImageReconstructorClient() {
         <PresentationView
           state={state}
           onFile={handleFile}
-          onReset={handleReset}
           onSwitchToExpert={() => switchMode("expert")}
           galleryItems={galleryItems}
           onSelectGalleryItem={handleSelectGalleryItem}

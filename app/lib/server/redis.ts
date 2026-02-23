@@ -1,10 +1,3 @@
-/**
- * Shared Redis client using ioredis.
- *
- * Reuses a single connection across invocations within the same
- * serverless container / dev server process.
- */
-
 import Redis from "ioredis";
 
 let client: Redis | null = null;

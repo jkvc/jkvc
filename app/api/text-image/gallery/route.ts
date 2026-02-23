@@ -1,32 +1,13 @@
 import { put } from "@vercel/blob";
-import { getRedis } from "@/app/projects/text-image/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import type { GalleryItem } from "@/app/projects/text-image/lib/types";
-import type { ParticleConfig } from "@/app/projects/text-image/components/ParticleControls";
-
-const GALLERY_KEY = "text-image:gallery";
+import type { ParticleConfig } from "@/app/projects/text-image/lib/particle-config";
+import { listGalleryItems, saveGalleryItem } from "@/app/lib/server/gallery-store";
+import { TEXT_IMAGE_GALLERY_NS } from "./storage";
 
 export async function GET() {
   try {
-    const redis = getRedis();
-    const ids = await redis.lrange(GALLERY_KEY, 0, 4); // max 5 items
-    if (ids.length === 0) return NextResponse.json([]);
-
-    const pipeline = redis.pipeline();
-    for (const id of ids) {
-      pipeline.get(`text-image:item:${id}`);
-    }
-    const results = await pipeline.exec();
-
-    const items: GalleryItem[] = [];
-    if (results) {
-      for (const [err, raw] of results) {
-        if (!err && typeof raw === "string") {
-          items.push(JSON.parse(raw) as GalleryItem);
-        }
-      }
-    }
-
+    const items = await listGalleryItems<GalleryItem>(TEXT_IMAGE_GALLERY_NS, 5);
     return NextResponse.json(items);
   } catch {
     return NextResponse.json([]);
@@ -71,9 +52,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const redis = getRedis();
-    await redis.set(`text-image:item:${id}`, JSON.stringify(item));
-    await redis.lpush(GALLERY_KEY, id);
+    await saveGalleryItem(TEXT_IMAGE_GALLERY_NS, id, item);
   } catch {
     // Redis not configured — blob was still uploaded successfully
   }

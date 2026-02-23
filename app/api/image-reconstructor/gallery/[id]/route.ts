@@ -1,9 +1,8 @@
 import { del } from "@vercel/blob";
-import { getRedis } from "@/app/projects/image-reconstructor/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import type { GalleryItem } from "@/app/projects/image-reconstructor/lib/types";
-
-const GALLERY_KEY = "image-reconstructor:gallery";
+import { getGalleryItem, removeGalleryItem } from "@/app/lib/server/gallery-store";
+import { IMAGE_RECON_GALLERY_NS } from "../storage";
 
 export async function DELETE(
   _request: NextRequest,
@@ -12,13 +11,10 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const redis = getRedis();
-
-    const raw = await redis.get(`image-reconstructor:item:${id}`);
-    if (!raw) {
+    const item = await getGalleryItem<GalleryItem>(IMAGE_RECON_GALLERY_NS, id);
+    if (!item) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    const item = JSON.parse(raw) as GalleryItem;
 
     const blobUrls = [item.originalUrl, item.thumbnailUrl];
     if (item.sketchUrl) blobUrls.push(item.sketchUrl);
@@ -27,8 +23,7 @@ export async function DELETE(
     const unique = [...new Set(blobUrls)];
     await Promise.all(unique.map((url) => del(url)));
 
-    await redis.del(`image-reconstructor:item:${id}`);
-    await redis.lrem(GALLERY_KEY, 1, id);
+    await removeGalleryItem(IMAGE_RECON_GALLERY_NS, id);
 
     return NextResponse.json({ success: true });
   } catch {

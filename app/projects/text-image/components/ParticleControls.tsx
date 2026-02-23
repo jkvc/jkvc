@@ -1,19 +1,8 @@
 "use client";
 
-import type { Shape, Background, Sampling } from "../lib/particle-types";
 import { SHAPES, BACKGROUNDS, SAMPLINGS } from "../lib/particle-types";
-
-export interface ParticleConfig {
-  shape: Shape;
-  background: Background;
-  sampling: Sampling;
-  dotsPerLongEdge: number;
-  totalPoints: number;
-  depthBias: number;
-  depthMul: number;
-  parallaxStrength: number;
-  opacity: number;
-}
+import type { ParticleConfig } from "../lib/particle-config";
+export type { ParticleConfig } from "../lib/particle-config";
 
 interface Props {
   config: ParticleConfig;

@@ -1,4 +1,4 @@
-import type { ParticleConfig } from "../components/ParticleControls";
+import type { ParticleConfig } from "./particle-config";
 
 export interface GalleryItem {
   id: string;

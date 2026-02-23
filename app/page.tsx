@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
+import IconCircleButton from "./components/ui/IconCircleButton";
 import { projects } from "./projects/data";
 
 const STORAGE_KEY = "jkvc:show-drafts";
@@ -109,26 +110,22 @@ export default function Home() {
 
         {/* Footer: wip toggle + github */}
         <footer className="mt-16 flex justify-center gap-3">
-          <button
+          <IconCircleButton
             onClick={toggleDrafts}
-            className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all cursor-pointer ${
-              showDrafts
-                ? "border-gold/50 text-gold"
-                : "border-border text-[#AAA] hover:border-gold/50 hover:text-gold"
-            }`}
+            icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
             title={showDrafts ? "Hide drafts" : "Show drafts"}
-          >
-            <i className={`fa-solid ${showDrafts ? "fa-eye" : "fa-eye-slash"} text-[13px]`} />
-          </button>
-          <a
+            size="md"
+            active={showDrafts}
+            iconClassName="text-[13px]"
+          />
+          <IconCircleButton
             href="https://github.com/jkvc"
-            className="flex items-center justify-center w-10 h-10 rounded-full border border-border text-[#AAA] hover:border-gold/50 hover:text-gold transition-all"
-            target="_blank"
-            rel="noopener noreferrer"
+            icon="fa-github"
+            iconFamily="fa-brands"
             title="GitHub"
-          >
-            <i className="fa-brands fa-github text-[14px]" />
-          </a>
+            size="md"
+            iconClassName="text-[14px]"
+          />
         </footer>
       </div>
     </div>
