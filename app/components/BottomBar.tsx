@@ -4,13 +4,18 @@ import { useCallback, useSyncExternalStore, useState } from "react";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 
 const STORAGE_KEY = "jkvc:show-drafts";
+const DRAFTS_CHANGE_EVENT = "jkvc:drafts-changed";
 
-function subscribeToStorage(cb: () => void) {
-  const handler = (e: StorageEvent) => {
+export function subscribeToStorage(cb: () => void) {
+  const storageHandler = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY) cb();
   };
-  window.addEventListener("storage", handler);
-  return () => window.removeEventListener("storage", handler);
+  window.addEventListener("storage", storageHandler);
+  window.addEventListener(DRAFTS_CHANGE_EVENT, cb);
+  return () => {
+    window.removeEventListener("storage", storageHandler);
+    window.removeEventListener(DRAFTS_CHANGE_EVENT, cb);
+  };
 }
 
 const IS_DEV = process.env.NODE_ENV === "development";
@@ -66,6 +71,7 @@ export default function BottomBar({ showHome, showDraftToggle }: BottomBarProps)
     try {
       const next = !getShowDrafts();
       localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+      window.dispatchEvent(new CustomEvent(DRAFTS_CHANGE_EVENT));
     } catch {
       // localStorage unavailable
     }

@@ -2,19 +2,9 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
-import BottomBar, { getShowDrafts } from "./components/BottomBar";
+import BottomBar, { getShowDrafts, subscribeToStorage } from "./components/BottomBar";
 import IconCircleButton from "./components/ui/IconCircleButton";
 import { projects } from "./projects/data";
-
-const STORAGE_KEY = "jkvc:show-drafts";
-
-function subscribeToStorage(cb: () => void) {
-  const handler = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) cb();
-  };
-  window.addEventListener("storage", handler);
-  return () => window.removeEventListener("storage", handler);
-}
 
 function getShowDraftsServer() {
   return false;
