@@ -143,7 +143,7 @@ function TimelineSection({ section }: { section: TimelineSectionData }) {
 
 export default function About() {
   return (
-    <div className="relative z-[1] min-h-screen text-text px-6 pt-4 pb-16 sm:px-8">
+    <div className="min-h-screen bg-surface text-text px-6 pt-4 pb-16 sm:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <section className="mt-24 mb-16">

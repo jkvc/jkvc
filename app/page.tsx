@@ -24,7 +24,7 @@ export default function Home() {
   const visible = projects.filter((p) => showDrafts || p.ready);
 
   return (
-    <div className="relative z-[1] min-h-screen text-text px-6 pt-4 pb-16 sm:px-8">
+    <div className="min-h-screen bg-surface text-text px-6 pt-4 pb-16 sm:px-8">
       {/* Scroll-triggered navbar */}
       <div
         className={`sticky top-0 z-10 flex items-center justify-center py-3 transition-all duration-200 ${
