@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
 import BottomBar, { getShowDrafts } from "./components/BottomBar";
+import IconCircleButton from "./components/ui/IconCircleButton";
 import { projects } from "./projects/data";
 
 const STORAGE_KEY = "jkvc:show-drafts";
@@ -55,16 +56,11 @@ export default function Home() {
       <div className="max-w-2xl mx-auto">
         {/* Hero */}
         <section className="mt-24 mb-8">
-          <div className="flex items-baseline gap-4">
+          <div className="flex items-center gap-3">
             <h1 ref={heroRef} className="font-serif text-4xl tracking-tight text-text-heading">
               jkvc
             </h1>
-            <a
-              href="/about"
-              className="text-[13px] text-text-muted hover:text-gold transition-colors"
-            >
-              about
-            </a>
+            <IconCircleButton href="/about" icon="fa-user" title="About" size="sm" />
           </div>
           <p className="mt-4 text-[15px] leading-relaxed text-text-muted">
             A human enthusiast.
