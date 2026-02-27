@@ -9,7 +9,7 @@ interface TimelineSectionData {
   organization: string;
   role: string;
   description: string;
-  images: TimelineImage[];
+  images: [TimelineImage, TimelineImage, TimelineImage];
   current?: boolean;
 }
 
@@ -19,7 +19,7 @@ const sections: TimelineSectionData[] = [
     organization: "Meta Superintelligence Lab",
     role: "Prototyping",
     description:
-      "Creating novel user experiences with cutting-edge model capabilities.",
+      "Making things that feel like they're from the future, using the latest models.",
     images: [
       { alt: "Prototyping session at Meta Superintelligence Lab" },
       { alt: "AI interaction demo at Meta Superintelligence Lab" },
@@ -32,7 +32,7 @@ const sections: TimelineSectionData[] = [
     organization: "Meta Gen AI",
     role: "Research to Production",
     description:
-      "Specialized in diffusion model inference algorithms, built scalable systems for model inference in production.",
+      "Got deep into making diffusion models fast — wrote inference algorithms and shipped them at scale.",
     images: [
       { alt: "Diffusion model research at Meta Gen AI" },
       { alt: "Production AI infrastructure at Meta Gen AI" },
@@ -44,7 +44,7 @@ const sections: TimelineSectionData[] = [
     organization: "Meta Computational Photography",
     role: "Computer Vision",
     description:
-      "Media understanding and quality using classic computer vision and ML approaches.",
+      "Made photos and videos on Meta's apps look better using CV and ML pipelines.",
     images: [
       { alt: "Computational photography research at Meta" },
       { alt: "Computer vision work at Meta" },
@@ -56,7 +56,7 @@ const sections: TimelineSectionData[] = [
     organization: "Stanford University",
     role: "Master's in AI/ML",
     description:
-      "Worked at Stanford NLP Group and Stanford Vision and Learning Lab (SVL). Published research in vision-and-language navigation at CVPR 2021.",
+      "Research at Stanford NLP Group and the Vision Lab (SVL). Ended up at CVPR 2021 for vision-language navigation.",
     images: [
       { alt: "Stanford University campus" },
       { alt: "Stanford Vision and Learning Lab" },
@@ -67,19 +67,19 @@ const sections: TimelineSectionData[] = [
     dateRange: "2014 – 2018",
     organization: "UC San Diego",
     role: "B.S. Computer Science",
-    description: "Undergraduate degree in Computer Science.",
+    description: "Studied CS by the beach. Go Tritons.",
     images: [
       { alt: "UC San Diego campus" },
       { alt: "UC San Diego Jacobs School of Engineering" },
-      { alt: "UCSD computer science department" },
+      { alt: "UCSD campus life" },
     ],
   },
 ];
 
-function PhotoPlaceholder({ alt }: { alt: string }) {
+function PhotoPlaceholder({ alt, className }: { alt: string; className?: string }) {
   return (
     <div
-      className="aspect-square rounded-lg border border-[#E8E8E8] bg-[#F5F5F3] flex items-center justify-center"
+      className={`rounded-lg border border-[#E8E8E8] bg-[#F5F5F3] flex items-center justify-center ${className ?? ""}`}
       role="img"
       aria-label={alt}
       title={alt}
@@ -89,42 +89,53 @@ function PhotoPlaceholder({ alt }: { alt: string }) {
   );
 }
 
+function PhotoGrid({ images }: { images: TimelineSectionData["images"] }) {
+  const [featured, a, b] = images;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {/* Featured landscape image */}
+      <PhotoPlaceholder alt={featured.alt} className="aspect-[16/9] w-full" />
+      {/* Two thumbnails */}
+      <div className="grid grid-cols-2 gap-1.5">
+        <PhotoPlaceholder alt={a.alt} className="aspect-square" />
+        <PhotoPlaceholder alt={b.alt} className="aspect-square" />
+      </div>
+    </div>
+  );
+}
+
 function TimelineSection({ section }: { section: TimelineSectionData }) {
   return (
-    <div className="mb-12">
-      {/* Gallery-style section divider */}
-      <div className="flex items-center gap-3 mb-5">
+    <div className="mb-14">
+      {/* Photo app-style section header */}
+      <div className="flex items-center gap-2.5 mb-3">
         {section.current && (
           <span className="relative flex h-2 w-2 flex-shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-60" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-gold" />
           </span>
         )}
-        <span className="text-[10px] uppercase tracking-widest text-text-faint whitespace-nowrap">
+        <span className="text-[11px] font-medium text-text-muted tracking-wide whitespace-nowrap">
           {section.dateRange}
         </span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
-      {/* Org + role */}
-      <div className="mb-4">
-        <h2 className="font-serif text-xl tracking-tight text-text-heading">
-          {section.organization}
-        </h2>
-        <p className="text-sm text-gold mt-0.5">{section.role}</p>
-      </div>
-
       {/* Photo grid */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {section.images.map((img, i) => (
-          <PhotoPlaceholder key={i} alt={img.alt} />
-        ))}
-      </div>
+      <PhotoGrid images={section.images} />
 
-      {/* Description */}
-      <p className="text-[13px] text-text-muted leading-relaxed">
-        {section.description}
-      </p>
+      {/* Org + role + caption */}
+      <div className="mt-3">
+        <div className="flex items-baseline gap-2">
+          <h2 className="font-serif text-lg tracking-tight text-text-heading">
+            {section.organization}
+          </h2>
+          <span className="text-[11px] text-gold">{section.role}</span>
+        </div>
+        <p className="mt-1 text-[13px] text-text-muted leading-relaxed">
+          {section.description}
+        </p>
+      </div>
     </div>
   );
 }
