@@ -115,7 +115,7 @@ function TimelineSection({ section }: { section: TimelineSectionData }) {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-gold" />
           </span>
         )}
-        <span className="text-[11px] font-medium text-text-muted tracking-wide whitespace-nowrap">
+        <span className="text-[10px] uppercase tracking-widest text-text-faint whitespace-nowrap">
           {section.dateRange}
         </span>
         <div className="flex-1 h-px bg-border" />
