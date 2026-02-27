@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-const CELL_SIZE = 50;
-const LINE_COLOR = "rgba(186, 146, 68, 0.55)";
+const CELL_SIZE = 10;
+const LINE_COLOR = "rgba(186, 146, 68, 0.10)";
 const BG = "#FAFAF8";
 
 // Directions: 0=N, 1=E, 2=S, 3=W
@@ -62,7 +62,7 @@ function draw(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, w, h);
 
   ctx.strokeStyle = LINE_COLOR;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 0.5;
   ctx.lineCap = "square";
 
   // Draw S and E walls only — covers every interior wall exactly once, no outer border
