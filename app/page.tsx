@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
-import IconCircleButton from "./components/ui/IconCircleButton";
+import BottomBar, { getShowDrafts } from "./components/BottomBar";
 import { projects } from "./projects/data";
 
 const STORAGE_KEY = "jkvc:show-drafts";
@@ -15,18 +15,6 @@ function subscribeToStorage(cb: () => void) {
   return () => window.removeEventListener("storage", handler);
 }
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
-function getShowDrafts() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored !== null) return stored === "1";
-    return IS_DEV;
-  } catch {
-    return IS_DEV;
-  }
-}
-
 function getShowDraftsServer() {
   return false;
 }
@@ -34,18 +22,7 @@ function getShowDraftsServer() {
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
-  const [, forceRender] = useState(0);
   const heroRef = useRef<HTMLHeadingElement>(null);
-
-  const toggleDrafts = useCallback(() => {
-    try {
-      const next = !getShowDrafts();
-      localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
-    } catch {
-      // localStorage unavailable
-    }
-    forceRender((n) => n + 1);
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -78,9 +55,17 @@ export default function Home() {
       <div className="max-w-2xl mx-auto">
         {/* Hero */}
         <section className="mt-24 mb-8">
-          <h1 ref={heroRef} className="font-serif text-4xl tracking-tight text-text-heading">
-            jkvc
-          </h1>
+          <div className="flex items-baseline gap-4">
+            <h1 ref={heroRef} className="font-serif text-4xl tracking-tight text-text-heading">
+              jkvc
+            </h1>
+            <a
+              href="/about"
+              className="text-[13px] text-text-muted hover:text-gold transition-colors"
+            >
+              about
+            </a>
+          </div>
           <p className="mt-4 text-[15px] leading-relaxed text-text-muted">
             A human enthusiast.
           </p>
@@ -108,32 +93,7 @@ export default function Home() {
           </p>
         </section>
 
-        {/* Footer: wip toggle + about + github */}
-        <footer className="mt-16 flex justify-center gap-3">
-          <IconCircleButton
-            onClick={toggleDrafts}
-            icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
-            title={showDrafts ? "Hide drafts" : "Show drafts"}
-            size="md"
-            active={showDrafts}
-            iconClassName="text-[13px]"
-          />
-          <IconCircleButton
-            href="/about"
-            icon="fa-user"
-            title="About"
-            size="md"
-            iconClassName="text-[14px]"
-          />
-          <IconCircleButton
-            href="https://github.com/jkvc"
-            icon="fa-github"
-            iconFamily="fa-brands"
-            title="GitHub"
-            size="md"
-            iconClassName="text-[14px]"
-          />
-        </footer>
+        <BottomBar />
       </div>
     </div>
   );

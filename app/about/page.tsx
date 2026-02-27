@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import BottomBar from "@/app/components/BottomBar";
 
 interface TimelineEntry {
   period: string;
@@ -152,29 +153,17 @@ export default function About() {
           </p>
         </section>
 
-        {/* Footer with social links */}
-        <footer className="mt-20 flex flex-col items-center gap-6">
-          <div className="flex justify-center gap-3">
-            <IconCircleButton
-              href="/"
-              icon="fa-home"
-              title="Home"
-              size="md"
-              iconClassName="text-[14px]"
-            />
+        {/* Connect */}
+        <section className="mt-16">
+          <h2 className="text-[10px] uppercase tracking-widest text-text-faint mb-4">
+            Connect
+          </h2>
+          <div className="flex flex-wrap gap-3">
             <IconCircleButton
               href="https://www.linkedin.com/in/jkvc"
               icon="fa-linkedin"
               iconFamily="fa-brands"
               title="LinkedIn"
-              size="md"
-              iconClassName="text-[14px]"
-            />
-            <IconCircleButton
-              href="https://github.com/jkvc"
-              icon="fa-github"
-              iconFamily="fa-brands"
-              title="GitHub"
               size="md"
               iconClassName="text-[14px]"
             />
@@ -187,7 +176,9 @@ export default function About() {
             />
             <EmailButton />
           </div>
-        </footer>
+        </section>
+
+        <BottomBar />
       </div>
     </div>
   );
