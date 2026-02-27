@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import BottomBar from "@/app/components/BottomBar";
 
 interface TimelineEntry {
@@ -50,30 +48,6 @@ const timeline: TimelineEntry[] = [
     skills: ["Computer Science", "Foundations"],
   },
 ];
-
-function EmailButton() {
-  const [revealed, setRevealed] = useState(false);
-  const email = ["jkvc", "dev"].join(".") + "@" + ["gmail", "com"].join(".");
-
-  if (revealed) {
-    return (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gold/50 text-gold text-sm">
-        <i className="fa-solid fa-envelope text-[13px]" />
-        <span className="font-mono text-[13px]">{email}</span>
-      </div>
-    );
-  }
-
-  return (
-    <IconCircleButton
-      onClick={() => setRevealed(true)}
-      icon="fa-envelope"
-      title="Reveal email"
-      size="md"
-      iconClassName="text-[14px]"
-    />
-  );
-}
 
 export default function About() {
   return (
@@ -153,32 +127,7 @@ export default function About() {
           </p>
         </section>
 
-        {/* Connect */}
-        <section className="mt-16">
-          <h2 className="text-[10px] uppercase tracking-widest text-text-faint mb-4">
-            Connect
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <IconCircleButton
-              href="https://www.linkedin.com/in/jkvc"
-              icon="fa-linkedin"
-              iconFamily="fa-brands"
-              title="LinkedIn"
-              size="md"
-              iconClassName="text-[14px]"
-            />
-            <IconCircleButton
-              href="https://scholar.google.com/citations?user=YOUR_ID"
-              icon="fa-graduation-cap"
-              title="Google Scholar"
-              size="md"
-              iconClassName="text-[14px]"
-            />
-            <EmailButton />
-          </div>
-        </section>
-
-        <BottomBar />
+        <BottomBar showHome />
       </div>
     </div>
   );

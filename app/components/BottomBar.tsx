@@ -29,7 +29,36 @@ function getShowDraftsServer() {
   return false;
 }
 
-export default function BottomBar() {
+function EmailButton() {
+  const [revealed, setRevealed] = useState(false);
+  const email = ["jkvc", "dev"].join(".") + "@" + ["gmail", "com"].join(".");
+
+  if (revealed) {
+    return (
+      <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gold/50 text-gold text-sm">
+        <i className="fa-solid fa-envelope text-[13px]" />
+        <span className="font-mono text-[13px]">{email}</span>
+      </div>
+    );
+  }
+
+  return (
+    <IconCircleButton
+      onClick={() => setRevealed(true)}
+      icon="fa-envelope"
+      title="Reveal email"
+      size="md"
+      iconClassName="text-[14px]"
+    />
+  );
+}
+
+interface BottomBarProps {
+  showHome?: boolean;
+  showDraftToggle?: boolean;
+}
+
+export default function BottomBar({ showHome, showDraftToggle }: BottomBarProps) {
   const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
   const [, forceRender] = useState(0);
 
@@ -44,21 +73,23 @@ export default function BottomBar() {
   }, []);
 
   return (
-    <footer className="mt-16 flex justify-center gap-3">
+    <footer className="mt-16 flex justify-center gap-3 flex-wrap">
+      {showHome && (
+        <IconCircleButton
+          href="/"
+          icon="fa-home"
+          title="Home"
+          size="md"
+          iconClassName="text-[14px]"
+        />
+      )}
       <IconCircleButton
-        href="/"
-        icon="fa-home"
-        title="Home"
+        href="https://www.linkedin.com/in/jkvc"
+        icon="fa-linkedin"
+        iconFamily="fa-brands"
+        title="LinkedIn"
         size="md"
         iconClassName="text-[14px]"
-      />
-      <IconCircleButton
-        onClick={toggleDrafts}
-        icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
-        title={showDrafts ? "Hide drafts" : "Show drafts"}
-        size="md"
-        active={showDrafts}
-        iconClassName="text-[13px]"
       />
       <IconCircleButton
         href="https://github.com/jkvc"
@@ -68,6 +99,24 @@ export default function BottomBar() {
         size="md"
         iconClassName="text-[14px]"
       />
+      <IconCircleButton
+        href="https://scholar.google.com/citations?user=YOUR_ID"
+        icon="fa-graduation-cap"
+        title="Google Scholar"
+        size="md"
+        iconClassName="text-[14px]"
+      />
+      <EmailButton />
+      {showDraftToggle && (
+        <IconCircleButton
+          onClick={toggleDrafts}
+          icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
+          title={showDrafts ? "Hide drafts" : "Show drafts"}
+          size="md"
+          active={showDrafts}
+          iconClassName="text-[13px]"
+        />
+      )}
     </footer>
   );
 }

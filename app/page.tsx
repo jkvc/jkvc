@@ -89,7 +89,7 @@ export default function Home() {
           </p>
         </section>
 
-        <BottomBar />
+        <BottomBar showDraftToggle />
       </div>
     </div>
   );
