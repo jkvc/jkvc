@@ -2,6 +2,10 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 @plugin "daisyui";
 
+body {
+  background-color: #FAFAF8;
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
