@@ -55,7 +55,7 @@ export default function About() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <section className="mt-24 mb-12">
-          <h1 className="font-serif text-4xl tracking-tight text-text-heading">About</h1>
+          <h1 className="font-serif text-4xl tracking-tight text-text-heading">Junshen Kevin Chen</h1>
           <p className="mt-4 text-[15px] leading-relaxed text-text-muted">
             Working at the intersection of creativity, models, and algorithms.
           </p>

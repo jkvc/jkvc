@@ -106,7 +106,7 @@ export default function BottomBar({ showHome, showDraftToggle }: BottomBarProps)
         iconClassName="text-[14px]"
       />
       <IconCircleButton
-        href="https://scholar.google.com/citations?user=YOUR_ID"
+        href="https://scholar.google.com/citations?user=eg-CJG0AAAAJ"
         icon="fa-graduation-cap"
         title="Google Scholar"
         size="md"
