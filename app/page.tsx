@@ -108,7 +108,7 @@ export default function Home() {
           </p>
         </section>
 
-        {/* Footer: wip toggle + github */}
+        {/* Footer: wip toggle + about + github */}
         <footer className="mt-16 flex justify-center gap-3">
           <IconCircleButton
             onClick={toggleDrafts}
@@ -117,6 +117,13 @@ export default function Home() {
             size="md"
             active={showDrafts}
             iconClassName="text-[13px]"
+          />
+          <IconCircleButton
+            href="/about"
+            icon="fa-user"
+            title="About"
+            size="md"
+            iconClassName="text-[14px]"
           />
           <IconCircleButton
             href="https://github.com/jkvc"
