@@ -56,24 +56,23 @@ function EmailButton() {
     return () => clearTimeout(timer);
   }, [revealed]);
 
+  if (revealed) {
+    return (
+      <div className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-gold/50 text-gold text-[12px]">
+        <span className="font-mono">{EMAIL_USER}</span>
+        <i className="fa-brands fa-google text-[12px]" />
+      </div>
+    );
+  }
+
   return (
-    <button
+    <IconCircleButton
       onClick={() => setRevealed(true)}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-border text-[#AAA] hover:border-gold/50 hover:text-gold transition-all cursor-pointer"
+      icon="fa-envelope"
       title="Reveal email"
-      aria-label="Reveal email address"
-    >
-      <i className="fa-solid fa-envelope text-[12px]" />
-      <span className="font-mono text-[12px]">
-        {EMAIL_USER}
-        {revealed ? (
-          <span className="text-gold">@</span>
-        ) : (
-          <span className="text-text-faint">{"<at>"}</span>
-        )}
-        {EMAIL_DOMAIN}
-      </span>
-    </button>
+      size="md"
+      iconClassName="text-[14px]"
+    />
   );
 }
 
