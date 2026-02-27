@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useSyncExternalStore, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore, useState } from "react";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 
 const STORAGE_KEY = "jkvc:show-drafts";
@@ -34,27 +34,36 @@ function getShowDraftsServer() {
   return false;
 }
 
+const EMAIL_USER = "kevinehc";
+const EMAIL_DOMAIN = "gmail.com";
+
 function EmailButton() {
   const [revealed, setRevealed] = useState(false);
-  const email = ["jkvc", "dev"].join(".") + "@" + ["gmail", "com"].join(".");
 
-  if (revealed) {
-    return (
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-gold/50 text-gold text-sm">
-        <i className="fa-solid fa-envelope text-[13px]" />
-        <span className="font-mono text-[13px]">{email}</span>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!revealed) return;
+    const timer = setTimeout(() => setRevealed(false), 3000);
+    return () => clearTimeout(timer);
+  }, [revealed]);
 
   return (
-    <IconCircleButton
+    <button
       onClick={() => setRevealed(true)}
-      icon="fa-envelope"
+      className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-border text-[#AAA] hover:border-gold/50 hover:text-gold transition-all cursor-pointer"
       title="Reveal email"
-      size="md"
-      iconClassName="text-[14px]"
-    />
+      aria-label="Reveal email address"
+    >
+      <i className="fa-solid fa-envelope text-[12px]" />
+      <span className="font-mono text-[12px]">
+        {EMAIL_USER}
+        {revealed ? (
+          <span className="text-gold">@</span>
+        ) : (
+          <span className="text-text-faint">{"<at>"}</span>
+        )}
+        {EMAIL_DOMAIN}
+      </span>
+    </button>
   );
 }
 
