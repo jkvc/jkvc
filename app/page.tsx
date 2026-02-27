@@ -70,15 +70,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About */}
-        <section className="mt-16">
-          <p className="text-[13px] text-text-muted leading-relaxed">
-            I work on diffusion model inference algorithms and build interactive
-            experiences that make generative AI more understandable and
-            controllable.
-          </p>
-        </section>
-
         <BottomBar showDraftToggle />
       </div>
     </div>
