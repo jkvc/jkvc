@@ -1,4 +1,5 @@
 import BottomBar from "@/app/components/BottomBar";
+import IconCircleButton from "@/app/components/ui/IconCircleButton";
 
 interface TimelineImage {
   alt: string;
@@ -161,7 +162,10 @@ export default function About() {
           ))}
         </section>
 
-        <BottomBar showHome />
+        <BottomBar />
+        <div className="mt-4 flex justify-center">
+          <IconCircleButton href="/" icon="fa-home" title="Home" size="md" iconClassName="text-[14px]" />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore, useState } from "react";
+import { useEffect, useState } from "react";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 
 const STORAGE_KEY = "jkvc:show-drafts";
@@ -30,8 +30,18 @@ export function getShowDrafts() {
   }
 }
 
-function getShowDraftsServer() {
+export function getShowDraftsServer() {
   return false;
+}
+
+export function toggleShowDrafts() {
+  try {
+    const next = !getShowDrafts();
+    localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+    window.dispatchEvent(new CustomEvent(DRAFTS_CHANGE_EVENT));
+  } catch {
+    // localStorage unavailable
+  }
 }
 
 const EMAIL_USER = "kevinehc";
@@ -67,37 +77,9 @@ function EmailButton() {
   );
 }
 
-interface BottomBarProps {
-  showHome?: boolean;
-  showDraftToggle?: boolean;
-}
-
-export default function BottomBar({ showHome, showDraftToggle }: BottomBarProps) {
-  const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
-  const [, forceRender] = useState(0);
-
-  const toggleDrafts = useCallback(() => {
-    try {
-      const next = !getShowDrafts();
-      localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
-      window.dispatchEvent(new CustomEvent(DRAFTS_CHANGE_EVENT));
-    } catch {
-      // localStorage unavailable
-    }
-    forceRender((n) => n + 1);
-  }, []);
-
+export default function BottomBar() {
   return (
     <footer className="mt-16 flex justify-center gap-3 flex-wrap">
-      {showHome && (
-        <IconCircleButton
-          href="/"
-          icon="fa-home"
-          title="Home"
-          size="md"
-          iconClassName="text-[14px]"
-        />
-      )}
       <IconCircleButton
         href="https://www.linkedin.com/in/jkvc"
         icon="fa-linkedin"
@@ -122,16 +104,6 @@ export default function BottomBar({ showHome, showDraftToggle }: BottomBarProps)
         iconClassName="text-[14px]"
       />
       <EmailButton />
-      {showDraftToggle && (
-        <IconCircleButton
-          onClick={toggleDrafts}
-          icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
-          title={showDrafts ? "Hide drafts" : "Show drafts"}
-          size="md"
-          active={showDrafts}
-          iconClassName="text-[13px]"
-        />
-      )}
     </footer>
   );
 }

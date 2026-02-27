@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import ProjectCard from "./components/ProjectCard";
-import BottomBar, { getShowDrafts, subscribeToStorage } from "./components/BottomBar";
+import BottomBar, { getShowDrafts, getShowDraftsServer, subscribeToStorage, toggleShowDrafts } from "./components/BottomBar";
 import IconCircleButton from "./components/ui/IconCircleButton";
 import { projects } from "./projects/data";
-
-function getShowDraftsServer() {
-  return false;
-}
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
+  const handleToggleDrafts = useCallback(() => toggleShowDrafts(), []);
   const heroRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -70,7 +67,17 @@ export default function Home() {
           </div>
         </section>
 
-        <BottomBar showDraftToggle />
+        <BottomBar />
+        <div className="mt-4 flex justify-center">
+          <IconCircleButton
+            onClick={handleToggleDrafts}
+            icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
+            title={showDrafts ? "Hide drafts" : "Show drafts"}
+            size="md"
+            active={showDrafts}
+            iconClassName="text-[13px]"
+          />
+        </div>
       </div>
     </div>
   );
