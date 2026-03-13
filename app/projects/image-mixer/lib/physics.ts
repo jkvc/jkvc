@@ -40,41 +40,41 @@ export function createBowlScene(
   });
 
   const bowlWidth = Math.min(width - 40, 400);
-  const bowlHeight = 200;
+  const bowlDepth = 160;
   const bowlX = width / 2;
-  const bowlY = height * 0.45;
+  const bowlY = height * 0.35; // rim y position
 
-  // Build bowl as a U-shape: left wall, right wall, bottom curve segments
+  // Build bowl as a U-shape using a bezier-sampled curve
+  // This must match the visual bezier in BowlCanvas drawBowl()
   const walls: Matter.Body[] = [];
-  const segments = 16;
+  const segments = 24;
   const halfW = bowlWidth / 2;
 
+  // Sample points along the same bezier used for drawing
+  const bezierPoints: { x: number; y: number }[] = [];
   for (let i = 0; i <= segments; i++) {
-    const angle = Math.PI + (Math.PI * i) / segments; // bottom half of circle
-    const cx = bowlX + halfW * Math.cos(angle);
-    const cy = bowlY + bowlHeight * 0.5 + (bowlHeight * 0.5) * Math.sin(angle);
-    const seg = Bodies.circle(cx, cy, BOWL_WALL_THICKNESS / 2, {
-      isStatic: true,
-      render: { visible: false },
-      friction: 0.3,
-      restitution: 0.2,
-    });
-    walls.push(seg);
+    const t = i / segments;
+    // Cubic bezier: P0=(left rim), P1=(left bottom), P2=(right bottom), P3=(right rim)
+    const p0x = bowlX - halfW, p0y = bowlY;
+    const p1x = bowlX - halfW, p1y = bowlY + bowlDepth * 1.8;
+    const p2x = bowlX + halfW, p2y = bowlY + bowlDepth * 1.8;
+    const p3x = bowlX + halfW, p3y = bowlY;
+
+    const mt = 1 - t;
+    const x = mt*mt*mt*p0x + 3*mt*mt*t*p1x + 3*mt*t*t*p2x + t*t*t*p3x;
+    const y = mt*mt*mt*p0y + 3*mt*mt*t*p1y + 3*mt*t*t*p2y + t*t*t*p3y;
+    bezierPoints.push({ x, y });
   }
 
-  // Fill gaps between circle segments with rectangles
-  for (let i = 0; i < segments; i++) {
-    const a1 = Math.PI + (Math.PI * i) / segments;
-    const a2 = Math.PI + (Math.PI * (i + 1)) / segments;
-    const x1 = bowlX + halfW * Math.cos(a1);
-    const y1 = bowlY + bowlHeight * 0.5 + (bowlHeight * 0.5) * Math.sin(a1);
-    const x2 = bowlX + halfW * Math.cos(a2);
-    const y2 = bowlY + bowlHeight * 0.5 + (bowlHeight * 0.5) * Math.sin(a2);
-    const mx = (x1 + x2) / 2;
-    const my = (y1 + y2) / 2;
-    const len = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-    const ang = Math.atan2(y2 - y1, x2 - x1);
-    const rect = Bodies.rectangle(mx, my, len + 4, BOWL_WALL_THICKNESS, {
+  // Create rectangle segments along the bezier
+  for (let i = 0; i < bezierPoints.length - 1; i++) {
+    const p1 = bezierPoints[i];
+    const p2 = bezierPoints[i + 1];
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    const len = Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2);
+    const ang = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    const rect = Bodies.rectangle(mx, my, len + 2, BOWL_WALL_THICKNESS, {
       isStatic: true,
       angle: ang,
       render: { visible: false },
@@ -111,7 +111,7 @@ export function createBowlScene(
     balls: [],
     bowlWalls: walls,
     bowlWidth,
-    bowlHeight,
+    bowlHeight: bowlDepth,
     bowlY,
     canvasWidth: width,
     canvasHeight: height,
@@ -128,7 +128,7 @@ export function addBall(
   const spread = scene.bowlWidth * 0.3;
   const x =
     scene.canvasWidth / 2 + (Math.random() - 0.5) * spread;
-  const y = scene.bowlY - scene.bowlHeight - 40;
+  const y = scene.bowlY - 60;
 
   const body = Bodies.circle(x, y, radius, {
     restitution: 0.4,

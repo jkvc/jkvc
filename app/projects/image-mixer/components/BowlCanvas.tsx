@@ -212,16 +212,16 @@ function drawBowl(ctx: CanvasRenderingContext2D, scene: BowlScene) {
   const cx = scene.canvasWidth / 2;
   const cy = scene.bowlY;
   const halfW = scene.bowlWidth / 2;
-  const halfH = scene.bowlHeight * 0.5;
+  const depth = scene.bowlHeight;
 
   ctx.save();
   ctx.beginPath();
 
-  // Draw U-shape path
+  // Draw U-shape — must match the bezier used in physics.ts
   ctx.moveTo(cx - halfW, cy);
   ctx.bezierCurveTo(
-    cx - halfW, cy + halfH * 1.8,
-    cx + halfW, cy + halfH * 1.8,
+    cx - halfW, cy + depth * 1.8,
+    cx + halfW, cy + depth * 1.8,
     cx + halfW, cy
   );
 
