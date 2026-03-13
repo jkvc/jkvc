@@ -36,4 +36,12 @@ export const projects: Project[] = [
     gradient: "linear-gradient(135deg, #E8B4B8 0%, #7B6B8D 100%)",
     ready: false,
   },
+  {
+    title: "Image Mixer",
+    slug: "image-mixer",
+    description: "Drop ingredients into the bowl and see what comes out",
+    tags: ["Physics", "Canvas", "Image-to-Image"],
+    gradient: "linear-gradient(135deg, #C4B5A0 0%, #8A7B6B 100%)",
+    ready: false,
+  },
 ];
