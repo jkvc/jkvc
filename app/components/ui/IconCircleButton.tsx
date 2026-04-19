@@ -13,6 +13,8 @@ interface BaseProps {
   className?: string;
   active?: boolean;
   disabled?: boolean;
+  /** Inverted variant for use on dark surfaces (e.g. ContactSlab). */
+  inverted?: boolean;
 }
 
 type ButtonProps = BaseProps & {
@@ -43,16 +45,25 @@ function getClasses({
   size,
   active,
   disabled,
+  inverted,
   className,
 }: {
   size: Size;
   active: boolean;
   disabled: boolean;
+  inverted: boolean;
   className?: string;
 }) {
-  const stateClasses = active
-    ? "border-gold/50 text-gold"
-    : "border-border text-[#AAA] hover:border-gold/50 hover:text-gold";
+  let stateClasses: string;
+  if (inverted) {
+    stateClasses = active
+      ? "border-hot text-hot"
+      : "border-surface/25 text-surface/60 hover:border-hot hover:text-hot";
+  } else {
+    stateClasses = active
+      ? "border-ink text-ink"
+      : "border-rule text-ink-faint hover:border-ink hover:text-ink";
+  }
 
   const disabledClasses = disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer";
 
@@ -65,9 +76,10 @@ export default function IconCircleButton(props: Props) {
   const size = props.size ?? "sm";
   const active = props.active ?? false;
   const disabled = props.disabled ?? false;
+  const inverted = props.inverted ?? false;
   const iconFamily = props.iconFamily ?? "fa-solid";
   const iconClassName = props.iconClassName ?? (size === "md" ? "text-[14px]" : "text-[13px]");
-  const classes = getClasses({ size, active, disabled, className: props.className });
+  const classes = getClasses({ size, active, disabled, inverted, className: props.className });
 
   const href = "href" in props ? props.href : undefined;
   if (typeof href === "string") {

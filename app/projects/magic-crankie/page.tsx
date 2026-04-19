@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import MagicCrankieClient from "./MagicCrankieClient";
-import { projects } from "../data";
+import { projects, getProjectMeta } from "../data";
 import ProjectPageFrame from "@/app/components/project/ProjectPageFrame";
 
 const project = projects.find((p) => p.slug === "magic-crankie")!;
+const meta = getProjectMeta("magic-crankie");
 
 export const metadata: Metadata = {
   title: `${project.title} | jkvc`,
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function MagicCrankiePage() {
   return (
-    <ProjectPageFrame title={project.title} description={project.description}>
+    <ProjectPageFrame title={project.title} description={project.description} meta={meta}>
       <Suspense>
         <MagicCrankieClient />
       </Suspense>

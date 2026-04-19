@@ -1,84 +1,111 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import ProjectCard from "./components/ProjectCard";
-import BottomBar, { getShowDrafts, getShowDraftsServer, subscribeToStorage, toggleShowDrafts } from "./components/BottomBar";
+import { useCallback, useState, useSyncExternalStore } from "react";
+import ProjectRow from "./components/ProjectRow";
+import {
+    getShowDrafts,
+    getShowDraftsServer,
+    subscribeToStorage,
+    toggleShowDrafts,
+} from "./components/BottomBar";
 import IconCircleButton from "./components/ui/IconCircleButton";
+import Wordmark from "./components/brand/Wordmark";
+import ContactSlab from "./components/editorial/ContactSlab";
 import { projects } from "./projects/data";
+import { SITE } from "./lib/site";
+
+type Category = "ALL" | "EXPERIMENTS" | "ESSAYS";
+
+const CATEGORIES: Category[] = ["ALL", "EXPERIMENTS", "ESSAYS"];
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
-  const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
-  const handleToggleDrafts = useCallback(() => toggleShowDrafts(), []);
-  const heroRef = useRef<HTMLHeadingElement>(null);
+    const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
+    const handleToggleDrafts = useCallback(() => toggleShowDrafts(), []);
+    const [category, setCategory] = useState<Category>("ALL");
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setScrolled(!entry.isIntersecting),
-      { threshold: 0 }
-    );
-    if (heroRef.current) observer.observe(heroRef.current);
-    return () => observer.disconnect();
-  }, []);
+    // Category narrows by kind; the DRAFTS toggle is orthogonal and gates
+    // whether not-ready items appear at all. Current data has no essays.
+    const visible = projects.filter((p) => {
+        if (category === "ESSAYS") return false;
+        return showDrafts || p.ready;
+    });
 
-  const visible = projects.filter((p) => showDrafts || p.ready);
+    return (
+        <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
+            <div className="max-w-2xl mx-auto">
+                {/* Hero */}
+                <section className="mb-10 flex items-start justify-between gap-6">
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-[64px] sm:text-[80px] text-ink">
+                            <Wordmark />
+                        </h1>
+                        <p className="mt-5 font-serif italic text-xl text-ink-muted leading-snug max-w-md">
+                            {SITE.tagline}
+                        </p>
+                    </div>
+                    <div className="pt-3 flex-shrink-0">
+                        <IconCircleButton href="/about" icon="fa-user" title="About" size="sm" />
+                    </div>
+                </section>
 
-  return (
-    <div className="min-h-screen bg-surface text-text px-6 pt-4 pb-16 sm:px-8">
-      {/* Scroll-triggered navbar */}
-      <div
-        className={`sticky top-0 z-10 flex items-center justify-center py-3 transition-all duration-200 ${
-          scrolled ? "bg-surface" : ""
-        }`}
-      >
-        <span
-          className={`font-serif text-sm tracking-wide transition-opacity duration-200 ${
-            scrolled ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          jkvc
-        </span>
-      </div>
+                {/* Category pill row + drafts toggle */}
+                <section className="mt-8 mb-8">
+                    <div className="flex flex-wrap items-center gap-2">
+                        {CATEGORIES.map((cat) => {
+                            const active = category === cat;
+                            return (
+                                <button
+                                    key={cat}
+                                    onClick={() => setCategory(cat)}
+                                    className={`font-mono text-[10px] uppercase tracking-[0.22em] rounded-full px-3.5 py-1.5 border transition-colors ${active
+                                        ? "bg-ink text-surface border-ink"
+                                        : "border-rule text-ink-muted hover:border-ink hover:text-ink"
+                                        }`}
+                                >
+                                    {cat}
+                                </button>
+                            );
+                        })}
 
-      <div className="max-w-2xl mx-auto">
-        {/* Hero */}
-        <section className="mt-24 mb-8">
-          <div className="flex items-center gap-3">
-            <h1 ref={heroRef} className="font-serif text-4xl tracking-tight text-text-heading">
-              jkvc
-            </h1>
-            <IconCircleButton href="/about" icon="fa-user" title="About" size="sm" />
-          </div>
-          <p className="mt-4 text-[15px] leading-relaxed text-text-muted">
-            A human enthusiast.
-          </p>
-        </section>
+                        <div className="flex-1 border-t border-rule mx-2 hidden sm:block" />
 
-        {/* Projects */}
-        <section className="mt-16">
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {visible.map((project) => (
-              <ProjectCard
-                key={project.slug}
-                {...project}
-                draft={showDrafts && !project.ready}
-              />
-            ))}
-          </div>
-        </section>
+                        <button
+                            onClick={handleToggleDrafts}
+                            title={showDrafts ? "Hide drafts" : "Show drafts"}
+                            aria-pressed={showDrafts}
+                            className={`font-mono text-[10px] uppercase tracking-[0.22em] rounded-full px-3.5 py-1.5 border transition-colors inline-flex items-center gap-1.5 ${showDrafts
+                                ? "bg-ink text-surface border-ink"
+                                : "border-rule text-ink-muted hover:border-ink hover:text-ink"
+                                }`}
+                        >
+                            <i className={`fa-solid ${showDrafts ? "fa-eye" : "fa-eye-slash"} text-[10px]`} />
+                            <span>Drafts</span>
+                        </button>
+                    </div>
+                </section>
 
-        <BottomBar />
-        <div className="mt-4 flex justify-center">
-          <IconCircleButton
-            onClick={handleToggleDrafts}
-            icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
-            title={showDrafts ? "Hide drafts" : "Show drafts"}
-            size="md"
-            active={showDrafts}
-            iconClassName="text-[13px]"
-          />
+                {/* Projects */}
+                <section>
+                    <div>
+                        {visible.map((project) => (
+                            <ProjectRow
+                                key={project.slug}
+                                {...project}
+                                draft={showDrafts && !project.ready}
+                            />
+                        ))}
+                        {visible.length === 0 && (
+                            <div className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+                                {category === "ESSAYS" ? "No essays yet · Coming soon" : "Nothing here"}
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <div className="mt-16">
+                    <ContactSlab />
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

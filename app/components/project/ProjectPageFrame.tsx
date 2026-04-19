@@ -1,51 +1,39 @@
-import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import RecipeHeader, {
+  type RecipeMeta,
+} from "@/app/components/editorial/RecipeHeader";
 
 interface Props {
   title: string;
   description: string;
+  meta?: RecipeMeta;
   headerAddon?: React.ReactNode;
   children: React.ReactNode;
   contentTopClassName?: string;
-  showHomeButton?: boolean;
 }
 
 export default function ProjectPageFrame({
   title,
   description,
+  meta,
   headerAddon,
   children,
-  contentTopClassName = "mt-10",
-  showHomeButton = true,
+  contentTopClassName = "mt-12",
 }: Props) {
   return (
-    <div className="min-h-screen bg-surface text-text px-6 pt-20 pb-20 sm:px-8">
+    <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
       <div className="max-w-2xl mx-auto">
         <div>
           {headerAddon}
-          <h1 className="font-serif text-3xl tracking-tight text-text-heading">
+          {meta && <RecipeHeader meta={meta} />}
+          <h1 className="mt-6 font-serif italic text-5xl leading-[1.05] tracking-[-0.02em] text-ink">
             {title}
           </h1>
-          <p className="mt-2.5 text-[13px] leading-relaxed text-text-muted">
+          <p className="mt-4 font-serif italic text-lg leading-relaxed text-ink-muted max-w-xl">
             {description}
           </p>
         </div>
 
-        <div className={contentTopClassName}>
-          {children}
-        </div>
-
-        {showHomeButton && (
-          <div className="mt-16 flex justify-center">
-            <IconCircleButton
-              href="/"
-              icon="fa-house"
-              size="md"
-              title="Home"
-              external={false}
-              iconClassName="text-[13px]"
-            />
-          </div>
-        )}
+        <div className={contentTopClassName}>{children}</div>
       </div>
     </div>
   );

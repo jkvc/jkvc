@@ -3,25 +3,40 @@
 @plugin "daisyui";
 
 body {
-  background-color: #FAFAF8;
+  background-color: #F3ECDD;
 }
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
-  /* Accent palette — warm slate */
-  --color-gold: #8A8578;
-  --color-gold-dark: #6B6860;
-  --color-gold-light: #A8A196;
+  /* Editorial palette — warm paper, ink, one hot accent */
+  --color-surface: #F3ECDD;
+  --color-surface-deep: #EAE1CC;
+  --color-ink: #1C1812;
+  --color-ink-muted: #6B6055;
+  --color-ink-faint: #A69B8E;
+  --color-rule: #D9CFB8;
+  --color-hot: #C0392B;
+  --color-hot-deep: #8E2A20;
 
-  /* Surface & text tokens */
-  --color-surface: #FAFAF8;
-  --color-text: #2C2C2C;
-  --color-text-heading: #1A1A1A;
-  --color-text-muted: #999;
-  --color-text-faint: #CCC;
-  --color-border: #E0E0E0;
-  --color-border-dashed: #DDD;
+  /* Legacy aliases — kept pointing at editorial tokens during migration.
+     Delete once all call sites use the editorial names directly. */
+  --color-gold: #1C1812;
+  --color-gold-dark: #000000;
+  --color-gold-light: #6B6055;
+  --color-text: #1C1812;
+  --color-text-heading: #1C1812;
+  --color-text-muted: #6B6055;
+  --color-text-faint: #A69B8E;
+  --color-border: #D9CFB8;
+  --color-border-dashed: #D9CFB8;
+}
+
+/* Wordmark honors reduced-motion by disabling its inline transitions. */
+@media (prefers-reduced-motion: reduce) {
+  .wordmark * {
+    transition: none !important;
+  }
 }
