@@ -396,7 +396,7 @@ export default function ParticleCanvas({
     <div className="flex flex-col gap-6">
       {showControls && (
         <>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest">
+          <p className="caption-mono text-ink-faint">
             Particle Parallax
           </p>
           <ParticleControls

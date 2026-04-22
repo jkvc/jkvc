@@ -59,40 +59,30 @@ function TimelineRow({ section }: { section: TimelineSectionData }) {
 
   return (
     <div className="border-b border-rule py-6">
-      {/* Eyebrow: date range + current pulse */}
-      <div className="flex items-center gap-2.5">
+      {/* Eyebrow: date range + current pulse. Uses the shared `caption-mono`
+          editorial utility — do NOT re-spell the mono/size/tracking classes. */}
+      <div className="flex items-center gap-2.5 caption-mono text-ink-faint">
         {section.current && (
           <span className="relative flex h-2 w-2 flex-shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-hot opacity-60" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-hot" />
           </span>
         )}
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-          {section.dateRange.toUpperCase()}
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-          ·
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-          {section.role.toUpperCase()}
-        </span>
+        <span>{section.dateRange.toUpperCase()}</span>
+        <span>·</span>
+        <span>{section.role.toUpperCase()}</span>
       </div>
 
-      {/* Organization */}
       <h2 className="mt-2 font-serif italic text-2xl leading-tight text-ink">
         {section.organization}
       </h2>
 
-      {/* Description */}
       <p className="mt-2 text-[14px] text-ink-muted leading-relaxed max-w-xl">
         {section.description}
       </p>
 
-      {/* Tag string */}
       {tagString && (
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-          {tagString}
-        </p>
+        <p className="mt-3 caption-mono text-ink-faint">{tagString}</p>
       )}
     </div>
   );
@@ -119,7 +109,9 @@ export default function About() {
               );
             })()}
           </h1>
-          <p className="mt-6 font-serif italic text-xl leading-relaxed text-ink-muted max-w-xl">
+          {/* Sans body for the hero subtitle — matches the project page
+              treatment introduced in ProjectPageFrame. */}
+          <p className="mt-6 text-base leading-relaxed text-ink-muted max-w-xl">
             {SITE.about.description}
           </p>
         </section>

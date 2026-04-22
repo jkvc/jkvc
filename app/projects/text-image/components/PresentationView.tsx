@@ -10,6 +10,7 @@ import type { ParticleConfig } from "../lib/particle-config";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
 import StatusPillRow from "@/app/components/ui/StatusPillRow";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import Pill from "@/app/components/editorial/Pill";
 
 interface Props {
   inference: InferenceState;
@@ -65,13 +66,12 @@ export default function PresentationView({
           }}
         />
 
-        <button
+        <Pill
           onClick={() => fileInputRef.current?.click()}
-          className="h-9 pl-3.5 pr-5 rounded-full border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold transition-all flex items-center gap-2.5 text-[13px] cursor-pointer"
+          icon="fa-arrow-up-from-bracket"
         >
-          <i className="fa-solid fa-arrow-up-from-bracket text-[12px]" />
-          <span>Upload image</span>
-        </button>
+          Upload image
+        </Pill>
 
         <ExampleGalleryStrip
           items={galleryItems.map((item) => ({
@@ -84,9 +84,10 @@ export default function PresentationView({
             if (item) onSelectGalleryItem(item);
           }}
           onDelete={onDeleteGalleryItem}
+          title="Or choose from an example"
           center
           thumbnailSize="md"
-          className="items-center"
+          className="items-center w-full"
         />
       </div>
     );

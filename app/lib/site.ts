@@ -16,7 +16,7 @@ export const SITE = {
     /** Canonical origin without trailing slash. */
     url: "https://jkvc.com",
     /** Where I work / live, uppercase mono. */
-    location: "SEATTLE / PARIS",
+    location: "SEATTLE / LILLE",
     /** Year the site was established. */
     est: "2022",
     email: "kevinehc@gmail.com",
@@ -28,6 +28,6 @@ export const SITE = {
     about: {
         /** Shared by the About page hero and its `<meta name="description">`. */
         description:
-            "Working at the intersection of creativity, models, and algorithms — diffusion, LLMs, and the interactions they make possible.",
+            "I make human things. AI optional.",
     },
 } as const;

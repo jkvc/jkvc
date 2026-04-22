@@ -21,8 +21,8 @@ Legacy `--color-gold*`, `--color-text*`, `--color-border*` are aliased to editor
 
 - **Display serif** — `font-serif` = Fraunces (variable, with SOFT + WONK + opsz axes). Used for wordmarks, section titles, pull-quotes.
 - **Italic Fraunces** is a deliberate accent — row titles, pull-quotes, the accented segments of the wordmark.
-- **Sans body** — Geist Sans (default).
-- **Mono micro-caption** — Geist Mono, `text-[10px] uppercase tracking-[0.22em] text-ink-faint`. Used for masthead chrome, tag strings, dates, status labels.
+- **Sans body** — Geist Sans (default). Project-page and About-page hero subtitles use `text-base text-ink-muted leading-relaxed`.
+- **Mono micro-caption** — use the `caption-mono` utility (Geist Mono, 10px, uppercase, 0.22em tracking). **Do not re-spell the raw Tailwind classes** — this is the single source of truth for the editorial eyebrow treatment used on masthead chrome, tag strings, dates, status labels, pill buttons, labeled dividers, and status row captions.
 - **Display scale**
   - Hero wordmark: `text-6xl leading-none tracking-[-0.03em]`
   - Section titles: `font-serif text-3xl`
@@ -41,12 +41,25 @@ Legacy `--color-gold*`, `--color-text*`, `--color-border*` are aliased to editor
 - **Wordmark** — `jkvc` with `kv` in hot red italic Fraunces. On hover/focus each letter expands to its full name (`j → Junshen`, `kv → Kevin`, `c → Chen`) via CSS transitions. Respects `prefers-reduced-motion`.
 - **Dotted-ring mark** — 24 evenly-spaced dots on a circle, fill `--color-hot`. Reused as `/favicon.svg` and OG image.
 
+## CSS utilities
+
+Defined in `app/globals.css` via Tailwind v4 `@utility`. Compose with normal Tailwind classes.
+
+| Class | Role |
+|---|---|
+| `caption-mono` | The canonical mono eyebrow — size, tracking, uppercase, mono family. Pair with a color class (`text-ink-faint`, `text-hot`, etc.) |
+| `hairline` | 1px `--color-rule` top border. Use for short label-divider stubs, inter-section rules, etc. |
+
 ## Structural components
 
-- `Masthead` — top/bottom hairline rules, two mono micro-caption rows, dotted-ring mark on the right. Props-driven; per-page lines can override.
-- `ProjectRow` — full-width row, circle thumbnail (64×64) left, red `№ 01` eyebrow + italic serif title + description + mono tag string center, plain year + status label + red status dot right. Hairline divider below, none on last item.
-- `ContactSlab` — inverted dark block at the bottom of every page. Italic serif headline, mono tag string, row of circular icon-buttons (inverted variant).
-- `IconCircleButton` — unchanged API; colors now flow from editorial tokens.
+- `Wordmark` — `jkvc`, `kv` in hot italic Fraunces. On hover/focus each letter expands to its full name. Respects `prefers-reduced-motion`.
+- `Pill` (`app/components/editorial/Pill.tsx`) — **the** editorial pill button. `caption-mono` typography, rounded-full, hairline border, active-inverts-to-ink state. Button or Link. Use for filters, toggles, inline CTAs. **Do not hand-roll pills.**
+- `LabeledDivider` (`app/components/editorial/LabeledDivider.tsx`) — `── LABEL ──` motif. `stub` variant for short accent stubs flanking a caption; `full` variant for flex-span section dividers. Uses `caption-mono` + `hairline`.
+- `RecipeHeader` (`app/components/editorial/RecipeHeader.tsx`) — top/bottom hairline meta strip for project and About pages. Back arrow, red `№ NN` issue label, right-aligned meta string.
+- `ContactSlab` (`app/components/editorial/ContactSlab.tsx`) — inverted dark block at the bottom of home/about. Row of circular icon-buttons (inverted variant), pulsing red dot, location line.
+- `IconCircleButton` (`app/components/ui/IconCircleButton.tsx`) — circular icon button. Sizes: `xs` (28px, inline) · `sm` (36px) · `md` (40px, used in `ContactSlab`). Inverted variant for dark surfaces.
+- `ProjectRow` (`app/components/ProjectRow.tsx`) — home-row card. Circle thumbnail (80×80) left, red `№ NN` eyebrow + italic serif title + description center, right column stacks status label+dot on top and YYYY-MM-DD date below.
+- `ExampleGalleryStrip` (`app/components/ui/ExampleGalleryStrip.tsx`) — circular-thumbnail strip with an optional `LabeledDivider` title above.
 
 ## Icons
 
@@ -54,10 +67,11 @@ Font Awesome 7 (`@fortawesome/fontawesome-free`). No hand-drawn inline SVGs unle
 
 ## Interaction patterns
 
-- **Circular/pill buttons** — idle `border-rule text-ink-muted`, hover `border-ink text-ink`.
-- **Active preset** — `bg-ink text-surface`.
+- **Circular/pill buttons** — idle `border-rule text-ink-muted`, hover `border-ink text-ink`. Use `<Pill>` or `<IconCircleButton>`; never hand-roll.
+- **Active state** — `bg-ink text-surface border-ink`. Built into `<Pill active>` and `<IconCircleButton active>`.
 - **Red status dot** — solid `bg-hot` circle; use the existing `animate-ping` halo for `current: true` indicators (also recolored to `--color-hot`).
-- **Loading** — spinner icon containers (`animate-spin` → `fa-check` on complete).
+- **Loading** — spinner icon containers (`animate-spin` → `fa-check` on complete). See `StatusPillRow`.
+- **Row enlargement on hover** — `transition-transform duration-300 group-hover:scale-[1.025]` on the row, `group-hover:scale-[1.08]` on the circular thumbnail. Center-origin (symmetric).
 
 ## Layout
 

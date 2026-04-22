@@ -27,7 +27,7 @@ export default async function ProjectPage({
       meta={meta}
       headerAddon={
         !project.ready ? (
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-hot/40 text-hot text-[10px] uppercase tracking-[0.22em] font-mono px-3 py-1 mb-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-hot/40 caption-mono text-hot px-3 py-1 mb-3">
             <i className="fa-solid fa-hammer text-[8px]" />
             <span>Under construction</span>
           </div>
@@ -37,9 +37,7 @@ export default async function ProjectPage({
       {/* Demo area placeholder */}
       <div className="mt-4">
         <div className="w-full aspect-video rounded-2xl border border-dashed border-rule flex items-center justify-center">
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-            Coming soon
-          </span>
+          <span className="caption-mono text-ink-faint">Coming soon</span>
         </div>
       </div>
     </ProjectPageFrame>

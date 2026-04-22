@@ -64,9 +64,7 @@ export default function ContactSlab({
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-hot opacity-60" />
           <span className="relative inline-flex rounded-full h-2 w-2 bg-hot" />
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-surface/50">
-          {eyebrow}
-        </span>
+        <span className="caption-mono text-surface/50">{eyebrow}</span>
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
@@ -98,9 +96,7 @@ export default function ContactSlab({
         />
         <EmailAction />
 
-        <div className="ml-auto font-mono text-[10px] uppercase tracking-[0.22em] text-surface/40">
-          {location}
-        </div>
+        <div className="ml-auto caption-mono text-surface/40">{location}</div>
       </div>
     </div>
   );

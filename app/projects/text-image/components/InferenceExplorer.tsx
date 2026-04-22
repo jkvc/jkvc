@@ -96,7 +96,7 @@ export default function InferenceExplorer({
         <>
           {/* Original */}
           <div>
-            <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
+            <p className="caption-mono text-ink-faint mb-2">
               Original
             </p>
             <img
@@ -109,7 +109,7 @@ export default function InferenceExplorer({
           {/* Depth + Segmentation side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
+              <p className="caption-mono text-ink-faint mb-2">
                 Depth Map
               </p>
               <img
@@ -119,7 +119,7 @@ export default function InferenceExplorer({
               />
             </div>
             <div>
-              <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
+              <p className="caption-mono text-ink-faint mb-2">
                 Segmentation
               </p>
               <SegmentationMap originalUrl={previewUrl} segments={segments} />

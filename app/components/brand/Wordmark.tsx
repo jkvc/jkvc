@@ -15,10 +15,10 @@ interface SegmentProps {
 }
 
 /**
- * Padding on top/bottom of each segment that extends the `overflow: hidden`
- * clip box so italic Fraunces glyphs with extra ascender/descender (J, Junshen,
- * Chen) aren't vertically truncated. Negated via matching negative margin so
- * layout metrics are unchanged.
+ * Padding on all four sides of each segment that extends the `overflow: hidden`
+ * clip box so italic Fraunces glyphs with long ascenders / descenders (the J
+ * tail in particular swings down-left past `left: 0`) aren't truncated.
+ * Negated via matching negative margin so in-flow layout metrics are unchanged.
  */
 const CLIP_OVERHANG = "0.25em";
 
@@ -60,13 +60,15 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
     <span
       className={`relative inline-block align-baseline ${color}`}
       style={{
+        // Tailwind preflight sets box-sizing: border-box globally, which makes
+        // `width` include padding. We want `width` to be the *text* width, then
+        // padding strictly expands the clip box outward. Force content-box.
+        boxSizing: "content-box",
         width: hasMeasured ? `${targetWidth}px` : "auto",
         transition: "width 500ms cubic-bezier(0.22, 1, 0.36, 1)",
         overflow: "hidden",
-        paddingTop: CLIP_OVERHANG,
-        paddingBottom: CLIP_OVERHANG,
-        marginTop: `calc(-1 * ${CLIP_OVERHANG})`,
-        marginBottom: `calc(-1 * ${CLIP_OVERHANG})`,
+        padding: CLIP_OVERHANG,
+        margin: `calc(-1 * ${CLIP_OVERHANG})`,
       }}
     >
       {/* Baseline holder — inline, visually invisible, sets the line-box. */}
@@ -78,9 +80,10 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
       <span
         ref={compactRef}
         aria-hidden="true"
-        className="absolute left-0 whitespace-nowrap"
+        className="absolute whitespace-nowrap"
         style={{
           top: CLIP_OVERHANG,
+          left: CLIP_OVERHANG,
           opacity: hovered ? 0 : 1,
           transition: "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
@@ -92,9 +95,10 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
       <span
         ref={fullRef}
         aria-hidden="true"
-        className="absolute left-0 whitespace-nowrap italic"
+        className="absolute whitespace-nowrap italic"
         style={{
           top: CLIP_OVERHANG,
+          left: CLIP_OVERHANG,
           opacity: hovered ? 1 : 0,
           transition: "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}

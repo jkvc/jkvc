@@ -17,13 +17,14 @@ interface Props {
 }
 
 export default function RecipeHeader({ meta, backHref = "/" }: Props) {
+  // Status is intentionally omitted — project pages only exist once published,
+  // so the label is redundant noise. The home row still shows it.
   const parts: string[] = [];
   if (meta.tags && meta.tags.length) {
     parts.push(meta.tags.map((t) => t.toUpperCase()).join(" · "));
   }
-  if (meta.status) parts.push(meta.status.toUpperCase());
   const dateLabel = meta.date ?? meta.year;
-  if (dateLabel) parts.push(dateLabel.toUpperCase());
+  if (dateLabel) parts.push(dateLabel);
   if (meta.location) parts.push(meta.location.toUpperCase());
 
   return (
@@ -38,12 +39,12 @@ export default function RecipeHeader({ meta, backHref = "/" }: Props) {
         </Link>
       )}
       {meta.issue && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-hot">
+        <span className="caption-mono text-hot">
           {/^\d/.test(meta.issue) ? `№ ${meta.issue}` : meta.issue}
         </span>
       )}
       {parts.length > 0 && (
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+        <span className="ml-auto caption-mono text-ink-faint text-right">
           {parts.join("  ·  ")}
         </span>
       )}

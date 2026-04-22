@@ -35,6 +35,30 @@ body {
   --color-border-dashed: #D4D2C9;
 }
 
+/* -----------------------------------------------------------------------------
+   Editorial primitives — see STYLE.md for the full design-language doc.
+   These are hand-written utilities (Tailwind v4 @utility) so they can be
+   composed in JSX alongside normal Tailwind classes.
+----------------------------------------------------------------------------- */
+
+/* The mono-eyebrow caption used everywhere: filter pills, meta strips, status
+   labels, tag runs, issue numbers. Centralized so the tracking, size and case
+   treatment can be tweaked from one place. */
+@utility caption-mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+}
+
+/* One-pixel editorial hairline in the `rule` token. Used as section dividers
+   and as the short stubs flanking labeled dividers. */
+@utility hairline {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: var(--color-rule);
+}
+
 /* Wordmark honors reduced-motion by disabling its inline transitions. */
 @media (prefers-reduced-motion: reduce) {
   .wordmark * {

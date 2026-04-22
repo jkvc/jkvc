@@ -17,7 +17,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
     <>
       {/* Shape */}
       <div className="flex flex-col gap-2">
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Shape</p>
+        <p className="caption-mono text-ink-faint">Shape</p>
         <div className="flex flex-wrap gap-1.5">
           {SHAPES.map((s) => {
             const disabled = !!(s.needsSegments && !hasSegments);
@@ -44,7 +44,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Background */}
       <div className="flex flex-col gap-2">
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Background</p>
+        <p className="caption-mono text-ink-faint">Background</p>
         <div className="flex flex-wrap gap-1.5">
           {BACKGROUNDS.map((bg) => (
             <button
@@ -64,7 +64,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Sampling */}
       <div className="flex flex-col gap-2">
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Sampling</p>
+        <p className="caption-mono text-ink-faint">Sampling</p>
         <div className="flex flex-wrap gap-1.5">
           {SAMPLINGS.map((s) => (
             <button
@@ -130,7 +130,7 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
 
       {/* Options */}
       <div className="flex flex-col gap-2">
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest font-medium">Options</p>
+        <p className="caption-mono text-ink-faint">Options</p>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-[#999]">
           <label className="flex flex-col gap-1">
             <span>Depth mul: {depthMul.toFixed(1)}</span>

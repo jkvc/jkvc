@@ -28,7 +28,7 @@ export default function ProjectPageFrame({
           <h1 className="mt-6 font-serif italic text-5xl leading-[1.05] tracking-[-0.02em] text-ink">
             {title}
           </h1>
-          <p className="mt-4 font-serif italic text-lg leading-relaxed text-ink-muted max-w-xl">
+          <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-xl">
             {description}
           </p>
         </div>

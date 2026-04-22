@@ -8,9 +8,10 @@ import {
     subscribeToStorage,
     toggleShowDrafts,
 } from "./components/BottomBar";
-import IconCircleButton from "./components/ui/IconCircleButton";
 import Wordmark from "./components/brand/Wordmark";
 import ContactSlab from "./components/editorial/ContactSlab";
+import Pill from "./components/editorial/Pill";
+import IconCircleButton from "./components/ui/IconCircleButton";
 import { projects } from "./projects/data";
 import { SITE } from "./lib/site";
 
@@ -41,53 +42,50 @@ export default function Home() {
         <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
             <div className="max-w-2xl mx-auto">
                 {/* Hero */}
-                <section className="mb-10 flex items-start justify-between gap-6">
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-[64px] sm:text-[80px] text-ink">
-                            <Wordmark />
-                        </h1>
-                        <p className="mt-5 font-serif italic text-xl text-ink-muted leading-snug max-w-md">
-                            {SITE.tagline}
-                        </p>
-                    </div>
-                    <div className="pt-3 flex-shrink-0">
-                        <IconCircleButton href="/about" icon="fa-user" title="About" size="sm" />
-                    </div>
+                <section className="mb-10">
+                    <h1 className="text-[64px] sm:text-[80px] text-ink">
+                        <Wordmark />
+                    </h1>
+                    <p className="mt-5 font-serif italic text-xl text-ink-muted leading-snug max-w-md">
+                        {SITE.tagline}
+                        {/* Inline About affordance — sized to match the pill caption
+                            metrics so it reads as typographic punctuation after the
+                            last word. `align-text-bottom` + `not-italic` keep the
+                            circle upright on the tagline baseline. */}
+                        <IconCircleButton
+                            href="/about"
+                            icon="fa-user"
+                            title="About"
+                            size="xs"
+                            className="ml-2 align-text-bottom not-italic"
+                        />
+                    </p>
                 </section>
 
                 {/* Category pill row + drafts toggle */}
                 <section className="mt-8 mb-8">
                     <div className="flex flex-wrap items-center gap-2">
-                        {CATEGORIES.map((cat) => {
-                            const active = category === cat;
-                            return (
-                                <button
-                                    key={cat}
-                                    onClick={() => setCategory(cat)}
-                                    className={`font-mono text-[10px] uppercase tracking-[0.22em] rounded-full px-3.5 py-1.5 border transition-colors ${active
-                                        ? "bg-ink text-surface border-ink"
-                                        : "border-rule text-ink-muted hover:border-ink hover:text-ink"
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            );
-                        })}
+                        {CATEGORIES.map((cat) => (
+                            <Pill
+                                key={cat}
+                                active={category === cat}
+                                onClick={() => setCategory(cat)}
+                            >
+                                {cat}
+                            </Pill>
+                        ))}
 
-                        <div className="flex-1 border-t border-rule mx-2 hidden sm:block" />
+                        <div className="flex-1 hairline mx-2 hidden sm:block" />
 
-                        <button
+                        <Pill
+                            active={showDrafts}
                             onClick={handleToggleDrafts}
+                            icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
                             title={showDrafts ? "Hide drafts" : "Show drafts"}
-                            aria-pressed={showDrafts}
-                            className={`font-mono text-[10px] uppercase tracking-[0.22em] rounded-full px-3.5 py-1.5 border transition-colors inline-flex items-center gap-1.5 ${showDrafts
-                                ? "bg-ink text-surface border-ink"
-                                : "border-rule text-ink-muted hover:border-ink hover:text-ink"
-                                }`}
+                            ariaPressed={showDrafts}
                         >
-                            <i className={`fa-solid ${showDrafts ? "fa-eye" : "fa-eye-slash"} text-[10px]`} />
-                            <span>Drafts</span>
-                        </button>
+                            Drafts
+                        </Pill>
                     </div>
                 </section>
 
@@ -102,7 +100,7 @@ export default function Home() {
                             />
                         ))}
                         {visible.length === 0 && (
-                            <div className="py-10 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
+                            <div className="py-10 text-center caption-mono text-ink-faint">
                                 {category === "ESSAYS" ? "No essays yet · Coming soon" : "Nothing here"}
                             </div>
                         )}

@@ -1,5 +1,7 @@
 "use client";
 
+import LabeledDivider from "@/app/components/editorial/LabeledDivider";
+
 export interface ExampleGalleryItem {
   id: string;
   imageUrl: string;
@@ -42,11 +44,7 @@ export default function ExampleGalleryStrip({
 
   return (
     <div className={`flex flex-col gap-2 ${center ? "items-center" : ""} ${className}`}>
-      {showTitle && (
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest">
-          {title}
-        </p>
-      )}
+      {showTitle && <LabeledDivider>{title}</LabeledDivider>}
       <div className={`flex flex-wrap gap-2 ${center ? "justify-center" : ""}`}>
         {items.map((item) => (
           <div key={item.id} className="relative group">
@@ -55,7 +53,7 @@ export default function ExampleGalleryStrip({
                 e.stopPropagation();
                 onSelect(item.id);
               }}
-              className={`rounded-lg overflow-hidden border border-[#E8E8E8] hover:border-gold/40 transition-colors ${SIZE_MAP[thumbnailSize]} p-0 cursor-pointer`}
+              className={`rounded-full overflow-hidden border border-rule hover:border-ink transition-colors ${SIZE_MAP[thumbnailSize]} p-0 cursor-pointer`}
             >
               <img
                 src={item.imageUrl}

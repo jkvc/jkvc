@@ -7,6 +7,10 @@ interface ProjectRowProps {
   thumbnail?: string;
   ready: boolean;
   status?: string;
+  /** ISO calendar date (YYYY-MM-DD). Rendered as a mono caption under the
+   *  status label. Falls back to `year` when absent. */
+  date?: string;
+  year?: string;
   /** Zero-padded issue number, e.g. "01". Rendered as a red eyebrow and
    *  used to pick a per-project placeholder disc color. */
   issue?: string;
@@ -65,11 +69,14 @@ export default function ProjectRow({
   thumbnail,
   ready,
   status,
+  date,
+  year,
   issue,
   icon,
   draft,
 }: ProjectRowProps) {
-  const resolvedStatus = status ?? (ready ? "READY" : "DRAFT");
+  const resolvedStatus = status ?? (ready ? "PUBLISHED" : "DRAFT");
+  const dateLabel = date ?? year;
 
   return (
     <Link href={`/projects/${slug}`} className="group block">
@@ -77,11 +84,7 @@ export default function ProjectRow({
         <Thumbnail title={title} thumbnail={thumbnail} issue={issue} icon={icon} />
 
         <div className="flex-1 min-w-0">
-          {issue && (
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-hot">
-              № {issue}
-            </p>
-          )}
+          {issue && <p className="caption-mono text-hot">№ {issue}</p>}
           <h3 className="mt-0.5 font-serif italic text-xl leading-tight text-ink">
             {title}
           </h3>
@@ -90,18 +93,23 @@ export default function ProjectRow({
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-faint">
-            {resolvedStatus}
-          </span>
-          {draft ? (
-            <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
-              <i className="fa-solid fa-hammer" />
+        <div className="flex flex-col items-end gap-1 flex-shrink-0 text-right">
+          <div className="flex items-center gap-2">
+            <span className="caption-mono text-ink-faint">{resolvedStatus}</span>
+            {draft ? (
+              <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
+                <i className="fa-solid fa-hammer" />
+              </span>
+            ) : ready ? (
+              <span className="inline-block w-2 h-2 rounded-full bg-hot" />
+            ) : (
+              <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
+            )}
+          </div>
+          {dateLabel && (
+            <span className="font-mono text-[10px] tracking-[0.1em] text-ink-faint">
+              {dateLabel}
             </span>
-          ) : ready ? (
-            <span className="inline-block w-2 h-2 rounded-full bg-hot" />
-          ) : (
-            <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
           )}
         </div>
       </div>
