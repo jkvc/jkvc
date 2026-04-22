@@ -11,6 +11,10 @@ export interface Project {
   date?: string;
   /** Short editorial status label. Falls back to READY / DRAFT. */
   status?: string;
+  /** Font Awesome icon class (sans family prefix), used in the placeholder
+   *  disc when no `thumbnail` is provided. E.g. "fa-blender". Defaults to
+   *  a neutral asterisk. */
+  icon?: string;
 }
 
 export interface ProjectMeta {
@@ -49,6 +53,7 @@ export const projects: Project[] = [
     year: "2025",
     date: "OCT 2025",
     status: "READY",
+    icon: "fa-tags",
   },
   {
     title: "Image Reconstructor",
@@ -60,6 +65,7 @@ export const projects: Project[] = [
     year: "2025",
     date: "NOV 2025",
     status: "IN PROGRESS",
+    icon: "fa-images",
   },
   {
     title: "Magic Crankie",
@@ -71,6 +77,7 @@ export const projects: Project[] = [
     year: "2025",
     date: "DEC 2025",
     status: "DRAFT",
+    icon: "fa-infinity",
   },
   {
     title: "Image Mixer",
@@ -82,5 +89,6 @@ export const projects: Project[] = [
     year: "2026",
     date: "JAN 2026",
     status: "DRAFT",
+    icon: "fa-blender",
   },
 ];

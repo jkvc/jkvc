@@ -25,10 +25,17 @@ export default function Home() {
 
     // Category narrows by kind; the DRAFTS toggle is orthogonal and gates
     // whether not-ready items appear at all. Current data has no essays.
-    const visible = projects.filter((p) => {
-        if (category === "ESSAYS") return false;
-        return showDrafts || p.ready;
-    });
+    //
+    // `projects` in data.ts is maintained oldest-first so issue numbers grow
+    // chronologically (№ 01 = earliest). Compute `issue` from that canonical
+    // order, then reverse for display so the newest piece sits at the top.
+    const visible = projects
+        .map((p, i) => ({ ...p, issue: String(i + 1).padStart(2, "0") }))
+        .filter((p) => {
+            if (category === "ESSAYS") return false;
+            return showDrafts || p.ready;
+        })
+        .reverse();
 
     return (
         <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
@@ -86,7 +93,7 @@ export default function Home() {
 
                 {/* Projects */}
                 <section>
-                    <div>
+                    <div className="flex flex-col gap-3">
                         {visible.map((project) => (
                             <ProjectRow
                                 key={project.slug}

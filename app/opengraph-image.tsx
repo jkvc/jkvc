@@ -6,9 +6,9 @@ export const alt = `${SITE.name} — ${SITE.description}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const SURFACE = "#F3ECDD";
-const INK = "#1C1812";
-const INK_FAINT = "#A69B8E";
+const SURFACE = "#F0EEE6";
+const INK = "#141413";
+const INK_FAINT = "#87867F";
 const HOT = "#C0392B";
 
 function DottedRing({ size: s = 120 }: { size?: number }) {

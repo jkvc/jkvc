@@ -3,7 +3,7 @@
 @plugin "daisyui";
 
 body {
-  background-color: #F3ECDD;
+  background-color: #F0EEE6;
 }
 
 @theme inline {
@@ -11,27 +11,28 @@ body {
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
-  /* Editorial palette — warm paper, ink, one hot accent */
-  --color-surface: #F3ECDD;
-  --color-surface-deep: #EAE1CC;
-  --color-ink: #1C1812;
-  --color-ink-muted: #6B6055;
-  --color-ink-faint: #A69B8E;
-  --color-rule: #D9CFB8;
+  /* Anthropic-inspired editorial palette — cool cream paper, warm-black ink,
+     and Claude coral as the single hot accent. */
+  --color-surface: #F0EEE6;
+  --color-surface-deep: #E8E6DC;
+  --color-ink: #141413;
+  --color-ink-muted: #3D3D3A;
+  --color-ink-faint: #87867F;
+  --color-rule: #D4D2C9;
   --color-hot: #C0392B;
   --color-hot-deep: #8E2A20;
 
   /* Legacy aliases — kept pointing at editorial tokens during migration.
      Delete once all call sites use the editorial names directly. */
-  --color-gold: #1C1812;
+  --color-gold: #141413;
   --color-gold-dark: #000000;
-  --color-gold-light: #6B6055;
-  --color-text: #1C1812;
-  --color-text-heading: #1C1812;
-  --color-text-muted: #6B6055;
-  --color-text-faint: #A69B8E;
-  --color-border: #D9CFB8;
-  --color-border-dashed: #D9CFB8;
+  --color-gold-light: #3D3D3A;
+  --color-text: #141413;
+  --color-text-heading: #141413;
+  --color-text-muted: #3D3D3A;
+  --color-text-faint: #87867F;
+  --color-border: #D4D2C9;
+  --color-border-dashed: #D4D2C9;
 }
 
 /* Wordmark honors reduced-motion by disabling its inline transitions. */

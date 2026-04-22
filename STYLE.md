@@ -1,17 +1,17 @@
 # STYLE.md
 
-Editorial / deli-zine design system. Warm paper, near-black ink, one red accent.
+Editorial / deli-zine design system. Cool cream paper and warm-black ink (Anthropic-inspired), one red accent.
 
 ## Palette
 
 | Token                  | Value     | Usage                                      |
 |------------------------|-----------|--------------------------------------------|
-| `--color-surface`      | `#F3ECDD` | Page background (warm cream paper)         |
-| `--color-surface-deep` | `#EAE1CC` | Hover tints on paper, inset panels         |
-| `--color-ink`          | `#1C1812` | Body text, headings, inverted-slab bg      |
-| `--color-ink-muted`    | `#6B6055` | Caption text, secondary text               |
-| `--color-ink-faint`    | `#A69B8E` | Micro-captions, mono eyebrows              |
-| `--color-rule`         | `#D9CFB8` | Hairline rules, dashed borders             |
+| `--color-surface`      | `#F0EEE6` | Page background (cool cream paper, Anthropic-ish) |
+| `--color-surface-deep` | `#E8E6DC` | Hover tints on paper, inset panels         |
+| `--color-ink`          | `#141413` | Body text, headings, inverted-slab bg      |
+| `--color-ink-muted`    | `#3D3D3A` | Caption text, secondary text               |
+| `--color-ink-faint`    | `#87867F` | Micro-captions, mono eyebrows              |
+| `--color-rule`         | `#D4D2C9` | Hairline rules, dashed borders             |
 | `--color-hot`          | `#C0392B` | Spot red — wordmark accent, status dots    |
 | `--color-hot-deep`     | `#8E2A20` | Red hover / active                         |
 
@@ -39,12 +39,12 @@ Legacy `--color-gold*`, `--color-text*`, `--color-border*` are aliased to editor
 ## Brand
 
 - **Wordmark** — `jkvc` with `kv` in hot red italic Fraunces. On hover/focus each letter expands to its full name (`j → Junshen`, `kv → Kevin`, `c → Chen`) via CSS transitions. Respects `prefers-reduced-motion`.
-- **Dotted-ring mark** — 24 evenly-spaced dots on a circle, stroke `--color-hot`. Lives top-right of the masthead; reused as `/favicon.svg` and OG image.
+- **Dotted-ring mark** — 24 evenly-spaced dots on a circle, fill `--color-hot`. Reused as `/favicon.svg` and OG image.
 
 ## Structural components
 
 - `Masthead` — top/bottom hairline rules, two mono micro-caption rows, dotted-ring mark on the right. Props-driven; per-page lines can override.
-- `ProjectRow` — full-width row, circle thumbnail (64×64) left, italic serif title + mono tag string + mono description center, year superscript + red status dot right. Hairline divider below.
+- `ProjectRow` — full-width row, circle thumbnail (64×64) left, red `№ 01` eyebrow + italic serif title + description + mono tag string center, plain year + status label + red status dot right. Hairline divider below, none on last item.
 - `ContactSlab` — inverted dark block at the bottom of every page. Italic serif headline, mono tag string, row of circular icon-buttons (inverted variant).
 - `IconCircleButton` — unchanged API; colors now flow from editorial tokens.
 
