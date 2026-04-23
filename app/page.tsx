@@ -12,20 +12,31 @@ import Wordmark from "./components/brand/Wordmark";
 import ContactSlab from "./components/editorial/ContactSlab";
 import Pill from "./components/editorial/Pill";
 import IconCircleButton from "./components/ui/IconCircleButton";
-import { projects } from "./projects/data";
+import { PROJECT_KINDS, projects, type ProjectKind } from "./projects/data";
 import { SITE } from "./lib/site";
 
-type Category = "ALL" | "EXPERIMENTS" | "ESSAYS";
+/** Filter bucket: either `"all"` (show every kind) or a specific ProjectKind.
+ *  The concrete kinds come from PROJECT_KINDS in data.ts — this page never
+ *  hardcodes them. */
+type Category = "all" | ProjectKind;
 
-const CATEGORIES: Category[] = ["ALL", "EXPERIMENTS", "ESSAYS"];
+interface CategoryMeta {
+    id: Category;
+    label: string;
+}
+
+const CATEGORIES: CategoryMeta[] = [
+    { id: "all", label: "ALL" },
+    ...PROJECT_KINDS.map((k) => ({ id: k.id as Category, label: k.label })),
+];
 
 export default function Home() {
     const showDrafts = useSyncExternalStore(subscribeToStorage, getShowDrafts, getShowDraftsServer);
     const handleToggleDrafts = useCallback(() => toggleShowDrafts(), []);
-    const [category, setCategory] = useState<Category>("ALL");
+    const [category, setCategory] = useState<Category>("all");
 
     // Category narrows by kind; the DRAFTS toggle is orthogonal and gates
-    // whether not-ready items appear at all. Current data has no essays.
+    // whether not-ready items appear at all.
     //
     // `projects` in data.ts is maintained oldest-first so issue numbers grow
     // chronologically (№ 01 = earliest). Compute `issue` from that canonical
@@ -33,7 +44,7 @@ export default function Home() {
     const visible = projects
         .map((p, i) => ({ ...p, issue: String(i + 1).padStart(2, "0") }))
         .filter((p) => {
-            if (category === "ESSAYS") return false;
+            if (category !== "all" && p.kind !== category) return false;
             return showDrafts || p.ready;
         })
         .reverse();
@@ -67,11 +78,11 @@ export default function Home() {
                     <div className="flex flex-wrap items-center gap-2">
                         {CATEGORIES.map((cat) => (
                             <Pill
-                                key={cat}
-                                active={category === cat}
-                                onClick={() => setCategory(cat)}
+                                key={cat.id}
+                                active={category === cat.id}
+                                onClick={() => setCategory(cat.id)}
                             >
-                                {cat}
+                                {cat.label}
                             </Pill>
                         ))}
 
@@ -101,7 +112,7 @@ export default function Home() {
                         ))}
                         {visible.length === 0 && (
                             <div className="py-10 text-center caption-mono text-ink-faint">
-                                {category === "ESSAYS" ? "No essays yet · Coming soon" : "Nothing here"}
+                                Nothing here yet
                             </div>
                         )}
                     </div>

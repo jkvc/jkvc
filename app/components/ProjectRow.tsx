@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PROJECT_KINDS, type ProjectKind } from "@/app/projects/data";
 
 interface ProjectRowProps {
   title: string;
@@ -16,6 +17,9 @@ interface ProjectRowProps {
   issue?: string;
   /** Font Awesome class (without family prefix) shown in the placeholder disc. */
   icon?: string;
+  /** Kind bucket (playable / readable). Drives the small glyph rendered next
+   *  to the issue number. */
+  kind?: ProjectKind;
   draft?: boolean;
 }
 
@@ -73,10 +77,14 @@ export default function ProjectRow({
   year,
   issue,
   icon,
+  kind,
   draft,
 }: ProjectRowProps) {
   const resolvedStatus = status ?? (ready ? "PUBLISHED" : "DRAFT");
   const dateLabel = date ?? year;
+  const kindIcon = kind
+    ? PROJECT_KINDS.find((k) => k.id === kind)?.icon
+    : undefined;
 
   return (
     <Link href={`/projects/${slug}`} className="group block">
@@ -84,7 +92,17 @@ export default function ProjectRow({
         <Thumbnail title={title} thumbnail={thumbnail} issue={issue} icon={icon} />
 
         <div className="flex-1 min-w-0">
-          {issue && <p className="caption-mono text-hot">№ {issue}</p>}
+          {(issue || kindIcon) && (
+            <p className="caption-mono text-hot inline-flex items-center gap-1.5">
+              {issue && <span>№ {issue}</span>}
+              {kindIcon && (
+                <i
+                  className={`fa-solid ${kindIcon} text-[9px]`}
+                  aria-label={kind}
+                />
+              )}
+            </p>
+          )}
           <h3 className="mt-0.5 font-serif italic text-xl leading-tight text-ink">
             {title}
           </h3>
