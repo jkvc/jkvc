@@ -51,8 +51,9 @@ export interface ProjectMeta {
     date?: string;
     issue?: string;
     location?: string;
-    /** Bucket label (e.g. "PLAYABLE" / "READABLE") for the meta strip. */
-    kind?: string;
+    /** Font Awesome class (sans family prefix) for the bucket glyph rendered
+     *  next to the issue number in the recipe header. */
+    kindIcon?: string;
 }
 
 /** Build an editorial meta block for a project. Issue number comes from the
@@ -68,7 +69,7 @@ export function getProjectMeta(slug: string): ProjectMeta | undefined {
         year: p.year,
         date: p.date,
         issue: String(index + 1).padStart(2, "0"),
-        kind: kindMeta?.label,
+        kindIcon: kindMeta?.icon,
     };
 }
 
@@ -125,5 +126,18 @@ export const projects: Project[] = [
         date: "2026-01-01",
         status: "DRAFT",
         icon: "fa-blender",
+    },
+    {
+        title: "Getting turn-based LLMs to work in the real world",
+        slug: "turn-based-llms-non-turn-based-world",
+        description: "And the real world is not turn-based.",
+        tags: ["LLMs", "Interaction", "Agents"],
+        gradient: "linear-gradient(135deg, #D4CFC2 0%, #8B6F5A 100%)",
+        ready: false,
+        kind: "readable",
+        year: "2026",
+        date: "2026-04-19",
+        status: "DRAFT",
+        icon: "fa-comments",
     },
 ];

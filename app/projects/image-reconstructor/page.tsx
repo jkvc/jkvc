@@ -14,7 +14,13 @@ export const metadata: Metadata = {
 
 export default function ImageReconstructorPage() {
   return (
-    <ProjectPageFrame title={project.title} description={project.description} meta={meta}>
+    <ProjectPageFrame
+      title={project.title}
+      description={project.description}
+      meta={meta}
+      draft={!project.ready}
+      kind={project.kind}
+    >
       <Suspense>
         <ImageReconstructorClient />
       </Suspense>

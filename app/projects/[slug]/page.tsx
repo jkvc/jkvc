@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { projects, getProjectMeta } from "../data";
 import ProjectPageFrame from "@/app/components/project/ProjectPageFrame";
+import PostBody from "@/app/components/post/PostBody";
+import { readPostSource } from "@/app/lib/posts";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -20,26 +22,29 @@ export default async function ProjectPage({
 
   const meta = getProjectMeta(slug);
 
+  // Readable entries render from `posts/<slug>.mdx`. Playable entries
+  // without a dedicated `app/projects/<slug>/page.tsx` route fall through
+  // to the generic "Coming soon" placeholder.
+  const postSource =
+    project.kind === "readable" ? await readPostSource(slug) : null;
+
   return (
     <ProjectPageFrame
       title={project.title}
       description={project.description}
       meta={meta}
-      headerAddon={
-        !project.ready ? (
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-hot/40 caption-mono text-hot px-3 py-1 mb-3">
-            <i className="fa-solid fa-hammer text-[8px]" />
-            <span>Under construction</span>
-          </div>
-        ) : undefined
-      }
+      draft={!project.ready}
+      kind={project.kind}
     >
-      {/* Demo area placeholder */}
-      <div className="mt-4">
-        <div className="w-full aspect-video rounded-2xl border border-dashed border-rule flex items-center justify-center">
-          <span className="caption-mono text-ink-faint">Coming soon</span>
+      {postSource ? (
+        <PostBody source={postSource} />
+      ) : (
+        <div className="mt-4">
+          <div className="w-full aspect-video rounded-2xl border border-dashed border-rule flex items-center justify-center">
+            <span className="caption-mono text-ink-faint">Coming soon</span>
+          </div>
         </div>
-      </div>
+      )}
     </ProjectPageFrame>
   );
 }

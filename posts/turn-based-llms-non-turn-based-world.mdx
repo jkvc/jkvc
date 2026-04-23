@@ -1,0 +1,358 @@
+## TLDR
+
+We build up the foundation to build a system to enable LLMs to observe,
+understand, and act on the real world [big asterisk].
+
+The asterisk: the "real world" is obviously used in a constrained sense. We here
+mostly concern ourselves about making LLMs behave in a specific tool or
+platform like how humans behave in it. We're certainly not building robots
+[TODO: insert Chinese robot meme link] here.
+
+## Prerequisite: Harness Is **THE** Product
+
+Anthropic just [published theirs](https://www.anthropic.com/engineering/harness-design-long-running-apps) —
+a three-agent pipeline that builds full-stack apps over multi-hour sessions.
+OpenAI shipped their Agents SDK. The industry has
+[think pieces about the pricing model](https://thenewsstack.io/ai-agent-harness-pricing-split/).
+
+OpenCode is a harness, Anthropic's new managed agent is a harness (with some
+web things), Claude Code and Cursor are harnesses.
+
+Two observations I made at least:
+
+- LLMs are getting good enough to allow for specialization to different use
+  cases via harness engineering alone, without specializing the model itself.
+- These harnesses are almost exclusively task-driven. Give the agent a task.
+  Let it plan. Let it execute. Stretch the context window. Run it for hours.
+  Ship the result.
+
+In this note we talk about the primitives of building a different kind of
+harness entirely, one that is even more interesting.
+
+---
+
+## Motivation: Agent-Human Parallelism
+
+What if your agent needs to *collaborate with some humans*?
+
+Suppose you are collaborating with your buddy on a project, you're doing
+your own thing, your buddy is doing their own thing. You're kind of
+observing what they are doing and acting somewhat accordingly, and they,
+you.
+
+Instead of giving you a tool where you prompt (and swing your whip at,
+depends on how you look at it), here we're concerned about dropping helpful
+agents into the world to coexist with you, be helpful, utilize its
+expertise, and collaborate, with you and with each other.
+
+For example, I'm writing this post by typing a bunch of random stuff, then
+asking an LLM (it sits in the sidebar) to clean it up, then repeat, while a
+much better experience would be I just write, the agent (my coauthor) looks
+at what I'm doing, and decides when to jump in, and writes with me. It'd be
+nice if it also laughs at my jokes.
+
+[TODO: visualization — maybe a two-panel comic. Panel 1: person typing into
+a chat box, waiting, getting a wall of text back, typing again. Labeled
+"the current deal." Panel 2: two people at the same desk, one typing, the
+other occasionally leaning over and adding a sentence. Labeled "what we
+actually want."]
+
+In the broad sense, if we're doing this well, we may as well pass another
+ambient kind of Turing test of agent-human coexistence: where the agents in
+the world do not know and do not need to know whether the other actors are
+agents or humans, and neither do you.
+
+## Motivation: Humans Are Not Turn-Based
+
+We're for some reason biased towards this preconception that "an AI product
+should be like a chatbot" only because it came out that way first (out of
+convenience, and I hate it). Non-turn-based humans coerce themselves into
+being turn-based when using LLM products: a prompt box at the bottom, a
+scroll view with agent messages on the left, user messages on the right:
+simplistic but flat.
+
+One can argue that this falls short in more complex situations or
+workflows, such as creativity-driven ones. Creativity is inherently messy.
+Instead of linearity, we need LLMs being able to deal with and participate
+in *organized chaos*.
+
+[TODO: generate — two side-by-side illustrations. Left: a neat ping-pong
+game labeled "how LLMs think conversations work." Right: a chaotic
+dodgeball game labeled "how humans actually interact with a creative
+workspace."]
+
+A human on a creative canvas will drop a comment, immediately upload a
+reference image, scribble on something, react with a thumbs up, walk away
+for ten minutes, come back and rapid-fire three more comments. There's no
+"your turn." There's just a continuous, messy, asynchronous stream of stuff
+happening.
+
+The LLM, meanwhile, processes a conversation as a sequence of turns. User
+message. Assistant response. User message. Assistant response. Clean.
+Orderly. One at a time.
+
+These two realities are fundamentally incompatible. The harness's job is to
+make them not be.
+
+---
+
+## Primitive: Observe the World (Just-In-Time-ish)
+
+How does an agent even know what's going on?
+
+In a chatbot, this is trivial — the user literally types a message to you.
+But if the agent is a collaborator in a shared space, "what's going on" is
+a much harder question. Things are happening all the time. Some of it is
+relevant, some isn't. Some of it is finished, some is still in progress.
+
+### What's Changed
+
+The core idea: a **watermark-based inbox**. Each agent tracks a timestamp —
+"the last time I looked." When it wakes up, it queries for everything that
+changed since then. One thing or fifteen things, it all arrives as a
+structured snapshot of "what happened while I was asleep" and reasons about
+the whole picture.
+
+[TODO: diagram — "the accordion." Timeline across the top. Human actions
+scattered irregularly. Below, they compress into one batch delivered to the
+agent. Show the many-to-one compression.]
+
+The watermark only advances when the agent explicitly checks. Events can
+never be lost — if the agent crashes and doesn't check for a while,
+everything is still waiting there. Basically consumer offsets from Kafka,
+but for agent perception.
+
+### What's Out There
+
+The inbox tells you what *changed*. But sometimes the agent needs the
+current state of the world — what's on the canvas right now, what does
+this image actually look like, what's the full context here.
+
+You can't dump the whole world state into the context window. So you give
+the agent structured tools to look around selectively. The trick is
+deciding what to show and what to hide:
+
+- **Strip spatial positions.** Agents reason about semantic relationships
+  (which comment is on which image, which images are grouped), not pixel
+  coordinates. LLMs are bad at spatial reasoning, so don't ask.
+- **Exclude image pixels.** Agents see metadata (prompt, model, caption)
+  but to actually *see* an image, they call a vision tool. Results are
+  cached.
+- **Hide unfinished things.** If an image is still generating or a scribble
+  hasn't been interpreted yet, the agent doesn't see it. It shows up when
+  it's ready.
+
+The general principle: present the world in the format the agent reasons
+best in (structured text with typed relationships), not in the format the
+human sees it in (visual, spatial, pixel-based).
+
+[TODO: generate — an agent with binoculars, looking at a messy canvas.
+Thought bubble shows a clean, structured view. Caption: "same canvas,
+different eyes."]
+
+### Waking Up
+
+The agent has tools to observe the world. But when does it wake up to use
+them?
+
+The wake signal has to be **meaning-free**. This is a hard rule and I'll
+die on this hill. The signal carries zero information about what happened.
+It's just "hey, wake up and look around."
+
+Why? Because wake signals are unreliable by nature. They can misfire,
+double-fire, or get dropped. If you smuggle intent through the signal
+("the user said X"), you lose that intent when things go wrong. All the
+real information lives in durable storage. The wake is just an alarm
+clock. The inbox is the source of truth.
+
+[TODO: generate — a meme. Alarm clock ringing labeled "wake signal."
+Person (agent) groggily getting up, checking their phone (inbox). The
+alarm has no message, just noise.]
+
+As for when to ring the alarm, there's a spectrum:
+
+- **Eager** — on every event. For agents that should always be paying
+  attention.
+- **Urgency-based** — debounced by event type, with burst detection. For
+  human-facing agents where responsiveness matters but you don't want to
+  wake on every keystroke.
+- **Cron / periodic** — fixed intervals. For background workers, cleanup,
+  monitoring.
+- **Lazy / on-demand** — only when explicitly tagged or called. For agents
+  that should stay out of the way unless needed.
+
+We ended up using urgency-based for most things — comments and uploads
+get a 1.5s debounce, reactions get 4s, deletions get 8s. If the human
+rapid-fires 3+ actions in 5 seconds, skip the debounce entirely. It feels
+responsive without being jittery.
+
+---
+
+## Primitive: Talk to Each Other, Share (Some) Memory
+
+Agents that can observe the world are useful. Agents that can also talk to
+each other and build up shared understanding are a lot more useful.
+
+### Short Nudges, Not Specs
+
+Let agents send messages to each other. But *how* they do it matters a lot.
+
+[TODO: generate — two panels. Left: an agent sending a 500-word spec,
+labeled "how most frameworks do it." Right: an agent passing a sticky note
+that says "4 more, noir style, check the board," labeled "how
+collaborators actually talk."]
+
+Short nudges (~25 words) work dramatically better than detailed
+specifications. The delegating agent says *what*, not *how*. The receiving
+agent independently reads the room — looks at the workspace, checks shared
+memory, makes its own decisions.
+
+Before this, the coordinator wrote 500-1700 character messages
+re-describing everything. It was like a manager who writes a two-page
+email when a sentence would do. Moving to short nudges made the other
+agents feel like they had their own judgment — which they do, the LLM is
+perfectly capable of reading context and deciding what to do.
+
+The messages themselves are persisted as durable events. The receiving
+agent discovers them through its inbox on next wake, just like any other
+event. No special channel, no side-band. Messages are just events.
+
+### Shared Memory
+
+When agents collaborate over time, they need shared understanding that
+persists across wakes. "We decided the style is noir." "The user hates
+purple gradients." Stuff every agent should know, always.
+
+The pattern: a **shared bulletin board**. A small persistent document
+(~2000 chars of markdown) that one agent curates and every agent sees,
+injected into the system prompt on every wake.
+
+It's not a conversation log or a summary. It's *currently-true standing
+orders*. One project's board tracks approved color schemes and
+materialization principles. Another tracks brand guidelines and a "winning
+formula." A third has a named art style with reference artists.
+
+[TODO: screenshot or mockup — a whiteboard/bulletin board with structured
+creative direction. Style notes, approved/rejected lists, pinned
+references.]
+
+No rigid schema. The curator organically decides what's worth remembering.
+An agent waking up 20 minutes in immediately has full creative context.
+
+### Private Memory and Independent Context
+
+Each agent also needs *private* memory — observations it's made, strategies
+it's developing. Especially in adversarial scenarios (games, debates) where
+information asymmetry is the whole point. But even collaboratively, the
+critic's internal notes are different from what the artist needs.
+
+And — the one that sounds expensive but actually matters — agents don't
+share a context window. Each one has its own conversation history,
+reconstructed from its own past runs, with its own token budget.
+
+Why? Because sycophancy is downstream of shared context. If the critic saw
+the artist's exact reasoning and deliberation, it's almost impossible to
+get a truly independent evaluation. Separate the context, and critique
+becomes structurally honest.
+
+[TODO: generate — split view. Two agents looking at the same canvas, each
+with a different "thought bubble" showing their own history and
+perspective. Caption: "same world, different perspectives."]
+
+---
+
+## Knowing When to Shut Up
+
+This is an important one and we haven't solved it perfectly yet. But we've
+made progress.
+
+The boogeyman of multi-agent systems is the infinite loop. Two agents
+complimenting each other forever. The "thank you" / "no, thank you" death
+spiral. Or just one agent that won't stop generating things nobody asked
+for.
+
+### Don't Act on Everything
+
+Not every agent needs to see every event. An image generator doesn't care
+about whiteboard edits. A researcher doesn't care about agent outputs.
+Each agent declares what event types it subscribes to — everything else
+gets filtered out.
+
+In practice, subscription filtering removes 77% of events for the image
+generator and 88% for the researcher. Fewer tokens, less noise, better
+reasoning.
+
+There's also the self-echo filter: agents don't see their own output. You
+just generated an image — you don't need to be told there's a new image.
+The exception: if the user *interacted* with something you made (selected
+an option, answered a question), you do need to see that.
+
+[TODO: generate — funnel diagram. Wide top: "everything happening in the
+world." Three filter stages: subscription ("not my department"), self-echo
+("I already know"), readiness ("not ready yet"). Narrow bottom: "what this
+agent actually sees." Label the percentages.]
+
+### Turn Budgets
+
+You know that movie where people trade in time and have a countdown timer
+on their arm? (*In Time*, 2011, underrated honestly.) That's basically
+what we do.
+
+[TODO: still from In Time (2011) showing the arm timer, or a generatable
+parody.]
+
+Each agent has a **turn budget** — a counter that ticks down with every
+LLM call. The agent can see the number in its system prompt. So it can
+plan: "I have 3 turns left, let me wrap up."
+
+Better than a hard cutoff. Agents wind down gracefully rather than getting
+mid-sentence guillotined. They finish their current thought, maybe leave a
+note, and go to sleep. The budget resets when the human does something
+new.
+
+### If All Fails: Reconstruct
+
+Here's the safety net: **an agent's full state can be reconstructed from
+the database at any time.**
+
+No in-memory state that matters. History is reconstructed from stored run
+segments. Inbox is rebuilt from watermarked queries. Shared memory is
+re-read from storage. If an agent crashes, hits a timeout, or behaves
+badly — kill it. Next wake starts clean, with full history.
+
+This is what lets you be bold with everything else. Aggressive wake
+policies, ambitious multi-agent coordination, creative experiments — if
+something goes wrong, nothing is lost. The database is always the source
+of truth.
+
+[TODO: generate — a phoenix metaphor. Agent crashes / burns. New agent
+rises from the same database, fully formed. Caption: "state is in the
+database, not in the process."]
+
+---
+
+## Summary
+
+The primitives:
+
+1. **Observe the world** — watermark-based inbox for "what changed,"
+   structured tools for "what's out there," meaning-free wake signals to
+   trigger it all.
+2. **Talk to each other** — short nudges not specs, shared bulletin board
+   for collective memory, private memory for individual perspective,
+   independent context for honest evaluation.
+3. **Know when to shut up** — subscription filtering, turn budgets for
+   graceful wind-down, full reconstruction from storage as a safety net.
+
+These aren't specific to any one application. They're the primitives for
+making turn-based LLMs participate in worlds that don't take turns —
+whether that world is a creative canvas, a group chat, a collaborative
+document, or something we haven't thought of yet.
+
+[TODO: do we want a "what's next" or "open problems" section?]
+
+The current harness discourse is about making agents execute tasks better
+and longer. That's valuable work. But there's a whole other category of
+harness problems that nobody seems to be talking about: not "how do I make
+my agent run for 6 hours" but "how do I make my agent coexist with humans
+who aren't waiting for it."

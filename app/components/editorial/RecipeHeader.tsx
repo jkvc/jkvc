@@ -8,9 +8,9 @@ export interface RecipeMeta {
   /** Short red label slot (e.g. "№ 02", "ABOUT"). */
   issue?: string;
   location?: string;
-  /** Bucket label — e.g. "PLAYABLE" / "READABLE". Rendered first in the
-   *  meta strip so it reads as the primary classifier. */
-  kind?: string;
+  /** Font Awesome class (sans family prefix) for the bucket glyph, rendered
+   *  inline with the issue number (mirrors the home row-card treatment). */
+  kindIcon?: string;
 }
 
 interface Props {
@@ -21,9 +21,9 @@ interface Props {
 
 export default function RecipeHeader({ meta, backHref = "/" }: Props) {
   // Status is intentionally omitted — project pages only exist once published,
-  // so the label is redundant noise. The home row still shows it.
+  // so the label is redundant noise. The kind label is likewise elided: it's
+  // already conveyed by the glyph beside the issue number.
   const parts: string[] = [];
-  if (meta.kind) parts.push(meta.kind.toUpperCase());
   if (meta.tags && meta.tags.length) {
     parts.push(meta.tags.map((t) => t.toUpperCase()).join(" · "));
   }
@@ -42,9 +42,16 @@ export default function RecipeHeader({ meta, backHref = "/" }: Props) {
           <i className="fa-solid fa-arrow-left text-[11px]" />
         </Link>
       )}
-      {meta.issue && (
-        <span className="caption-mono text-hot">
-          {/^\d/.test(meta.issue) ? `№ ${meta.issue}` : meta.issue}
+      {(meta.issue || meta.kindIcon) && (
+        <span className="caption-mono text-hot inline-flex items-center gap-1.5">
+          {meta.issue && (
+            <span>
+              {/^\d/.test(meta.issue) ? `№ ${meta.issue}` : meta.issue}
+            </span>
+          )}
+          {meta.kindIcon && (
+            <i className={`fa-solid ${meta.kindIcon} text-[9px]`} aria-hidden />
+          )}
         </span>
       )}
       {parts.length > 0 && (
