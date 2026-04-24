@@ -30,3 +30,16 @@ Use **Font Awesome 7** (`@fortawesome/fontawesome-free`) for all icons. Do **not
 
 ### 6. Style Guide
 All visual design decisions (palette, typography, border radii, button patterns, layout conventions) are documented in `STYLE.md` at the project root. Read and follow it when creating or modifying UI.
+
+### 7. Prose Line Wrapping
+Do **not** hard-wrap paragraphs in Markdown / MDX content (e.g. files under `posts/`, `README.md`, `STYLE.md`, any `.md` / `.mdx`). Write each paragraph, list item, and block-level element as a single unwrapped line. Editor word wrap is on — mid-paragraph line breaks make editing awkward and produce noisy diffs. Blank lines still separate blocks as usual.
+
+### 8. Post layout and images
+Each readable post is a **directory** named after the project `slug` (must match `app/projects/data.ts`):
+
+- `posts/<slug>/content.mdx` — the MDX body
+- `posts/<slug>/assets/` — images and other static files for that post (optional)
+
+Do **not** use `posts/<slug>.mdx` at the top level. Inline images in MDX with a root-relative URL, e.g. `![](/post-assets/<slug>/hero.png)` (served from `app/post-assets`). Nested paths work: `assets/diagrams/x.png` → `![](/post-assets/<slug>/diagrams/x.png)`.
+
+**Image width** — Defaults live in `app/components/post/PostBody.tsx` (`max-w-xl`, centered). In MDX: (1) `<PostImage columnWidth={0.5} />` for a **fraction of the text column** (same width as the `max-w-2xl` main column — `1` = full column); (2) `<PostImage maxWidth="2xl" />` for Tailwind max-width presets; (3) `<img className="…" />` with `tailwind-merge` overrides. Plain `![](/post-assets/...)` keeps the default.

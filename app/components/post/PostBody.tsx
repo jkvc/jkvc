@@ -1,6 +1,83 @@
 import { compileMDX } from "next-mdx-remote/rsc";
 import matter from "gray-matter";
+import { twMerge } from "tailwind-merge";
 import type { MDXComponents } from "mdx/types";
+import type { ImgHTMLAttributes } from "react";
+
+/** Default figure styling — override per image via `<PostImage>` props or `className`. */
+const postImgClass =
+  "mt-4 block h-auto w-full max-w-xl mx-auto rounded-xl border border-rule";
+
+function mergeImgClass(...extra: (string | undefined)[]) {
+  return twMerge(postImgClass, ...extra);
+}
+
+/** Tailwind `max-w-*` presets for `<PostImage maxWidth="…" />`. */
+const POST_IMAGE_MAX = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+  "4xl": "max-w-4xl",
+  "5xl": "max-w-5xl",
+  "6xl": "max-w-6xl",
+  "7xl": "max-w-7xl",
+  full: "max-w-full",
+  none: "max-w-none",
+  prose: "max-w-prose",
+} as const;
+
+export type PostImageMaxWidth = keyof typeof POST_IMAGE_MAX;
+
+export type PostImageProps = Omit<
+  ImgHTMLAttributes<HTMLImageElement>,
+  "maxWidth"
+> & {
+  /** Replaces the default cap width via a Tailwind preset. */
+  maxWidth?: PostImageMaxWidth;
+  /**
+   * Width as a fraction of the post text column (same `max-w-2xl` content
+   * area as body copy), e.g. `0.5` → 50%. Takes precedence over `maxWidth`.
+   */
+  columnWidth?: number;
+};
+
+function PostImage({
+  className,
+  alt,
+  maxWidth,
+  columnWidth,
+  style,
+  ...rest
+}: PostImageProps) {
+  const fraction =
+    typeof columnWidth === "number" &&
+    Number.isFinite(columnWidth) &&
+    columnWidth > 0
+      ? Math.min(1, columnWidth)
+      : null;
+  const override =
+    fraction != null
+      ? "w-auto max-w-none"
+      : maxWidth
+        ? POST_IMAGE_MAX[maxWidth]
+        : undefined;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className={mergeImgClass(override, className)}
+      alt={alt ?? ""}
+      {...rest}
+      style={
+        fraction != null
+          ? { width: `${fraction * 100}%`, ...style }
+          : style
+      }
+    />
+  );
+}
 
 /**
  * MDX component overrides used for editorial blog-post rendering. Headings
@@ -75,6 +152,22 @@ const MDX_COMPONENTS: MDXComponents = {
   strong: (props) => (
     <strong className="font-semibold text-ink" {...props} />
   ),
+  img: (props: ImgHTMLAttributes<HTMLImageElement>) => {
+    const { className, alt, ...rest } = props;
+    return (
+      // eslint-disable-next-line @next/next/no-img-element -- colocated / post-assets URLs; `className` overrides defaults via twMerge
+      <img
+        className={mergeImgClass(className)}
+        alt={typeof alt === "string" ? alt : ""}
+        {...rest}
+      />
+    );
+  },
+  /**
+   * `<PostImage columnWidth={0.5} />` → half the text column. `maxWidth="2xl"` for
+   * preset caps. `className` merges with `tailwind-merge` over the defaults.
+   */
+  PostImage,
 };
 
 interface Props {
@@ -92,7 +185,11 @@ export default async function PostBody({ source }: Props) {
   const { content: rendered } = await compileMDX({
     source: content,
     components: MDX_COMPONENTS,
-    options: { parseFrontmatter: false },
+    options: {
+      parseFrontmatter: false,
+      blockJS: false,
+      blockDangerousJS: true,
+    },
   });
 
   return (
