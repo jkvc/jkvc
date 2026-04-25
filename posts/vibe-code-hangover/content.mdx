@@ -1,0 +1,70 @@
+So I had a few consecutive nights out drinking and found this analogy quite befitting:
+
+- **Don't**: chug everything as fast as possible, pass out, feel like shit the next morning
+- **Do**: pace yourself, eat some carbs, drink lots of water, chat with your friends, walk around every now and then, take a shower before going to bed...
+
+<PostImage src="/post-assets/vibe-code-hangover/wine-glass.webp" alt="A wine glass — paced, not chugged." columnWidth={0.7} />
+
+---
+
+I am a pretty big believer in the fundamental difference between "vibe coding" and "AI assisted system design". Coding agents are getting very very good, but building a project purely on vibes means the project is fun only in the beginning of it, then you run into the walls of AI slop, ungeneralizable code, bad (or no) abstraction... 
+
+Coding / drinking purely on vibes pretty much means you wake up with a hangover with no recollection of what you just did. 
+
+--- 
+
+Here's some minimal Claude Code / Cursor skills and rules [`jkvc/jkvc-skills`](https://github.com/jkvc/jkvc-skills) I have going on. I built several large-ish systems with them (projects which grew with them) over the past few months. 
+
+--- 
+
+Here's what I typically do (over a 25 minute session or so):
+
+### Examine the code 
+
+...and memory if you have it, around the vicinity of the blast radius of code that you're going to touch, so the context window has stuff you need. 
+
+> `/architecture-review` examine in detail where we handle wake pattern for concurrent agents in the system
+
+### Perform a monologue; get interviewed
+
+Go in to plan mode, tell the agent what you want to do, tell it how you want to do it the best you can. 
+
+It is quintessential to provide as much information as possible. You want to favor the quantity of information over quality here, it doesnt matter if its messy or contradict somewhat, as long as its there. Its always preferable to just turn on dictation and ramble a bunch of stuff. 
+
+Then tell it to make a plan and call out unresolved design choices to make or concerns. 
+
+> i want to ....... (omit many words). thoroughly examine code, make a plan, `/interview` me for unclear stuff or need design decision
+
+### Pressure the plan 
+
+Straightforward, another round of reviewing the plan and ask more clarifying questions 
+
+> `/critique` the plan and see if there is any concern, `/interview` me again if you need
+
+### Implement
+
+Get a coffee and wait 15 minutes depends on what model youre using
+
+### Test
+
+Run test, tell the agent to implement tests, do human test, etc. This has existed before LLMs came along
+
+If you're yoloing and have no checks and balances and the project becomes sloppy, theres no one else to blame
+
+### Retrospect
+
+Quite optional, but I have found it useful time and time again. 
+
+**Use a fresh agent session**, examine the implementation we just did and point out any problem, concern, missed consideration, etc. and propose fixes. 
+
+This gives yourself a much better chance in discovering something not thought of before. You're essentially creating a critic. Because it does not share context with the implementer, it can be much more unbiased and much less prone to sycophancy. 
+
+> `/retrospective` on the previous commit, and tell me what we should do 
+
+---
+
+That's about it, rinse and repeat and you should have a healthy project that scales well over time. 
+
+<PostImage src="/post-assets/vibe-code-hangover/beer.webp" alt="A glass of beer — pace yourself." columnWidth={0.8} />
+
+Heres to many more semi-opaque Flemish beers in double digit alcohol.

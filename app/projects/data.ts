@@ -140,4 +140,17 @@ export const projects: Project[] = [
         status: "PUBLISHED",
         icon: "fa-comments",
     },
+    {
+        title: "Vibe-code hangover",
+        slug: "vibe-code-hangover",
+        description: "And a cure perhaps.",
+        tags: ["Vibe", "Skills"],
+        gradient: "linear-gradient(135deg, #C8D2BE 0%, #6E7E63 100%)",
+        ready: true,
+        kind: "readable",
+        year: "2026",
+        date: "2026-04-25",
+        status: "PUBLISHED",
+        icon: "fa-beer-mug-empty",
+    },
 ];
