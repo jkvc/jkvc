@@ -146,6 +146,7 @@ export const projects: Project[] = [
         description: "And a cure perhaps.",
         tags: ["Vibe", "Skills"],
         gradient: "linear-gradient(135deg, #C8D2BE 0%, #6E7E63 100%)",
+        thumbnail: "/post-assets/vibe-code-hangover/wine-glass.webp",
         ready: true,
         kind: "readable",
         year: "2026",
