@@ -119,15 +119,22 @@ export default function ProjectRow({
         <div className="flex flex-col items-end gap-1 flex-shrink-0 text-right">
           {showStatus && (
             <div className="flex items-center gap-2">
-              <span className="caption-mono text-ink-faint">
-                {resolvedStatus}
-              </span>
               {draft ? (
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
-                  <i className="fa-solid fa-hammer" />
-                </span>
+                <>
+                  <span className="caption-mono text-ink-faint">
+                    {resolvedStatus}
+                  </span>
+                  <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
+                    <i className="fa-solid fa-hammer" />
+                  </span>
+                </>
               ) : ready ? (
-                <span className="inline-block w-2 h-2 rounded-full bg-hot" />
+                <span
+                  className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]"
+                  title="Published"
+                >
+                  <i className="fa-solid fa-stamp" />
+                </span>
               ) : (
                 <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
               )}
