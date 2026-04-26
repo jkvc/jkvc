@@ -1,9 +1,14 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 import type { GalleryItem } from "@/app/projects/text-image/lib/types";
 import type { ParticleConfig } from "@/app/projects/text-image/lib/particle-config";
 import { listGalleryItems, saveGalleryItem } from "@/app/lib/server/gallery-store";
 import { TEXT_IMAGE_GALLERY_NS } from "./storage";
+
+async function fileToBuffer(file: File): Promise<Buffer> {
+  return Buffer.from(await file.arrayBuffer());
+}
 
 export async function GET() {
   try {
@@ -29,10 +34,29 @@ export async function POST(request: NextRequest) {
 
   const id = crypto.randomUUID();
 
+  // All raster assets are stored as WebP. Snapshot arrives already encoded by the
+  // client canvas (lossy q=0.92); original + depth arrive in whatever format their
+  // upstream produced (user upload / Replicate ZoeDepth) and are transcoded here.
+  // Depth uses lossless WebP because depth values are read pixel-by-pixel during
+  // particle sampling and any quantization would shift the result.
+  const [originalWebp, depthWebp] = await Promise.all([
+    sharp(await fileToBuffer(original)).webp({ quality: 90 }).toBuffer(),
+    sharp(await fileToBuffer(depth)).webp({ lossless: true }).toBuffer(),
+  ]);
+
   const [snapshotBlob, originalBlob, depthBlob, segmentsBlob] = await Promise.all([
-    put(`text-image/${id}/snapshot.png`, snapshot, { access: "public" }),
-    put(`text-image/${id}/original.png`, original, { access: "public" }),
-    put(`text-image/${id}/depth.png`, depth, { access: "public" }),
+    put(`text-image/${id}/snapshot.webp`, snapshot, {
+      access: "public",
+      contentType: "image/webp",
+    }),
+    put(`text-image/${id}/original.webp`, originalWebp, {
+      access: "public",
+      contentType: "image/webp",
+    }),
+    put(`text-image/${id}/depth.webp`, depthWebp, {
+      access: "public",
+      contentType: "image/webp",
+    }),
     put(`text-image/${id}/segments.json`, segmentsFile, { access: "public" }),
   ]);
 

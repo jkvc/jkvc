@@ -31,22 +31,23 @@ export default function SaveToGallery({
       throw new Error("Canvas is not ready yet");
     }
 
-    // Capture canvas snapshot as PNG blob
+    // Capture canvas snapshot as WebP blob (server stores all assets as WebP)
     const snapshotBlob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => {
         if (blob) resolve(blob);
         else reject(new Error("Failed to capture canvas"));
-      }, "image/png");
+      }, "image/webp", 0.92);
     });
 
-    const originalFile = await fetchAsFile(originalUrl, "original.png", "image/png");
-    const depthFile = await fetchAsFile(depthUrl, "depth.png", "image/png");
+    // Pass original + depth through unmodified; the server converts both to WebP
+    // before storing (sharp). Filenames here are advisory only.
+    const originalFile = await fetchAsFile(originalUrl, "original");
+    const depthFile = await fetchAsFile(depthUrl, "depth");
 
-    // Build labels list from segments
     const labels = segments.map((s) => s.label);
 
     const formData = new FormData();
-    formData.append("snapshot", new File([snapshotBlob], "snapshot.png", { type: "image/png" }));
+    formData.append("snapshot", new File([snapshotBlob], "snapshot.webp", { type: "image/webp" }));
     formData.append("original", originalFile);
     formData.append("width", String(canvas.width));
     formData.append("height", String(canvas.height));
