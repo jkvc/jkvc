@@ -73,7 +73,7 @@ function TimelineRow({ section }: { section: TimelineSectionData }) {
         <span>{section.role.toUpperCase()}</span>
       </div>
 
-      <h2 className="mt-2 font-serif italic text-2xl leading-tight text-ink">
+      <h2 className="mt-2 font-serif text-2xl leading-tight text-ink">
         {section.organization}
       </h2>
 
