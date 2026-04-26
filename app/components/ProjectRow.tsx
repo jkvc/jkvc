@@ -21,6 +21,10 @@ interface ProjectRowProps {
    *  to the issue number. */
   kind?: ProjectKind;
   draft?: boolean;
+  /** Render the right-hand status label + indicator (PUBLISHED/DRAFT + dot/hammer).
+   *  When the drafts toggle is off and only published items are visible, this
+   *  block is redundant — leave it off in that case. Defaults to false. */
+  showStatus?: boolean;
 }
 
 /** Flat editorial color pool for thumbless projects. All warm, all on-palette —
@@ -79,6 +83,7 @@ export default function ProjectRow({
   icon,
   kind,
   draft,
+  showStatus = false,
 }: ProjectRowProps) {
   const resolvedStatus = status ?? (ready ? "PUBLISHED" : "DRAFT");
   const dateLabel = date ?? year;
@@ -112,18 +117,22 @@ export default function ProjectRow({
         </div>
 
         <div className="flex flex-col items-end gap-1 flex-shrink-0 text-right">
-          <div className="flex items-center gap-2">
-            <span className="caption-mono text-ink-faint">{resolvedStatus}</span>
-            {draft ? (
-              <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
-                <i className="fa-solid fa-hammer" />
+          {showStatus && (
+            <div className="flex items-center gap-2">
+              <span className="caption-mono text-ink-faint">
+                {resolvedStatus}
               </span>
-            ) : ready ? (
-              <span className="inline-block w-2 h-2 rounded-full bg-hot" />
-            ) : (
-              <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
-            )}
-          </div>
+              {draft ? (
+                <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-hot text-[9px]">
+                  <i className="fa-solid fa-hammer" />
+                </span>
+              ) : ready ? (
+                <span className="inline-block w-2 h-2 rounded-full bg-hot" />
+              ) : (
+                <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
+              )}
+            </div>
+          )}
           {dateLabel && (
             <span className="font-mono text-[10px] tracking-[0.1em] text-ink-faint">
               {dateLabel}

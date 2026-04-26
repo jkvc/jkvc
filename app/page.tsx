@@ -108,6 +108,7 @@ export default function Home() {
                                 key={project.slug}
                                 {...project}
                                 draft={showDrafts && !project.ready}
+                                showStatus={showDrafts}
                             />
                         ))}
                         {visible.length === 0 && (
