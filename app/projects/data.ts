@@ -133,6 +133,8 @@ export const projects: Project[] = [
         description: "(Un)fortunately, the real world is not turn-based.",
         tags: ["LLMs", "Interaction", "Agents"],
         gradient: "linear-gradient(135deg, #D4CFC2 0%, #8B6F5A 100%)",
+        thumbnail:
+            "/post-assets/turn-based-llms-non-turn-based-world/llm-vending-machine-thumbnail.webp",
         ready: true,
         kind: "readable",
         year: "2026",
