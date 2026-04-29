@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-
-type Size = "xs" | "sm" | "md";
+import { CONTROL_SIZE, type ControlSize } from "./controlSize";
 
 interface BaseProps {
   icon: string;
   title: string;
-  size?: Size;
+  size?: ControlSize;
   iconFamily?: "fa-solid" | "fa-regular" | "fa-brands";
   iconClassName?: string;
   className?: string;
@@ -36,12 +35,6 @@ type LinkProps = BaseProps & {
 
 type Props = ButtonProps | LinkProps;
 
-const SIZE_MAP: Record<Size, string> = {
-  xs: "w-7 h-7",
-  sm: "w-9 h-9",
-  md: "w-10 h-10",
-};
-
 function getClasses({
   size,
   active,
@@ -49,7 +42,7 @@ function getClasses({
   inverted,
   className,
 }: {
-  size: Size;
+  size: ControlSize;
   active: boolean;
   disabled: boolean;
   inverted: boolean;
@@ -70,7 +63,7 @@ function getClasses({
 
   // inline-flex so the button can be placed mid-paragraph (e.g. the inline
   // About affordance in the home hero) without breaking the text line.
-  return `inline-flex items-center justify-center rounded-full border transition-all ${SIZE_MAP[size]} ${stateClasses} ${disabledClasses} ${
+  return `inline-flex items-center justify-center rounded-full border transition-all ${CONTROL_SIZE[size].square} ${stateClasses} ${disabledClasses} ${
     className ?? ""
   }`;
 }
@@ -81,9 +74,7 @@ export default function IconCircleButton(props: Props) {
   const disabled = props.disabled ?? false;
   const inverted = props.inverted ?? false;
   const iconFamily = props.iconFamily ?? "fa-solid";
-  const defaultIconSize =
-    size === "md" ? "text-[14px]" : size === "sm" ? "text-[13px]" : "text-[11px]";
-  const iconClassName = props.iconClassName ?? defaultIconSize;
+  const iconClassName = props.iconClassName ?? CONTROL_SIZE[size].circleIcon;
   const classes = getClasses({ size, active, disabled, inverted, className: props.className });
 
   const href = "href" in props ? props.href : undefined;

@@ -88,15 +88,13 @@ export default function Home() {
 
                         <div className="flex-1 hairline mx-2 hidden sm:block" />
 
-                        <Pill
-                            active={showDrafts}
+                        <IconCircleButton
                             onClick={handleToggleDrafts}
                             icon={showDrafts ? "fa-eye" : "fa-eye-slash"}
                             title={showDrafts ? "Hide drafts" : "Show drafts"}
-                            ariaPressed={showDrafts}
-                        >
-                            Drafts
-                        </Pill>
+                            size="xs"
+                            active={showDrafts}
+                        />
                     </div>
                 </section>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CONTROL_SIZE, type ControlSize } from "../ui/controlSize";
 
 /**
  * Pill — the universal editorial pill button.
@@ -15,6 +16,11 @@ import Link from "next/link";
  * plain `<a target>` when `external` is true. Icon prefix is optional and sits
  * at caption scale (10px) to match the text.
  *
+ * Sizing shares the `ControlSize` token with `IconCircleButton`: at any given
+ * `size` a pill and a circle render at the same height (the pill's width is
+ * still intrinsic to its content). Default is `"xs"` to match the historical
+ * caption-pill metrics.
+ *
  * Do NOT restyle pills inline — if a variant is needed (e.g. pressed, inverted
  * for dark surfaces), add it here.
  */
@@ -22,6 +28,8 @@ import Link from "next/link";
 interface BaseProps {
   children: React.ReactNode;
   active?: boolean;
+  /** Shared with `IconCircleButton`. Default `"xs"`. */
+  size?: ControlSize;
   /** Font Awesome class (without family prefix), e.g. "fa-eye". */
   icon?: string;
   iconFamily?: "fa-solid" | "fa-regular" | "fa-brands";
@@ -52,19 +60,22 @@ type LinkVariant = BaseProps & {
 type Props = ButtonVariant | LinkVariant;
 
 const BASE =
-  "caption-mono rounded-full px-3.5 py-1.5 border transition-colors inline-flex items-center gap-1.5 cursor-pointer";
+  "caption-mono rounded-full border transition-colors inline-flex items-center gap-1.5 cursor-pointer";
 
 function classes({
   active,
+  size,
   extra,
 }: {
   active: boolean;
+  size: ControlSize;
   extra?: string;
 }): string {
   const state = active
     ? "bg-ink text-surface border-ink"
     : "border-rule text-ink-muted hover:border-ink hover:text-ink";
-  return `${BASE} ${state} ${extra ?? ""}`;
+  const dims = `${CONTROL_SIZE[size].height} ${CONTROL_SIZE[size].pillPaddingX}`;
+  return `${BASE} ${dims} ${state} ${extra ?? ""}`;
 }
 
 function Body({
@@ -86,8 +97,9 @@ function Body({
 
 export default function Pill(props: Props) {
   const active = props.active ?? false;
+  const size = props.size ?? "xs";
   const iconFamily = props.iconFamily ?? "fa-solid";
-  const cls = classes({ active, extra: props.className });
+  const cls = classes({ active, size, extra: props.className });
 
   if ("href" in props && typeof props.href === "string") {
     const isExternal = props.external ?? /^https?:\/\//.test(props.href);
