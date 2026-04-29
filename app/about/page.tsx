@@ -1,6 +1,8 @@
+import Wordmark from "@/app/components/brand/Wordmark";
 import ContactSlab from "@/app/components/editorial/ContactSlab";
 import RecipeHeader from "@/app/components/editorial/RecipeHeader";
 import { SITE } from "@/app/lib/site";
+import { renderInlineMarkdown } from "@/app/lib/inline-markdown";
 
 interface TimelineSectionData {
   dateRange: string;
@@ -58,7 +60,7 @@ function TimelineRow({ section }: { section: TimelineSectionData }) {
   const tagString = (section.tags ?? []).map((t) => t.toUpperCase()).join(" · ");
 
   return (
-    <div className="border-b border-rule py-6">
+    <div className="py-6">
       {/* Eyebrow: date range + current pulse. Uses the shared `caption-mono`
           editorial utility — do NOT re-spell the mono/size/tracking classes. */}
       <div className="flex items-center gap-2.5 caption-mono text-ink-faint">
@@ -94,30 +96,25 @@ export default function About() {
       <div className="max-w-2xl mx-auto">
         <RecipeHeader meta={{ issue: "ABOUT" }} />
 
-        {/* Hero — middle word of the full name renders italic+red. Assumes
-            three-word name; adjust split if that ever changes. */}
+        {/* Hero — uses the shared Wordmark component pinned to the expanded
+            ("Junshen Kevin Chen") form. No hover interaction here; the
+            canonical full name is the one and only state on /about. */}
         <section className="mt-6 mb-14">
-          <h1 className="font-serif text-5xl sm:text-6xl leading-[1.02] tracking-[-0.02em] text-ink">
-            {(() => {
-              const [first, middle, ...rest] = SITE.fullName.split(" ");
-              return (
-                <>
-                  {first}{" "}
-                  <span className="italic text-hot">{middle}</span>{" "}
-                  {rest.join(" ")}
-                </>
-              );
-            })()}
+          <h1 className="text-5xl sm:text-6xl text-ink">
+            <Wordmark defaultExpanded interactive={false} />
           </h1>
-          {/* Sans body for the hero subtitle — matches the project page
-              treatment introduced in ProjectPageFrame. */}
-          <p className="mt-6 text-base leading-relaxed text-ink-muted max-w-xl">
-            {SITE.about.description}
+          {/* Subtitle is identical to the home-page tagline (same source,
+              same classes, same inline-markdown rendering) so the hero on
+              `/` and `/about` reads as a continuous statement. */}
+          <p className="mt-6 text-sm leading-relaxed text-ink-muted">
+            {renderInlineMarkdown(SITE.tagline)}
           </p>
         </section>
 
-        {/* Timeline */}
-        <section className="border-t border-rule">
+        {/* Timeline — `divide-y` draws a hairline only between rows, no
+            border at the top or bottom of the list (same pattern as the
+            project rows on the home page). */}
+        <section className="divide-y divide-rule">
           {sections.map((section, i) => (
             <TimelineRow key={i} section={section} />
           ))}

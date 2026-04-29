@@ -9,10 +9,14 @@ export const SITE = {
     /** Full legal / display name. */
     fullName: "Junshen Kevin Chen",
     /** Short one-liner for the home hero. */
-    tagline: "A human enthusiast.",
+    tagline: "[jkvc](/about) is an experimental ~~AI~~ human that can occasionally make mistakes. \nAlways verify important information.",
     /** Meta-description / social preview copy for the root. */
     description:
-        "Diffusion, LLMs, and interaction — prototypes, essays, experiments.",
+        "A personal website. Somewhere in here is a mix of ML modeling, inference systems, interaction engineering, generative art.",
+    /** Top-line categories — rendered uppercase + dot-joined in the OG masthead.
+     *  Kept as an explicit list (not derived from `description`) so reworking
+     *  the description prose doesn't silently break the OG card. */
+    keywords: ["ML modeling", "inference", "interaction", "generative art"] as const,
     /** Canonical origin without trailing slash. */
     url: "https://jkvc.com",
     /** Where I work / live, uppercase mono. */
@@ -24,10 +28,5 @@ export const SITE = {
         linkedin: "https://www.linkedin.com/in/jkvc",
         github: "https://github.com/jkvc",
         scholar: "https://scholar.google.com/citations?user=eg-CJG0AAAAJ",
-    },
-    about: {
-        /** Shared by the About page hero and its `<meta name="description">`. */
-        description:
-            "I make human things. AI optional.",
     },
 } as const;

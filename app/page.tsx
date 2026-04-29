@@ -14,6 +14,7 @@ import Pill from "./components/editorial/Pill";
 import IconCircleButton from "./components/ui/IconCircleButton";
 import { PROJECT_KINDS, projects, type ProjectKind } from "./projects/data";
 import { SITE } from "./lib/site";
+import { renderInlineMarkdown } from "./lib/inline-markdown";
 
 /** Filter bucket: either `"all"` (show every kind) or a specific ProjectKind.
  *  The concrete kinds come from PROJECT_KINDS in data.ts — this page never
@@ -52,24 +53,16 @@ export default function Home() {
     return (
         <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
             <div className="max-w-2xl mx-auto">
-                {/* Hero */}
+                {/* Hero — wordmark links to /about (both compact and
+                    hover-expanded forms share the same click target); the
+                    inline `[jkvc](/about)` in the tagline is a second
+                    affordance for the same destination. */}
                 <section className="mb-10">
                     <h1 className="text-[64px] sm:text-[80px] text-ink">
-                        <Wordmark />
+                        <Wordmark href="/about" />
                     </h1>
-                    <p className="mt-5 font-serif italic text-xl text-ink-muted leading-snug max-w-md">
-                        {SITE.tagline}
-                        {/* Inline About affordance — sized to match the pill caption
-                            metrics so it reads as typographic punctuation after the
-                            last word. `align-text-bottom` + `not-italic` keep the
-                            circle upright on the tagline baseline. */}
-                        <IconCircleButton
-                            href="/about"
-                            icon="fa-user"
-                            title="About"
-                            size="xs"
-                            className="ml-2 align-text-bottom not-italic"
-                        />
+                    <p className="mt-6 text-sm leading-relaxed text-ink-muted">
+                        {renderInlineMarkdown(SITE.tagline)}
                     </p>
                 </section>
 

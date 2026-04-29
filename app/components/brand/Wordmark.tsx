@@ -1,17 +1,30 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useRef, useState } from "react";
 
 interface WordmarkProps {
   className?: string;
   tabbable?: boolean;
+  /** When set, renders the wordmark as a Next.js `<Link>` to this href so the
+   *  whole brand mark — both compact and expanded states — is one click
+   *  target. The hover/focus animation is unchanged. */
+  href?: string;
+  /** Reverse the default state: render the expanded full name on first paint
+   *  and contract to the compact wordmark on hover/focus. Useful on the About
+   *  page where the full name is the canonical hero, but the brand mark is
+   *  still discoverable as a Easter-egg-style hover. */
+  defaultExpanded?: boolean;
+  /** When false, hover/focus does not toggle the state — the wordmark is
+   *  pinned to whichever state `defaultExpanded` selects. Default true. */
+  interactive?: boolean;
 }
 
 interface SegmentProps {
   compact: string;
   full: string;
   red?: boolean;
-  hovered: boolean;
+  expanded: boolean;
 }
 
 /**
@@ -28,7 +41,7 @@ const CLIP_OVERHANG = "0.25em";
  * transitions between the two states while the children cross-fade.
  * Baseline is established by an invisible upright copy of the compact text.
  */
-function Segment({ compact, full, red, hovered }: SegmentProps) {
+function Segment({ compact, full, red, expanded }: SegmentProps) {
   const compactRef = useRef<HTMLSpanElement>(null);
   const fullRef = useRef<HTMLSpanElement>(null);
   const [widths, setWidths] = useState<{ compact: number; full: number }>({
@@ -53,7 +66,7 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
   }, [compact, full]);
 
   const hasMeasured = widths.compact > 0 && widths.full > 0;
-  const targetWidth = hovered ? widths.full : widths.compact;
+  const targetWidth = expanded ? widths.full : widths.compact;
   const color = red ? "text-hot" : "text-ink";
 
   return (
@@ -76,7 +89,7 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
         {compact}
       </span>
 
-      {/* Compact state — upright, fades out on hover. */}
+      {/* Compact state — upright. Visible when not expanded. */}
       <span
         ref={compactRef}
         aria-hidden="true"
@@ -84,14 +97,14 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
         style={{
           top: CLIP_OVERHANG,
           left: CLIP_OVERHANG,
-          opacity: hovered ? 0 : 1,
+          opacity: expanded ? 0 : 1,
           transition: "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
         {compact}
       </span>
 
-      {/* Full state — italic, fades in on hover. */}
+      {/* Full state — italic. Visible when expanded. */}
       <span
         ref={fullRef}
         aria-hidden="true"
@@ -99,7 +112,7 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
         style={{
           top: CLIP_OVERHANG,
           left: CLIP_OVERHANG,
-          opacity: hovered ? 1 : 0,
+          opacity: expanded ? 1 : 0,
           transition: "opacity 500ms cubic-bezier(0.22, 1, 0.36, 1)",
         }}
       >
@@ -109,22 +122,59 @@ function Segment({ compact, full, red, hovered }: SegmentProps) {
   );
 }
 
-export default function Wordmark({ className = "", tabbable = true }: WordmarkProps) {
+export default function Wordmark({
+  className = "",
+  tabbable = true,
+  href,
+  defaultExpanded = false,
+  interactive = true,
+}: WordmarkProps) {
   const [hovered, setHovered] = useState(false);
+  // Default direction is compact → expand on hover. With `defaultExpanded`
+  // the polarity is flipped, so the same single hover-state drives the
+  // animation either way. When `interactive=false`, hover state is ignored
+  // and the wordmark is pinned to whichever state `defaultExpanded` selects.
+  const expanded = interactive
+    ? defaultExpanded
+      ? !hovered
+      : hovered
+    : defaultExpanded;
+  const cls = `wordmark font-serif leading-none tracking-[-0.03em] inline-flex items-baseline outline-none ${className}`;
+  const handlers = interactive
+    ? {
+        onMouseEnter: () => setHovered(true),
+        onMouseLeave: () => setHovered(false),
+        onFocus: () => setHovered(true),
+        onBlur: () => setHovered(false),
+      }
+    : {};
+  const segments = (
+    <>
+      <Segment compact="j" full={"Junshen\u00A0"} expanded={expanded} />
+      <Segment compact="kv" full={"Kevin\u00A0"} red expanded={expanded} />
+      <Segment compact="c" full="Chen" expanded={expanded} />
+    </>
+  );
+
+  if (href) {
+    // Anchor variant — natively focusable, so we drop the manual tabIndex and
+    // role="img" (the link semantics already announce the wordmark text).
+    return (
+      <Link href={href} className={cls} aria-label="jkvc — Junshen Kevin Chen" {...handlers}>
+        {segments}
+      </Link>
+    );
+  }
+
   return (
     <span
-      className={`wordmark font-serif leading-none tracking-[-0.03em] inline-flex items-baseline outline-none ${className}`}
+      className={cls}
       tabIndex={tabbable ? 0 : -1}
       role="img"
       aria-label="jkvc — Junshen Kevin Chen"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onFocus={() => setHovered(true)}
-      onBlur={() => setHovered(false)}
+      {...handlers}
     >
-      <Segment compact="j" full={"Junshen\u00A0"} hovered={hovered} />
-      <Segment compact="kv" full={"Kevin\u00A0"} red hovered={hovered} />
-      <Segment compact="c" full="Chen" hovered={hovered} />
+      {segments}
     </span>
   );
 }

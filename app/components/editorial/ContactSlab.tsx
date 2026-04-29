@@ -7,8 +7,6 @@ import { SITE } from "@/app/lib/site";
 interface ContactSlabProps {
   /** Lower-right location line. */
   location?: string;
-  /** Mono eyebrow next to the red pulse dot. */
-  eyebrow?: string;
   className?: string;
 }
 
@@ -52,21 +50,12 @@ function EmailAction() {
  */
 export default function ContactSlab({
   location = SITE.location,
-  eyebrow = "CONTACT",
   className = "",
 }: ContactSlabProps) {
   return (
     <div
       className={`bg-ink text-surface rounded-2xl p-7 sm:p-8 relative overflow-hidden ${className}`}
     >
-      <div className="flex items-center gap-2.5 mb-6">
-        <span className="relative inline-flex h-2 w-2 flex-shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-hot opacity-60" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-hot" />
-        </span>
-        <span className="caption-mono text-surface/50">{eyebrow}</span>
-      </div>
-
       <div className="flex items-center gap-3 flex-wrap">
         <IconCircleButton
           href={SITE.social.linkedin}

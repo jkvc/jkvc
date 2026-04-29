@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { SITE } from "./lib/site";
+import { renderInlineMarkdown } from "./lib/inline-markdown";
 
 export const runtime = "edge";
 export const alt = `${SITE.name} — ${SITE.description}`;
@@ -10,6 +11,9 @@ const SURFACE = "#F0EEE6";
 const INK = "#141413";
 const INK_FAINT = "#87867F";
 const HOT = "#C0392B";
+
+/** Masthead caption — uppercase + dot-joined `SITE.keywords`. */
+const MASTHEAD_CAPTION = SITE.keywords.map((k) => k.toUpperCase()).join(" · ");
 
 function DottedRing({ size: s = 120 }: { size?: number }) {
     const cx = s / 2;
@@ -58,7 +62,7 @@ export default async function Image() {
                     }}
                 >
                     <div style={{ display: "flex", flexDirection: "column", gap: 6, color: INK_FAINT, fontSize: 18, letterSpacing: "0.22em", fontFamily: "ui-monospace, SFMono-Regular, monospace" }}>
-                        <span>DIFFUSION · LLMS · INTERACTION</span>
+                        <span>{MASTHEAD_CAPTION}</span>
                         <span>{SITE.location}</span>
                     </div>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
@@ -96,7 +100,7 @@ export default async function Image() {
                                 lineHeight: 1.3,
                             }}
                         >
-                            A human enthusiast.
+                            {renderInlineMarkdown(SITE.tagline)}
                         </div>
                     </div>
                 </div>
