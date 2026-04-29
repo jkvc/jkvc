@@ -12,6 +12,7 @@ import StatusPillRow from "@/app/components/ui/StatusPillRow";
 interface Props {
   state: ProcessingState;
   onFile: (file: File) => void;
+  onReset: () => void;
   onSwitchToExpert: () => void;
   galleryItems: GalleryItem[];
   onSelectGalleryItem: (item: GalleryItem) => void;
@@ -31,6 +32,7 @@ const STATUS_PILLS: { key: StatusKey; icon: string; label: string }[] = [
 export default function PresentationView({
   state,
   onFile,
+  onReset,
   onSwitchToExpert,
   galleryItems,
   onSelectGalleryItem,
@@ -90,12 +92,18 @@ export default function PresentationView({
   if (isProcessing && !isComplete) {
     return (
       <div className="flex flex-col gap-6">
-        {/* Toolbar */}
+        {/* Toolbar: expert · reset (right-aligned) */}
         <div className="flex items-center justify-end gap-2">
           <IconCircleButton
             onClick={onSwitchToExpert}
             icon="fa-flask"
             title="Expert mode"
+          />
+          <span className="text-[#DDD] text-xs select-none">&middot;</span>
+          <IconCircleButton
+            onClick={onReset}
+            icon="fa-rotate"
+            title="New image"
           />
         </div>
 
@@ -113,12 +121,18 @@ export default function PresentationView({
   // ---- Complete: playback ----
   return (
     <div className="flex flex-col gap-6">
-      {/* Toolbar */}
+      {/* Toolbar: expert · reset (right-aligned) */}
       <div className="flex items-center justify-end gap-2">
         <IconCircleButton
           onClick={onSwitchToExpert}
           icon="fa-flask"
           title="Expert mode"
+        />
+        <span className="text-[#DDD] text-xs select-none">&middot;</span>
+        <IconCircleButton
+          onClick={onReset}
+          icon="fa-rotate"
+          title="New image"
         />
       </div>
 

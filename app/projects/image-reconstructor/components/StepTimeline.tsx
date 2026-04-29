@@ -26,12 +26,7 @@ export default function StepTimeline({
 
       <div>
         {frames.map((frame, i) => (
-          <StepCard
-            key={i}
-            index={i}
-            label={frame.label}
-            compositeUrl={frame.compositeUrl}
-          />
+          <StepCard key={i} index={i} compositeUrl={frame.compositeUrl} />
         ))}
 
         {isRunning && (

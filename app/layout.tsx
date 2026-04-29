@@ -22,7 +22,7 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: SITE.name,
-  description: SITE.description,
+  description: SITE.tagline,
   icons: {
     icon: "/favicon.svg",
   },

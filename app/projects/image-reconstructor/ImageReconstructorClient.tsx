@@ -8,6 +8,9 @@ import type {
   ColorInFrame,
   GalleryItem,
 } from "./lib/types";
+// NOTE: `segments` here are k-means color clusters produced by
+// /api/image-reconstructor/cluster (LAB clustering, sorted ascending chroma),
+// not semantic segments. Type/state names retained to limit churn.
 import PresentationView from "./components/PresentationView";
 import ExpertView from "./components/ExpertView";
 
@@ -77,72 +80,6 @@ function getPixelData(
   return ctx.getImageData(0, 0, w, h);
 }
 
-/** Generate distinct colors for segments. */
-const SEG_COLORS = [
-  [255, 99, 71],
-  [30, 144, 255],
-  [50, 205, 50],
-  [255, 215, 0],
-  [186, 85, 211],
-  [0, 206, 209],
-  [255, 140, 0],
-  [220, 20, 60],
-  [0, 191, 255],
-  [154, 205, 50],
-  [255, 105, 180],
-  [72, 209, 204],
-  [255, 69, 0],
-  [138, 43, 226],
-  [0, 250, 154],
-];
-
-/** Build a colored segmentation overlay on top of the sketch. */
-async function buildSegOverlay(
-  sketchUrl: string,
-  segments: SegmentResult[]
-): Promise<string> {
-  const sketchImg = await loadImage(sketchUrl);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = SIZE;
-  canvas.height = SIZE;
-  const ctx = canvas.getContext("2d")!;
-
-  ctx.drawImage(sketchImg, 0, 0, SIZE, SIZE);
-
-  for (let s = 0; s < segments.length; s++) {
-    const seg = segments[s];
-    const maskSrc = `data:image/png;base64,${seg.mask}`;
-    const maskImg = await loadImage(maskSrc);
-    const maskData = getPixelData(maskImg, SIZE, SIZE);
-
-    const [r, g, b] = SEG_COLORS[s % SEG_COLORS.length];
-
-    const overlay = ctx.createImageData(SIZE, SIZE);
-    for (let i = 0; i < maskData.data.length; i += 4) {
-      if (maskData.data[i] > 128) {
-        overlay.data[i] = r;
-        overlay.data[i + 1] = g;
-        overlay.data[i + 2] = b;
-        overlay.data[i + 3] = 100;
-      }
-    }
-
-    const tmpCanvas = document.createElement("canvas");
-    tmpCanvas.width = SIZE;
-    tmpCanvas.height = SIZE;
-    const tmpCtx = tmpCanvas.getContext("2d")!;
-    tmpCtx.putImageData(overlay, 0, 0);
-
-    ctx.drawImage(tmpCanvas, 0, 0);
-  }
-
-  const blob = await new Promise<Blob>((res) =>
-    canvas.toBlob((b) => res(b!), "image/png")
-  );
-  return URL.createObjectURL(blob);
-}
-
 /** Build color-in frames by overlaying original pixels onto sketch per segment. */
 async function buildColorInFrames(
   sketchUrl: string,
@@ -155,27 +92,28 @@ async function buildColorInFrames(
   const sketchData = getPixelData(sketchImg, SIZE, SIZE);
   const originalData = getPixelData(originalImg, SIZE, SIZE);
 
-  // Load all masks and compute area, sort largest first
-  const masksWithArea: {
+  // Server returns segments pre-sorted in the desired reveal order
+  // (ascending centroid saturation). Just load masks; defensively skip empty ones.
+  const masksOrdered: {
     label: string;
     data: ImageData;
-    area: number;
   }[] = [];
 
   for (const seg of segments) {
     const maskSrc = `data:image/png;base64,${seg.mask}`;
     const maskImg = await loadImage(maskSrc);
     const maskData = getPixelData(maskImg, SIZE, SIZE);
-    let area = 0;
+    let hasPixels = false;
     for (let i = 0; i < maskData.data.length; i += 4) {
-      if (maskData.data[i] > 128) area++;
+      if (maskData.data[i] > 128) {
+        hasPixels = true;
+        break;
+      }
     }
-    if (area > 0) {
-      masksWithArea.push({ label: seg.label, data: maskData, area });
+    if (hasPixels) {
+      masksOrdered.push({ label: seg.label, data: maskData });
     }
   }
-
-  masksWithArea.sort((a, b) => a.area - b.area);
 
   // Build frames
   const canvas = document.createElement("canvas");
@@ -198,8 +136,9 @@ async function buildColorInFrames(
     compositeUrl: URL.createObjectURL(sketchBlob),
   });
 
-  // For each segment, overlay original pixels where mask is active
-  for (const mask of masksWithArea) {
+  // For each segment (in server-provided reveal order), overlay original pixels
+  // where mask is active.
+  for (const mask of masksOrdered) {
     for (let i = 0; i < mask.data.data.length; i += 4) {
       if (mask.data.data[i] > 128) {
         basePixels[i] = originalData.data[i];
@@ -229,7 +168,6 @@ async function buildColorInFrames(
 const INITIAL_STATE: ProcessingState = {
   originalImageUrl: null,
   sketchUrl: null,
-  segOverlayUrl: null,
   segments: null,
   frames: [],
   videoUrl: null,
@@ -298,18 +236,14 @@ export default function ImageReconstructorClient() {
     }));
 
     try {
-      const [frames, segOverlayUrl] = await Promise.all([
-        buildColorInFrames(
-          sketchUrlRef.current,
-          originalUrlRef.current,
-          segmentsRef.current
-        ),
-        buildSegOverlay(sketchUrlRef.current, segmentsRef.current),
-      ]);
+      const frames = await buildColorInFrames(
+        sketchUrlRef.current,
+        originalUrlRef.current,
+        segmentsRef.current
+      );
       setState((p) => ({
         ...p,
         frames,
-        segOverlayUrl,
         compositingStatus: "complete",
         currentStepLabel: null,
       }));
@@ -346,7 +280,7 @@ export default function ImageReconstructorClient() {
       const formData = new FormData();
       formData.append("image", cropped);
 
-      // Fire sketch, segmentation, prompt concurrently
+      // Fire sketch, clustering, prompt concurrently
       // Animation fires after prompt is ready
 
       // Sketch
@@ -378,17 +312,17 @@ export default function ImageReconstructorClient() {
         }
       })();
 
-      // Segmentation
+      // Color clustering (k-means in LAB → connected components)
       (async () => {
         try {
           const segForm = new FormData();
           segForm.append("image", cropped);
-          const res = await fetch("/api/image-reconstructor/segmentation", {
+          const res = await fetch("/api/image-reconstructor/cluster", {
             method: "POST",
             body: segForm,
           });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Segmentation failed");
+          if (!res.ok) throw new Error(data.error || "Clustering failed");
           segmentsRef.current = data.segments;
           setState((p) => ({
             ...p,
@@ -402,7 +336,7 @@ export default function ImageReconstructorClient() {
             segStatus: "error",
             error:
               (p.error ? p.error + "; " : "") +
-              `Segmentation: ${e instanceof Error ? e.message : "Unknown"}`,
+              `Clustering: ${e instanceof Error ? e.message : "Unknown"}`,
           }));
         }
       })();
@@ -476,7 +410,6 @@ export default function ImageReconstructorClient() {
     setState({
       originalImageUrl: item.originalUrl,
       sketchUrl: item.sketchUrl,
-      segOverlayUrl: null,
       segments: null,
       frames,
       videoUrl: item.videoUrl || null,
@@ -526,6 +459,7 @@ export default function ImageReconstructorClient() {
         <PresentationView
           state={state}
           onFile={handleFile}
+          onReset={handleReset}
           onSwitchToExpert={() => switchMode("expert")}
           galleryItems={galleryItems}
           onSelectGalleryItem={handleSelectGalleryItem}

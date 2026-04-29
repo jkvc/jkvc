@@ -2,11 +2,10 @@
 
 interface Props {
   index: number;
-  label: string;
   compositeUrl: string;
 }
 
-export default function StepCard({ index, label, compositeUrl }: Props) {
+export default function StepCard({ index, compositeUrl }: Props) {
   return (
     <div className="flex gap-3">
       {/* Numbered circle + vertical line */}
@@ -19,14 +18,11 @@ export default function StepCard({ index, label, compositeUrl }: Props) {
 
       {/* Content */}
       <div className="flex-1 pb-4 min-w-0">
-        <div className="flex gap-3 items-center">
-          <img
-            src={compositeUrl}
-            alt={`Step ${index}: ${label}`}
-            className="w-20 h-20 rounded-lg border border-[#E8E8E8] object-cover shrink-0"
-          />
-          <p className="text-[13px] text-text font-medium truncate">{label}</p>
-        </div>
+        <img
+          src={compositeUrl}
+          alt={`Step ${index}`}
+          className="w-20 h-20 rounded-lg border border-[#E8E8E8] object-cover shrink-0"
+        />
       </div>
     </div>
   );

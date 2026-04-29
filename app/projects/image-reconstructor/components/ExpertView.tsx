@@ -89,57 +89,27 @@ export default function ExpertView({
         </div>
       )}
 
-      {/* Row 2: Sketch + Segmentation side by side */}
+      {/* Row 2: Sketch */}
       {state.originalImageUrl && (
-        <div className="grid grid-cols-2 gap-4">
-          {/* Sketch */}
-          <div>
-            <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-              Sketch
-            </p>
-            {state.sketchUrl ? (
-              <img
-                src={state.sketchUrl}
-                alt="Sketch"
-                className="w-full rounded-lg border border-[#E8E8E8] aspect-square object-cover"
-              />
-            ) : (
-              <div className="w-full rounded-lg border border-dashed border-[#DDD] aspect-square flex items-center justify-center">
-                {state.sketchStatus === "running" ? (
-                  <i className="fa-solid fa-spinner fa-spin text-gold text-[16px]" />
-                ) : (
-                  <span className="text-[#CCC] text-[12px]">Waiting</span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Segmentation overlay */}
-          <div>
-            <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-              Segmentation
-              {state.segments
-                ? ` (${state.segments.length})`
-                : ""}
-            </p>
-            {state.segOverlayUrl ? (
-              <img
-                src={state.segOverlayUrl}
-                alt="Segmentation overlay"
-                className="w-full rounded-lg border border-[#E8E8E8] aspect-square object-cover"
-              />
-            ) : (
-              <div className="w-full rounded-lg border border-dashed border-[#DDD] aspect-square flex items-center justify-center">
-                {state.segStatus === "running" ||
-                state.sketchStatus === "running" ||
-                state.compositingStatus === "running" ? (
-                  <i className="fa-solid fa-spinner fa-spin text-gold text-[16px]" />
-                ) : (
-                  <span className="text-[#CCC] text-[12px]">Waiting</span>
-                )}
-              </div>
-            )}
-          </div>
+        <div>
+          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
+            Sketch
+          </p>
+          {state.sketchUrl ? (
+            <img
+              src={state.sketchUrl}
+              alt="Sketch"
+              className="w-full rounded-lg border border-[#E8E8E8] aspect-square object-cover"
+            />
+          ) : (
+            <div className="w-full rounded-lg border border-dashed border-[#DDD] aspect-square flex items-center justify-center">
+              {state.sketchStatus === "running" ? (
+                <i className="fa-solid fa-spinner fa-spin text-gold text-[16px]" />
+              ) : (
+                <span className="text-[#CCC] text-[12px]">Waiting</span>
+              )}
+            </div>
+          )}
         </div>
       )}
 

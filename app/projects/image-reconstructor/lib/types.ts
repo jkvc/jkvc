@@ -1,8 +1,7 @@
-/** A single segment from SegFormer. */
+/** A single color-cluster mask from /api/image-reconstructor/cluster. */
 export interface SegmentResult {
   label: string;
   mask: string; // base64 PNG
-  score: number | null;
 }
 
 /** A single frame in the color-in sequence. */
@@ -17,7 +16,6 @@ type Status = "idle" | "running" | "complete" | "error";
 export interface ProcessingState {
   originalImageUrl: string | null; // 768x768 cropped
   sketchUrl: string | null;
-  segOverlayUrl: string | null; // colored segment overlay on sketch
   segments: SegmentResult[] | null;
   frames: ColorInFrame[];
   videoUrl: string | null;
