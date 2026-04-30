@@ -64,7 +64,7 @@ function resizeImage(file: File, maxEdge: number): Promise<File> {
 // Component
 // ---------------------------------------------------------------------------
 
-export default function TextImageClient() {
+export default function ImageLabelifierClient() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -91,7 +91,7 @@ export default function TextImageClient() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await fetch("/api/text-image/gallery");
+                const res = await fetch("/api/image-labelifier/gallery");
                 if (res.ok) {
                     const data: GalleryItem[] = await res.json();
                     setGalleryItems(data.slice(0, 10));
@@ -126,7 +126,7 @@ export default function TextImageClient() {
 
         const depthPromise = (async () => {
             try {
-                const res = await fetch("/api/text-image/depth", {
+                const res = await fetch("/api/image-labelifier/depth", {
                     method: "POST",
                     body: formData,
                 });
@@ -148,7 +148,7 @@ export default function TextImageClient() {
             try {
                 const segFormData = new FormData();
                 segFormData.append("image", resizedFile);
-                const res = await fetch("/api/text-image/segmentation", {
+                const res = await fetch("/api/image-labelifier/segmentation", {
                     method: "POST",
                     body: segFormData,
                 });
@@ -219,7 +219,7 @@ export default function TextImageClient() {
 
     const handleDeleteGalleryItem = useCallback(
         async (id: string) => {
-            await fetch(`/api/text-image/gallery/${id}`, { method: "DELETE" });
+            await fetch(`/api/image-labelifier/gallery/${id}`, { method: "DELETE" });
             setGalleryItems((prev) => prev.filter((item) => item.id !== id));
         },
         []

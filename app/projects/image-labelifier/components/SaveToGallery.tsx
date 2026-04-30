@@ -58,7 +58,7 @@ export default function SaveToGallery({
     appendJsonFile(formData, "segments", "segments.json", segments);
     formData.append("depth", depthFile);
 
-    const res = await fetch("/api/text-image/gallery", {
+    const res = await fetch("/api/image-labelifier/gallery", {
       method: "POST",
       body: formData,
     });

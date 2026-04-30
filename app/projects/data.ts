@@ -125,7 +125,7 @@ export function getProjectMeta(slug: string): ProjectMeta | undefined {
 export const projects: Project[] = [
     {
         title: "Image Labelifier",
-        slug: "text-image",
+        slug: "image-labelifier",
         description: "Every pixel has a name.",
         gradient: "linear-gradient(135deg, #A8A196 0%, #6B6860 100%)",
         thumbnail: "/thumnails/image-labelifier.jpg",
@@ -138,7 +138,7 @@ export const projects: Project[] = [
         refs: [
             {
                 kind: "code",
-                url: "https://github.com/jkvc/jkvc/tree/main/app/projects/text-image",
+                url: "https://github.com/jkvc/jkvc/tree/main/app/projects/image-labelifier",
             },
         ],
     },
@@ -153,18 +153,6 @@ export const projects: Project[] = [
         date: "2025-12-01",
         status: "DRAFT",
         icon: "fa-infinity",
-    },
-    {
-        title: "Image Mixer",
-        slug: "image-mixer",
-        description: "Drop ingredients into the bowl and see what comes out",
-        gradient: "linear-gradient(135deg, #C4B5A0 0%, #8A7B6B 100%)",
-        ready: false,
-        kind: "playable",
-        year: "2026",
-        date: "2026-01-01",
-        status: "DRAFT",
-        icon: "fa-blender",
     },
     {
         title: "Getting turn-based LLMs to work \nin the real world",

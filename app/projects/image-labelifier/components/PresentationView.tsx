@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { InferenceState } from "../TextImageClient";
+import type { InferenceState } from "../ImageLabelifierClient";
 import type { GalleryItem } from "../lib/types";
 import { PRESETS, type Preset } from "../lib/presets";
 import ParticleCanvas from "./ParticleCanvas";

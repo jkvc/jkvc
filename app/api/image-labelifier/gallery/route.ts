@@ -1,10 +1,10 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
-import type { GalleryItem } from "@/app/projects/text-image/lib/types";
-import type { ParticleConfig } from "@/app/projects/text-image/lib/particle-config";
+import type { GalleryItem } from "@/app/projects/image-labelifier/lib/types";
+import type { ParticleConfig } from "@/app/projects/image-labelifier/lib/particle-config";
 import { listGalleryItems, saveGalleryItem } from "@/app/lib/server/gallery-store";
-import { TEXT_IMAGE_GALLERY_NS } from "./storage";
+import { IMAGE_LABELIFIER_GALLERY_NS } from "./storage";
 
 async function fileToBuffer(file: File): Promise<Buffer> {
   return Buffer.from(await file.arrayBuffer());
@@ -12,7 +12,7 @@ async function fileToBuffer(file: File): Promise<Buffer> {
 
 export async function GET() {
   try {
-    const items = await listGalleryItems<GalleryItem>(TEXT_IMAGE_GALLERY_NS, 5);
+    const items = await listGalleryItems<GalleryItem>(IMAGE_LABELIFIER_GALLERY_NS, 5);
     return NextResponse.json(items);
   } catch {
     return NextResponse.json([]);
@@ -44,6 +44,10 @@ export async function POST(request: NextRequest) {
     sharp(await fileToBuffer(depth)).webp({ lossless: true }).toBuffer(),
   ]);
 
+  // Blob path prefix is intentionally kept as `text-image/` to match existing
+  // assets uploaded before the project was renamed to "Image Labelifier".
+  // Stored items reference full blob URLs in Redis, so the prefix is internal
+  // organization only — flipping it would just split storage across two folders.
   const [snapshotBlob, originalBlob, depthBlob, segmentsBlob] = await Promise.all([
     put(`text-image/${id}/snapshot.webp`, snapshot, {
       access: "public",
@@ -76,7 +80,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    await saveGalleryItem(TEXT_IMAGE_GALLERY_NS, id, item);
+    await saveGalleryItem(IMAGE_LABELIFIER_GALLERY_NS, id, item);
   } catch {
     // Redis not configured — blob was still uploaded successfully
   }

@@ -1,4 +1,4 @@
-# Text Image Canvas
+# Image Labelifier
 
 Transform uploaded images into interactive particle-parallax visualizations using depth estimation and semantic segmentation.
 
@@ -26,7 +26,7 @@ Upload image
 ### Orchestration flow
 
 ```text
-TextImageClient
+ImageLabelifierClient
   ├── shared inference + gallery state
   ├── handleFile(): runs depth + segmentation in parallel
   ├── PresentationView
@@ -68,9 +68,9 @@ Loading a saved item restores the exact saved visualization without re-inference
 ## File structure
 
 ```text
-text-image/
+image-labelifier/
   page.tsx
-  TextImageClient.tsx
+  ImageLabelifierClient.tsx
   lib/
     types.ts
     particle-config.ts
@@ -97,8 +97,8 @@ Shared components used by this project now live in:
 
 | Route | Description |
 |-------|-------------|
-| `/projects/text-image` | Presentation mode |
-| `/projects/text-image?mode=expert` | Expert mode |
+| `/projects/image-labelifier` | Presentation mode |
+| `/projects/image-labelifier?mode=expert` | Expert mode |
 
 ## Parallax math
 

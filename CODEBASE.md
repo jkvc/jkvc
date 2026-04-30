@@ -48,7 +48,7 @@ app/
   projects/
     data.ts                          # Project metadata for home + pages
     [slug]/page.tsx                  # Generic fallback project page
-    text-image/
+    image-labelifier/
     image-reconstructor/
     magic-crankie/
 ```
