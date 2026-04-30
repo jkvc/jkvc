@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 export interface RecipeMeta {
-  tags?: string[];
   status?: string;
   year?: string;
   date?: string;
@@ -24,9 +23,6 @@ export default function RecipeHeader({ meta, backHref = "/" }: Props) {
   // so the label is redundant noise. The kind label is likewise elided: it's
   // already conveyed by the glyph beside the issue number.
   const parts: string[] = [];
-  if (meta.tags && meta.tags.length) {
-    parts.push(meta.tags.map((t) => t.toUpperCase()).join(" · "));
-  }
   const dateLabel = meta.date ?? meta.year;
   if (dateLabel) parts.push(dateLabel);
   if (meta.location) parts.push(meta.location.toUpperCase());

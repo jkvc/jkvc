@@ -35,6 +35,7 @@ export default async function ProjectPage({
       meta={meta}
       draft={!project.ready}
       kind={project.kind}
+      refs={project.refs}
     >
       {postSource ? (
         <PostBody source={postSource} />

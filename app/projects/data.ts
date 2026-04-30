@@ -21,11 +21,56 @@ export const PROJECT_KINDS: ProjectKindMeta[] = [
     { id: "readable", label: "READABLE", icon: "fa-book-open" },
 ];
 
+/** Typed external reference attached to a project (e.g. its source repo).
+ *  `kind` selects both the icon/family and the default human-readable label
+ *  via the `REF_KINDS` registry. The label can still be overridden per entry. */
+export type RefKind = "code" | "skills";
+
+export interface RefKindMeta {
+    id: RefKind;
+    /** Default visible label shown inside the pill (e.g. "code", "skills"). */
+    label: string;
+    /** Font Awesome class (sans family prefix). */
+    icon: string;
+    iconFamily: "fa-solid" | "fa-regular" | "fa-brands";
+}
+
+export const REF_KINDS: RefKindMeta[] = [
+    { id: "code", label: "code", icon: "fa-github", iconFamily: "fa-brands" },
+    { id: "skills", label: "skills", icon: "fa-github", iconFamily: "fa-brands" },
+];
+
+export interface Ref {
+    kind: RefKind;
+    url: string;
+    /** Optional override for the default kind label. */
+    label?: string;
+}
+
+export interface ResolvedRef {
+    icon: string;
+    iconFamily: "fa-solid" | "fa-regular" | "fa-brands";
+    label: string;
+    url: string;
+}
+
+export function resolveRef(ref: Ref): ResolvedRef {
+    const meta = REF_KINDS.find((k) => k.id === ref.kind);
+    if (!meta) {
+        throw new Error(`Unknown ref kind: ${ref.kind}`);
+    }
+    return {
+        icon: meta.icon,
+        iconFamily: meta.iconFamily,
+        label: ref.label ?? meta.label,
+        url: ref.url,
+    };
+}
+
 export interface Project {
     title: string;
     slug: string;
     description: string;
-    tags: string[];
     gradient: string;
     thumbnail?: string;
     ready: boolean;
@@ -42,10 +87,13 @@ export interface Project {
      *  disc when no `thumbnail` is provided. E.g. "fa-blender". Defaults to
      *  a neutral asterisk. */
     icon?: string;
+    /** Optional list of typed external references (repo links, etc.). Rendered
+     *  as small circular indicators on home rows and clickable pills under
+     *  the title on the project detail page. */
+    refs?: Ref[];
 }
 
 export interface ProjectMeta {
-    tags?: string[];
     status?: string;
     year?: string;
     date?: string;
@@ -54,6 +102,7 @@ export interface ProjectMeta {
     /** Font Awesome class (sans family prefix) for the bucket glyph rendered
      *  next to the issue number in the recipe header. */
     kindIcon?: string;
+    refs?: Ref[];
 }
 
 /** Build an editorial meta block for a project. Issue number comes from the
@@ -64,12 +113,12 @@ export function getProjectMeta(slug: string): ProjectMeta | undefined {
     const p = projects[index];
     const kindMeta = PROJECT_KINDS.find((k) => k.id === p.kind);
     return {
-        tags: p.tags,
         status: p.status ?? (p.ready ? "PUBLISHED" : "DRAFT"),
         year: p.year,
         date: p.date,
         issue: String(index + 1).padStart(2, "0"),
         kindIcon: kindMeta?.icon,
+        refs: p.refs,
     };
 }
 
@@ -78,7 +127,6 @@ export const projects: Project[] = [
         title: "Image Labelifier",
         slug: "text-image",
         description: "Every pixel has a name.",
-        tags: ["Upload", "Segment", "Hover"],
         gradient: "linear-gradient(135deg, #A8A196 0%, #6B6860 100%)",
         thumbnail: "/thumnails/image-labelifier.jpg",
         ready: true,
@@ -87,12 +135,17 @@ export const projects: Project[] = [
         date: "2025-10-01",
         status: "PUBLISHED",
         icon: "fa-tags",
+        refs: [
+            {
+                kind: "code",
+                url: "https://github.com/jkvc/jkvc/tree/main/app/projects/text-image",
+            },
+        ],
     },
     {
         title: "Magic Crankie",
         slug: "magic-crankie",
         description: "A never-ending scroll through a state machine",
-        tags: ["Animation", "State Machine", "Canvas"],
         gradient: "linear-gradient(135deg, #E8B4B8 0%, #7B6B8D 100%)",
         ready: false,
         kind: "playable",
@@ -105,7 +158,6 @@ export const projects: Project[] = [
         title: "Image Mixer",
         slug: "image-mixer",
         description: "Drop ingredients into the bowl and see what comes out",
-        tags: ["Physics", "Canvas", "Image-to-Image"],
         gradient: "linear-gradient(135deg, #C4B5A0 0%, #8A7B6B 100%)",
         ready: false,
         kind: "playable",
@@ -118,7 +170,6 @@ export const projects: Project[] = [
         title: "Getting turn-based LLMs to work \nin the real world",
         slug: "turn-based-llms-non-turn-based-world",
         description: "(Un)fortunately, the real world is not turn-based.",
-        tags: ["LLMs", "Interaction", "Agents"],
         gradient: "linear-gradient(135deg, #D4CFC2 0%, #8B6F5A 100%)",
         thumbnail:
             "/post-assets/turn-based-llms-non-turn-based-world/llm-vending-machine-thumbnail.webp",
@@ -133,7 +184,6 @@ export const projects: Project[] = [
         title: "Vibe-code hangover",
         slug: "vibe-code-hangover",
         description: "And a cure perhaps.",
-        tags: ["Vibe", "Skills"],
         gradient: "linear-gradient(135deg, #C8D2BE 0%, #6E7E63 100%)",
         thumbnail: "/post-assets/vibe-code-hangover/wine-glass.webp",
         ready: true,
@@ -142,12 +192,14 @@ export const projects: Project[] = [
         date: "2026-04-25",
         status: "PUBLISHED",
         icon: "fa-beer-mug-empty",
+        refs: [
+            { kind: "skills", url: "https://github.com/jkvc/jkvc-skills" },
+        ],
     },
     {
         title: "Image Reconstructor",
         slug: "image-reconstructor",
         description: "Photos are built from scratch",
-        tags: ["Vision", "Image-to-Image", "Video"],
         gradient: "linear-gradient(135deg, #B8C6DB 0%, #6B7B8D 100%)",
         thumbnail: "/thumnails/image-reconstructor.webp",
         ready: true,
@@ -156,5 +208,11 @@ export const projects: Project[] = [
         date: "2026-04-29",
         status: "PUBLISHED",
         icon: "fa-images",
+        refs: [
+            {
+                kind: "code",
+                url: "https://github.com/jkvc/jkvc/tree/main/app/projects/image-reconstructor",
+            },
+        ],
     },
 ];

@@ -1,7 +1,8 @@
 import RecipeHeader, {
   type RecipeMeta,
 } from "@/app/components/editorial/RecipeHeader";
-import type { ProjectKind } from "@/app/projects/data";
+import Pill from "@/app/components/editorial/Pill";
+import { resolveRef, type ProjectKind, type Ref } from "@/app/projects/data";
 
 /**
  * Copy + glyph for the draft indicator pill, keyed by project kind. Playables
@@ -24,6 +25,9 @@ interface Props {
   kind?: ProjectKind;
   /** Extra node slotted above the draft badge — reserved for one-off banners. */
   headerAddon?: React.ReactNode;
+  /** Optional list of typed external references. Rendered as a row of clickable
+   *  pills under the description, above the content area. */
+  refs?: Ref[];
   children: React.ReactNode;
   contentTopClassName?: string;
 }
@@ -35,6 +39,7 @@ export default function ProjectPageFrame({
   draft,
   kind,
   headerAddon,
+  refs,
   children,
   contentTopClassName = "mt-12",
 }: Props) {
@@ -58,6 +63,24 @@ export default function ProjectPageFrame({
           <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-xl">
             {description}
           </p>
+          {refs && refs.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {refs.map((ref, i) => {
+                const r = resolveRef(ref);
+                return (
+                  <Pill
+                    key={i}
+                    href={r.url}
+                    icon={r.icon}
+                    iconFamily={r.iconFamily}
+                    title={r.url}
+                  >
+                    {r.label}
+                  </Pill>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className={contentTopClassName}>{children}</div>

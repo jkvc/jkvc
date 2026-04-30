@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { PROJECT_KINDS, type ProjectKind } from "@/app/projects/data";
+import {
+  PROJECT_KINDS,
+  resolveRef,
+  type ProjectKind,
+  type Ref,
+} from "@/app/projects/data";
 
 interface ProjectRowProps {
   title: string;
@@ -25,6 +30,11 @@ interface ProjectRowProps {
    *  When the drafts toggle is off and only published items are visible, this
    *  block is redundant — leave it off in that case. Defaults to false. */
   showStatus?: boolean;
+  /** Optional list of typed external references. Rendered as small passive
+   *  circular indicators in the right-side column, above the date. The row's
+   *  outer `<Link>` already wraps everything, so these are intentionally not
+   *  independently clickable. */
+  refs?: Ref[];
 }
 
 /** Flat editorial color pool for thumbless projects. All warm, all on-palette —
@@ -84,6 +94,7 @@ export default function ProjectRow({
   kind,
   draft,
   showStatus = false,
+  refs,
 }: ProjectRowProps) {
   const resolvedStatus = status ?? (ready ? "PUBLISHED" : "DRAFT");
   const dateLabel = date ?? year;
@@ -138,6 +149,26 @@ export default function ProjectRow({
               ) : (
                 <span className="inline-block w-2 h-2 rounded-full border border-ink-faint" />
               )}
+            </div>
+          )}
+          {refs && refs.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              {refs.map((ref, i) => {
+                const r = resolveRef(ref);
+                return (
+                  <span
+                    key={i}
+                    title={r.label}
+                    aria-label={r.label}
+                    className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-rule text-ink-faint"
+                  >
+                    <i
+                      className={`${r.iconFamily} ${r.icon} text-[9px]`}
+                      aria-hidden="true"
+                    />
+                  </span>
+                );
+              })}
             </div>
           )}
           {dateLabel && (

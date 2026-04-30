@@ -20,6 +20,7 @@ export default function ImageReconstructorPage() {
       meta={meta}
       draft={!project.ready}
       kind={project.kind}
+      refs={project.refs}
     >
       <Suspense>
         <ImageReconstructorClient />
