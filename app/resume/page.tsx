@@ -306,7 +306,7 @@ export default function ResumePage() {
                             <p className="mt-2 text-[11px] leading-snug text-ink-muted max-w-[4.6in]">
                                 ML engineer with experience in diffusion models, large-scale model inference systems, and LLM harnesses.
                                 <br />
-                                Broadly interested in human–AI collaboration in the real world.
+                                Broadly interested in human–AI collaboration in the real world for creativity.
                                 <br />
                                 Currently working at Meta Superintelligence Lab.
                             </p>
