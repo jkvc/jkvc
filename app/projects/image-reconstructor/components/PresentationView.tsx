@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import PlaybackPlayer from "./PlaybackPlayer";
 import SaveToGallery from "./SaveToGallery";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
-import UploadDropZone from "@/app/components/ui/UploadDropZone";
 import StatusPillRow from "@/app/components/ui/StatusPillRow";
+import Pill from "@/app/components/editorial/Pill";
 
 interface Props {
   state: ProcessingState;
@@ -39,6 +39,8 @@ export default function PresentationView({
   onDeleteGalleryItem,
   onGallerySaved,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const isProcessing =
     state.sketchStatus === "running" ||
     state.segStatus === "running" ||
@@ -65,10 +67,25 @@ export default function PresentationView({
   // ---- Empty state: upload prompt ----
   if (!state.originalImageUrl) {
     return (
-      <UploadDropZone
-        onFile={onFile}
-        prompt="Drop an image or click to upload"
-      >
+      <div className="flex flex-col items-center gap-8">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFile(f);
+          }}
+        />
+
+        <Pill
+          onClick={() => fileInputRef.current?.click()}
+          icon="fa-arrow-up-from-bracket"
+        >
+          Upload image
+        </Pill>
+
         <ExampleGalleryStrip
           items={galleryItems.map((item) => ({
             id: item.id,
@@ -80,11 +97,12 @@ export default function PresentationView({
             if (item) onSelectGalleryItem(item);
           }}
           onDelete={onDeleteGalleryItem}
+          title="Or choose from an example"
           center
           thumbnailSize="md"
-          className="items-center"
+          className="items-center w-full"
         />
-      </UploadDropZone>
+      </div>
     );
   }
 

@@ -1,12 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import StepTimeline from "./StepTimeline";
 import PlaybackPlayer from "./PlaybackPlayer";
 import SaveToGallery from "./SaveToGallery";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
-import UploadDropZone from "@/app/components/ui/UploadDropZone";
+import Pill from "@/app/components/editorial/Pill";
 
 interface Props {
   state: ProcessingState;
@@ -29,6 +30,8 @@ export default function ExpertView({
   onDeleteGalleryItem,
   onGallerySaved,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const isComplete =
     state.compositingStatus === "complete" &&
     (state.animationStatus === "complete" || state.animationStatus === "idle");
@@ -68,11 +71,24 @@ export default function ExpertView({
 
       {/* Upload prompt if no image yet */}
       {!state.originalImageUrl && (
-        <UploadDropZone
-          onFile={onFile}
-          prompt="Drop an image or click to upload"
-          className="mb-0"
-        />
+        <div className="flex justify-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(f);
+            }}
+          />
+          <Pill
+            onClick={() => fileInputRef.current?.click()}
+            icon="fa-arrow-up-from-bracket"
+          >
+            Upload image
+          </Pill>
+        </div>
       )}
 
       {/* Row 1: Original (full width) */}
