@@ -47,7 +47,7 @@ const EXPERIENCE: Role[] = [
         location: "Seattle",
         bullets: [
             "Prototyping non-turn-based agents on top of turn-based LLMs — interaction & harness engineering for systems that act in the real world like a human would.",
-            "Building interactive AI experiences as research artifacts; bridging model capability and felt UX.",
+            "Building interactive AI experiences and art installations to showcase human-AI collaboration for events such as Connect.",
         ],
         tags: ["AGENTS", "INTERACTION", "PROTOTYPING"],
     },
@@ -58,7 +58,7 @@ const EXPERIENCE: Role[] = [
         location: "Seattle",
         bullets: [
             "Built and led the research-to-production hub system that all of Meta's media models train, eval, and ship through — enabled 5+ teams to iterate in parallel and ship 300+ model versions across 15 lines.",
-            "Developed inference-time algorithms for diffusion models for novel use cases (latency hiding, character consistency, attention manipulation) and shipped them at scale.",
+            "Trained, finetuned, optimized, and developed inference algorithms for diffusion models for novel use cases (latency hiding, character consistency, attention manipulation) and shipped them at scale.",
         ],
         tags: ["DIFFUSION", "INFERENCE", "PRODUCTION"],
     },
@@ -68,7 +68,7 @@ const EXPERIENCE: Role[] = [
         org: "Meta — Computational Photography",
         location: "Menlo Park",
         bullets: [
-            "Worked on media quality, understanding, and post-processing algorithms for wearables and mobile capture.",
+            "Trained models and developed algorithms on media quality and understanding for wearables and mobile capture.",
             "Designed and collected a large-scale general-purpose egocentric dataset that became the substrate for many downstream projects.",
         ],
         tags: ["CV", "ML PIPELINES", "WEARABLES"],
