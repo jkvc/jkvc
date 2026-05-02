@@ -37,6 +37,8 @@ interface BaseProps {
   className?: string;
   /** Accessibility toggle state for button variant (e.g. drafts toggle). */
   ariaPressed?: boolean;
+  /** Inverted variant for dark surfaces (mirrors `IconCircleButton.inverted`). */
+  inverted?: boolean;
 }
 
 type ButtonVariant = BaseProps & {
@@ -65,15 +67,26 @@ const BASE =
 function classes({
   active,
   size,
+  inverted,
   extra,
 }: {
   active: boolean;
   size: ControlSize;
+  inverted: boolean;
   extra?: string;
 }): string {
-  const state = active
-    ? "bg-ink text-surface border-ink"
-    : "border-rule text-ink-muted hover:border-ink hover:text-ink";
+  let state: string;
+  if (inverted) {
+    // Mirrors IconCircleButton.inverted: dim surface chrome, hot-coral hover.
+    // Active inverted lifts to a filled cream chip on dark.
+    state = active
+      ? "bg-surface text-ink border-surface"
+      : "border-surface/25 text-surface/60 hover:border-hot hover:text-hot";
+  } else {
+    state = active
+      ? "bg-ink text-surface border-ink"
+      : "border-rule text-ink-muted hover:border-ink hover:text-ink";
+  }
   const dims = `${CONTROL_SIZE[size].height} ${CONTROL_SIZE[size].pillPaddingX}`;
   return `${BASE} ${dims} ${state} ${extra ?? ""}`;
 }
@@ -98,8 +111,9 @@ function Body({
 export default function Pill(props: Props) {
   const active = props.active ?? false;
   const size = props.size ?? "xs";
+  const inverted = props.inverted ?? false;
   const iconFamily = props.iconFamily ?? "fa-solid";
-  const cls = classes({ active, size, extra: props.className });
+  const cls = classes({ active, size, inverted, extra: props.className });
 
   if ("href" in props && typeof props.href === "string") {
     const isExternal = props.external ?? /^https?:\/\//.test(props.href);

@@ -20,7 +20,7 @@ export const SITE = {
     /** Canonical origin without trailing slash. */
     url: "https://jkvc.com",
     /** Where I work / live, uppercase mono. */
-    location: "SEATTLE / LILLE",
+    location: "SEATTLE & LILLE",
     /** Year the site was established. */
     est: "2022",
     email: "kevinehc@gmail.com",

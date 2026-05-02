@@ -65,3 +65,12 @@ body {
     transition: none !important;
   }
 }
+
+/* ContactSlab seek-toast: 1s fade-in, 3s hold, 1s fade-out — 5s total. The
+   toast pill is positioned with translateX(-50%) for centering, so this
+   keyframe touches opacity only to avoid clobbering the transform. */
+@keyframes contact-toast-fade {
+  0%, 100%  { opacity: 0; }
+  20%, 80%  { opacity: 1; }
+}
+
