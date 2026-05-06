@@ -178,10 +178,10 @@ export default function About() {
                         I'm generally interested in building AI things.
                     </p>
                     <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
-                        Over time I've found myself having experience every part of the stack in an AI system, from training the model, to optimization, to inference algorithms, to large scale inference systems, to model orchestration, to the apps, and finally to the user interaction itself.
+                        Over time I've found myself having worked on every part of the stack in an AI system, from training the model, to optimization, to inference algorithms, to large scale inference systems, to model orchestration, to the apps and the user interaction itself.
                     </p>
                     <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
-                        But at the end, the AI things we build are for the human.
+                        This website is for experimenting, ranting, memeing. Like all things I've built, it's built with AI, for humans.
                     </p>
                 </section>
 
