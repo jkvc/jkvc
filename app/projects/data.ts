@@ -203,4 +203,23 @@ export const projects: Project[] = [
             },
         ],
     },
+    {
+        title: "Photo Commentator",
+        slug: "photo-commentator",
+        description: "Every corner has something to say.",
+        gradient: "linear-gradient(135deg, #2A2D3A 0%, #C84B5C 100%)",
+        thumbnail: "/thumnails/photo-commentator.webp",
+        ready: true,
+        kind: "playable",
+        year: "2026",
+        date: "2026-05-06",
+        status: "PUBLISHED",
+        icon: "fa-comment-dots",
+        refs: [
+            {
+                kind: "code",
+                url: "https://github.com/jkvc/jkvc/tree/main/app/projects/photo-commentator",
+            },
+        ],
+    },
 ];
