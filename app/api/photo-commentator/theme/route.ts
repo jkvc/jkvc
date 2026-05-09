@@ -11,7 +11,9 @@ const ALLOWED_MEDIA: Media[] = [
   "image/webp",
 ];
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("photo-commentator-theme", async (request: NextRequest) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -66,4 +68,4 @@ export async function POST(request: NextRequest) {
   console.log("[photo-commentator/theme] →", theme);
 
   return NextResponse.json({ theme });
-}
+});

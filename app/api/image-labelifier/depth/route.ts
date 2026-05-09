@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 const ZOEDEPTH_MODEL =
   "zedge/zoedepth:fd85428545f04150f59856dab2a51a7be2ca5003a331920b0e4303b17b411332";
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("image-labelifier-depth", async (request: NextRequest) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(
@@ -32,4 +34,4 @@ export async function POST(request: NextRequest) {
       : String(output);
 
   return NextResponse.json({ depthUrl });
-}
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useChargeFetch } from "@/app/hooks/useChargeFetch";
 import { useSearchParams, useRouter } from "next/navigation";
 import type {
   Box,
@@ -59,8 +60,9 @@ async function runCommentsBatch(opts: {
   theme: string;
   tunables: Tunables;
   setState: React.Dispatch<React.SetStateAction<ProcessingState>>;
+  fetchFn: typeof fetch;
 }) {
-  const { image, imageW, imageH, boxes, theme, tunables, setState } = opts;
+  const { image, imageW, imageH, boxes, theme, tunables, setState, fetchFn } = opts;
   if (boxes.length === 0) return;
 
   // Mark every box "running" so the inspector reflects in-flight status.
@@ -102,7 +104,7 @@ async function runCommentsBatch(opts: {
     form.append("maxWordsPerLine", String(tunables.maxWordsPerLine));
     form.append("systemPrompt", tunables.commentSystemPrompt);
 
-    const res = await fetch("/api/photo-commentator/comment", {
+    const res = await fetchFn("/api/photo-commentator/comment", {
       method: "POST",
       body: form,
     });
@@ -178,6 +180,7 @@ async function runCommentsBatch(opts: {
 export default function PhotoCommentatorClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const chargeFetch = useChargeFetch();
 
   const modeParam = searchParams.get("mode");
   const [mode, setMode] = useState<ViewMode>(
@@ -238,7 +241,7 @@ export default function PhotoCommentatorClient() {
         const form = new FormData();
         form.append("image", themeFile);
         form.append("systemPrompt", t.themeSystemPrompt);
-        const res = await fetch("/api/photo-commentator/theme", {
+        const res = await chargeFetch("/api/photo-commentator/theme", {
           method: "POST",
           body: form,
         });
@@ -273,12 +276,13 @@ export default function PhotoCommentatorClient() {
         theme,
         tunables: t,
         setState,
+        fetchFn: chargeFetch,
       });
 
       // Suppress unused-file warning if we ever stop persisting it.
       void file;
     },
-    []
+    [chargeFetch]
   );
 
   const handleFile = useCallback(
@@ -358,9 +362,10 @@ export default function PhotoCommentatorClient() {
         theme: state.theme,
         tunables,
         setState,
+        fetchFn: chargeFetch,
       });
     },
-    [state.boxes, state.theme, tunables]
+    [state.boxes, state.theme, tunables, chargeFetch]
   );
 
   const handleReset = useCallback(() => {

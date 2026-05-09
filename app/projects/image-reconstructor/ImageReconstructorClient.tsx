@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useChargeFetch } from "@/app/hooks/useChargeFetch";
 import { useSearchParams, useRouter } from "next/navigation";
 import type {
   ProcessingState,
@@ -188,6 +189,7 @@ const INITIAL_STATE: ProcessingState = {
 export default function ImageReconstructorClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const chargeFetch = useChargeFetch();
 
   const modeParam = searchParams.get("mode");
   const [mode, setMode] = useState<ViewMode>(
@@ -288,7 +290,7 @@ export default function ImageReconstructorClient() {
         try {
           const sketchForm = new FormData();
           sketchForm.append("image", cropped);
-          const res = await fetch("/api/image-reconstructor/sketch", {
+          const res = await chargeFetch("/api/image-reconstructor/sketch", {
             method: "POST",
             body: sketchForm,
           });
@@ -346,7 +348,7 @@ export default function ImageReconstructorClient() {
         try {
           const promptForm = new FormData();
           promptForm.append("image", cropped);
-          const res = await fetch("/api/image-reconstructor/generate-prompt", {
+          const res = await chargeFetch("/api/image-reconstructor/generate-prompt", {
             method: "POST",
             body: promptForm,
           });
@@ -363,7 +365,7 @@ export default function ImageReconstructorClient() {
           const animForm = new FormData();
           animForm.append("image", cropped);
           animForm.append("prompt", data.prompt);
-          const animRes = await fetch("/api/image-reconstructor/animate", {
+          const animRes = await chargeFetch("/api/image-reconstructor/animate", {
             method: "POST",
             body: animForm,
           });
@@ -388,7 +390,7 @@ export default function ImageReconstructorClient() {
         }
       })();
     },
-    [tryComposite]
+    [tryComposite, chargeFetch]
   );
 
   // ---- Reset ----

@@ -1,7 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("image-reconstructor-generate-prompt", async (request: NextRequest) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -53,4 +55,4 @@ export async function POST(request: NextRequest) {
   console.log("[generate-prompt] Claude response:", prompt);
 
   return NextResponse.json({ prompt });
-}
+});

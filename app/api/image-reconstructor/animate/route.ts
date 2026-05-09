@@ -24,7 +24,9 @@ async function cropAndResize(file: File): Promise<File> {
   return new File([bytes], "input.jpg", { type: "image/jpeg" });
 }
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("image-reconstructor-animate", async (request: NextRequest) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(
@@ -58,4 +60,4 @@ export async function POST(request: NextRequest) {
       : String(output);
 
   return NextResponse.json({ videoUrl });
-}
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useChargeFetch } from "@/app/hooks/useChargeFetch";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { SegmentResult, GalleryItem } from "./lib/types";
 import InferenceExplorer from "./components/InferenceExplorer";
@@ -67,6 +68,7 @@ function resizeImage(file: File, maxEdge: number): Promise<File> {
 export default function ImageLabelifierClient() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const chargeFetch = useChargeFetch();
 
     const modeParam = searchParams.get("mode");
     const [mode, setMode] = useState<ViewMode>(
@@ -126,7 +128,7 @@ export default function ImageLabelifierClient() {
 
         const depthPromise = (async () => {
             try {
-                const res = await fetch("/api/image-labelifier/depth", {
+                const res = await chargeFetch("/api/image-labelifier/depth", {
                     method: "POST",
                     body: formData,
                 });
@@ -148,7 +150,7 @@ export default function ImageLabelifierClient() {
             try {
                 const segFormData = new FormData();
                 segFormData.append("image", resizedFile);
-                const res = await fetch("/api/image-labelifier/segmentation", {
+                const res = await chargeFetch("/api/image-labelifier/segmentation", {
                     method: "POST",
                     body: segFormData,
                 });
@@ -167,7 +169,7 @@ export default function ImageLabelifierClient() {
         })();
 
         await Promise.all([depthPromise, segPromise]);
-    }, []);
+    }, [chargeFetch]);
 
     // -------------------------------------------------------------------------
     // Reset — clear inference state to go back to upload view

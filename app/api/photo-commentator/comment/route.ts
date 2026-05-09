@@ -49,7 +49,9 @@ interface RawCaption {
   lines?: unknown;
 }
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("photo-commentator-comment", async (request: NextRequest) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
@@ -150,4 +152,4 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ captions });
-}
+});

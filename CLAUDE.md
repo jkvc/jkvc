@@ -43,3 +43,12 @@ Each readable post is a **directory** named after the project `slug` (must match
 Do **not** use `posts/<slug>.mdx` at the top level. Inline images in MDX with a root-relative URL, e.g. `![](/post-assets/<slug>/hero.png)` (served from `app/post-assets`). Nested paths work: `assets/diagrams/x.png` → `![](/post-assets/<slug>/diagrams/x.png)`.
 
 **Image width** — Defaults live in `app/components/post/PostBody.tsx` (`max-w-xl`, centered). In MDX: (1) `<PostImage columnWidth={0.5} />` for a **fraction of the text column** (same width as the `max-w-2xl` main column — `1` = full column); (2) `<PostImage maxWidth="2xl" />` for Tailwind max-width presets; (3) `<img className="…" />` with `tailwind-merge` overrides. Plain `![](/post-assets/...)` keeps the default.
+
+### 9. Charge System
+Model-calling API routes are gated by a token-bucket charge system. See [`docs/charges.md`](docs/charges.md) for the algorithm, configuration, and dev bypass behavior. See [`docs/api.md`](docs/api.md) for API conventions and error response shapes.
+
+### 10. Track Tech Debt
+Known shortcuts and deferred work go in [`TECH_DEBT.md`](TECH_DEBT.md). **All tech debt taken on must be recorded** — if you make a conscious shortcut, add an entry. Delete entries once resolved.
+
+### 11. Testing
+Tests live in `app/__tests__/`. Run with `pnpm test` (vitest). Pre-push hook runs type-check, lint, test, then build in sequence. Practice TDD for non-trivial logic.

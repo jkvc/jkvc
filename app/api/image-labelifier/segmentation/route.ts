@@ -4,7 +4,9 @@ import { NextRequest, NextResponse } from "next/server";
 const SEGFORMER_MODEL =
   "simbrams/segformer-b5-finetuned-ade-640-640:a2e13e3527942cb26fd17f896cafd648875f80feeb842444f0cd253acc093cd0";
 
-export async function POST(request: NextRequest) {
+import { withCharge } from "@/app/lib/server/with-charge";
+
+export const POST = withCharge("image-labelifier-segmentation", async (request: NextRequest) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(
@@ -27,4 +29,4 @@ export async function POST(request: NextRequest) {
 
   // output is an array of { label: string, mask: string (base64 PNG), score: null }
   return NextResponse.json({ segments: output });
-}
+});

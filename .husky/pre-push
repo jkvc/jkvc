@@ -1,1 +1,48 @@
-CHECK_BUILD=1 npx pnpm run build
+export PATH="/opt/homebrew/bin:$PATH"
+
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
+echo "⚡ Running checks in parallel..."
+
+pnpm run type-check > "$tmpdir/tc.log" 2>&1 &
+pid_tc=$!
+pnpm run lint > "$tmpdir/lint.log" 2>&1 &
+pid_lint=$!
+pnpm test > "$tmpdir/test.log" 2>&1 &
+pid_test=$!
+
+failed=0
+
+if ! wait $pid_tc; then
+  echo "❌ Type-check failed:"
+  cat "$tmpdir/tc.log"
+  failed=1
+else
+  echo "  ✓ type-check"
+fi
+
+if ! wait $pid_lint; then
+  echo "❌ Lint failed:"
+  cat "$tmpdir/lint.log"
+  failed=1
+else
+  echo "  ✓ lint"
+fi
+
+if ! wait $pid_test; then
+  echo "❌ Tests failed:"
+  cat "$tmpdir/test.log"
+  failed=1
+else
+  echo "  ✓ tests"
+fi
+
+if [ $failed -eq 1 ]; then
+  exit 1
+fi
+
+echo "🏗️ Running build..."
+CHECK_BUILD=1 pnpm run build || exit 1
+
+echo "✅ All checks passed!"
