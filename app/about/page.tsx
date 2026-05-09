@@ -175,13 +175,13 @@ export default function About() {
                 <section className="mb-14">
                     <SectionHead title="Hi" />
                     <p className="text-[15px] leading-relaxed text-ink-muted">
-                        I'm generally interested in building AI things.
+                        I&apos;m generally interested in building AI things.
                     </p>
                     <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
-                        Over time I've found myself having worked on every part of the stack in an AI system, from training the model, to optimization, to inference algorithms, to large scale inference systems, to model orchestration, to the apps and the user interaction itself.
+                        Over time I&apos;ve found myself having worked on every part of the stack in an AI system, from training the model, to optimization, to inference algorithms, to large scale inference systems, to model orchestration, to the apps and the user interaction itself.
                     </p>
                     <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
-                        This website is for experimenting, ranting, memeing. Like all things I've built, it's built with AI, for humans.
+                        This website is for experimenting, ranting, memeing. Like all things I&apos;ve built, it&apos;s built with AI, for humans.
                     </p>
                 </section>
 
