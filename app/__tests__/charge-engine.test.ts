@@ -1,9 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   computeRecharge,
+  createChargeSystem,
   type ChargeState,
   type ConsumeResult,
-} from "@/app/lib/server/charge-engine";
+  type ChargeRedis,
+  type ChargePoolConfig,
+} from "next-charge";
 
 // --------------------------------------------------------------------------
 // Pure recharge math (no Redis)
@@ -66,7 +69,6 @@ describe("computeRecharge", () => {
       start + elapsed,
     );
     expect(result.current).toBe(6);
-    // lastUpdatedAt advances by 1 full interval, preserving 0.5 interval progress
     expect(result.lastUpdatedAt).toBe(start + INTERVAL_MS);
   });
 
@@ -79,7 +81,6 @@ describe("computeRecharge", () => {
       start + 5 * INTERVAL_MS,
     );
     expect(result.current).toBe(MAX);
-    // When capped, advance lastUpdatedAt to now to avoid accumulating stale time
     expect(result.lastUpdatedAt).toBe(start + 5 * INTERVAL_MS);
   });
 
@@ -116,7 +117,6 @@ describe("computeRecharge", () => {
       start + partialElapsed,
     );
     expect(result.current).toBe(0);
-    // retryAfterMs = interval - (elapsed % interval)
     expect(result.retryAfterMs).toBeCloseTo(0.7 * INTERVAL_MS, 0);
   });
 });
@@ -125,38 +125,46 @@ describe("computeRecharge", () => {
 // Redis-backed operations (mocked)
 // --------------------------------------------------------------------------
 
-const mockStore: Record<string, string> = {};
-let luaHandler: ((...args: unknown[]) => unknown) | null = null;
+const TEST_POOLS: ChargePoolConfig[] = [
+  { id: "photo-commentator-comment", maxCharges: 10, rechargeIntervalHours: 1, label: "Comment", group: "Photo Commentator" },
+  { id: "photo-commentator-theme", maxCharges: 10, rechargeIntervalHours: 1, label: "Theme", group: "Photo Commentator" },
+];
 
-vi.mock("@/app/lib/server/redis", () => ({
-  getRedis: () => ({
-    get: vi.fn((key: string) => Promise.resolve(mockStore[key] ?? null)),
-    set: vi.fn((key: string, value: string) => {
-      mockStore[key] = value;
-      return Promise.resolve("OK");
-    }),
-    eval: vi.fn(
-      (
-        script: string,
-        numKeys: number,
-        ...args: unknown[]
-      ) => {
-        if (luaHandler) return Promise.resolve(luaHandler(script, numKeys, ...args));
-        return Promise.resolve(null);
-      },
-    ),
-  }),
-}));
+function createMockRedis() {
+  const store: Record<string, string> = {};
+  let luaHandler: ((...args: unknown[]) => unknown) | null = null;
+
+  const redis: ChargeRedis = {
+    get: async (key: string) => store[key] ?? null,
+    set: async (key: string, value: string) => {
+      store[key] = value;
+      return "OK";
+    },
+    eval: async (script: string, keys: string[], args: string[]) => {
+      if (luaHandler) return luaHandler(script, keys, args);
+      return null;
+    },
+  };
+
+  return {
+    redis,
+    store,
+    setLuaHandler: (fn: ((...args: unknown[]) => unknown) | null) => {
+      luaHandler = fn;
+    },
+  };
+}
 
 describe("charge-engine Redis operations", () => {
+  let mock: ReturnType<typeof createMockRedis>;
+
   beforeEach(() => {
-    for (const key of Object.keys(mockStore)) delete mockStore[key];
-    luaHandler = null;
+    mock = createMockRedis();
   });
 
   describe("getChargeState", () => {
     it("returns fully charged state for a new pool", async () => {
-      const { getChargeState } = await import("@/app/lib/server/charge-engine");
+      const { getChargeState } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       const state = await getChargeState("photo-commentator-comment");
       expect(state.current).toBe(10);
       expect(state.max).toBe(10);
@@ -167,11 +175,11 @@ describe("charge-engine Redis operations", () => {
 
     it("computes nextRechargeAt when not full", async () => {
       const now = Date.now();
-      mockStore["charge:photo-commentator-comment"] = JSON.stringify({
+      mock.store["charge:photo-commentator-comment"] = JSON.stringify({
         current: 5,
         lastUpdatedAt: now,
       });
-      const { getChargeState } = await import("@/app/lib/server/charge-engine");
+      const { getChargeState } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       const state = await getChargeState("photo-commentator-comment");
       expect(state.current).toBe(5);
       expect(state.nextRechargeAt).toBe(now + 3_600_000);
@@ -179,44 +187,32 @@ describe("charge-engine Redis operations", () => {
     });
 
     it("throws for unknown pool ID", async () => {
-      const { getChargeState } = await import("@/app/lib/server/charge-engine");
+      const { getChargeState } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       await expect(getChargeState("nonexistent")).rejects.toThrow();
     });
   });
 
   describe("getAllChargeStates", () => {
     it("returns states for all configured pools", async () => {
-      const { getAllChargeStates } = await import(
-        "@/app/lib/server/charge-engine"
-      );
+      const { getAllChargeStates } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       const states = await getAllChargeStates();
-      expect(states).toHaveLength(7);
+      expect(states).toHaveLength(2);
       expect(states.every((s: ChargeState) => s.current === s.max)).toBe(true);
     });
   });
 
   describe("consumeCharge", () => {
     it("succeeds when charges are available", async () => {
-      const now = Date.now();
-      mockStore["charge:photo-commentator-comment"] = JSON.stringify({
-        current: 5,
-        lastUpdatedAt: now,
-      });
-      luaHandler = () => JSON.stringify({ ok: true });
-      const { consumeCharge } = await import("@/app/lib/server/charge-engine");
-      const result: ConsumeResult = await consumeCharge(
-        "photo-commentator-comment",
-      );
+      mock.setLuaHandler(() => JSON.stringify({ ok: true }));
+      const { consumeCharge } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
+      const result: ConsumeResult = await consumeCharge("photo-commentator-comment");
       expect(result.ok).toBe(true);
     });
 
     it("fails when charges are depleted", async () => {
-      luaHandler = () =>
-        JSON.stringify({ ok: false, retryAfterMs: 1_800_000 });
-      const { consumeCharge } = await import("@/app/lib/server/charge-engine");
-      const result: ConsumeResult = await consumeCharge(
-        "photo-commentator-comment",
-      );
+      mock.setLuaHandler(() => JSON.stringify({ ok: false, retryAfterMs: 1_800_000 }));
+      const { consumeCharge } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
+      const result: ConsumeResult = await consumeCharge("photo-commentator-comment");
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.retryAfterMs).toBe(1_800_000);
@@ -224,35 +220,33 @@ describe("charge-engine Redis operations", () => {
     });
 
     it("throws for unknown pool ID", async () => {
-      const { consumeCharge } = await import("@/app/lib/server/charge-engine");
+      const { consumeCharge } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       await expect(consumeCharge("nonexistent")).rejects.toThrow();
     });
   });
 
   describe("topOff", () => {
     it("resets pool to max charges", async () => {
-      const { topOff, getChargeState } = await import(
-        "@/app/lib/server/charge-engine"
-      );
       const now = Date.now();
-      mockStore["charge:photo-commentator-comment"] = JSON.stringify({
+      mock.store["charge:photo-commentator-comment"] = JSON.stringify({
         current: 2,
         lastUpdatedAt: now - 1_000_000,
       });
+      const { topOff, getChargeState } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       await topOff("photo-commentator-comment");
       const state = await getChargeState("photo-commentator-comment");
       expect(state.current).toBe(10);
     });
 
     it("throws for unknown pool ID", async () => {
-      const { topOff } = await import("@/app/lib/server/charge-engine");
+      const { topOff } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       await expect(topOff("nonexistent")).rejects.toThrow();
     });
   });
 
   describe("checkCharges", () => {
     it("returns ok when all requested pools have charges", async () => {
-      const { checkCharges } = await import("@/app/lib/server/charge-engine");
+      const { checkCharges } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       const result = await checkCharges([
         "photo-commentator-comment",
         "photo-commentator-theme",
@@ -262,11 +256,11 @@ describe("charge-engine Redis operations", () => {
 
     it("returns not ok when any pool is depleted", async () => {
       const now = Date.now();
-      mockStore["charge:photo-commentator-comment"] = JSON.stringify({
+      mock.store["charge:photo-commentator-comment"] = JSON.stringify({
         current: 0,
         lastUpdatedAt: now,
       });
-      const { checkCharges } = await import("@/app/lib/server/charge-engine");
+      const { checkCharges } = createChargeSystem({ redis: mock.redis, pools: TEST_POOLS });
       const result = await checkCharges([
         "photo-commentator-comment",
         "photo-commentator-theme",

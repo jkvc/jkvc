@@ -2,7 +2,7 @@
 
 ## Charge-gated routes
 
-Model-calling API routes are wrapped with `withCharge(poolId, handler)` from `app/lib/server/with-charge.ts`. The wrapper checks charges before the handler runs.
+Model-calling API routes are wrapped with `withCharge(poolId, handler)` from `app/lib/server/charge.ts` (powered by the `next-charge` package). The wrapper checks charges before the handler runs.
 
 ### Error responses
 

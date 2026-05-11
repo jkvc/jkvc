@@ -7,13 +7,13 @@ Consciously taken shortcuts and known issues. **All tech debt taken on must be r
 ## Charge system Lua script not tested against real Redis
 
 **Added:** 2026-05-08
-**Files:** `app/lib/server/charge-engine.ts`, `app/__tests__/charge-engine.test.ts`
+**Files:** `next-charge` package (engine.ts), `app/__tests__/charge-engine.test.ts`
 
 **What:** The Lua script inside `consumeCharge` is tested via a mock that simulates `redis.eval()` returning pre-determined JSON. The recharge math is tested exhaustively via the pure `computeRecharge` function, but the Lua script itself is a transliteration that could diverge.
 
 **Why:** Unit tests run without Redis. Integration tests against a real Redis instance would require CI infrastructure or a local Redis dependency.
 
-**Fix:** Add an integration test that runs the Lua script against a real Redis instance (e.g. via `testcontainers` or a conditional test that requires `REDIS_URL`). Verify the Lua script produces identical results to `computeRecharge` for a matrix of inputs.
+**Fix:** Add an integration test in the `next-charge` package that runs the Lua script against a real Redis instance (e.g. via `testcontainers` or a conditional test that requires `REDIS_URL`). Verify the Lua script produces identical results to `computeRecharge` for a matrix of inputs.
 
 ---
 

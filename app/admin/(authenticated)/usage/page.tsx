@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import ChargeStatusPanel from "@/app/components/ChargeStatusPanel";
 import RecipeHeader from "@/app/components/editorial/RecipeHeader";
 import Pill from "@/app/components/editorial/Pill";
-import { CHARGE_POOLS } from "@/app/lib/server/charge-config";
+import { CHARGE_POOLS } from "@/app/lib/charge-pools";
 
 export default function AdminUsagePage() {
   const router = useRouter();

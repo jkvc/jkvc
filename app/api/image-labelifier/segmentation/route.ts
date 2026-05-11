@@ -1,12 +1,12 @@
 import Replicate from "replicate";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 const SEGFORMER_MODEL =
   "simbrams/segformer-b5-finetuned-ade-640-640:a2e13e3527942cb26fd17f896cafd648875f80feeb842444f0cd253acc093cd0";
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("image-labelifier-segmentation", async (request: NextRequest) => {
+export const POST = withCharge("image-labelifier-segmentation", async (request) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(

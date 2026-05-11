@@ -1,5 +1,5 @@
 import Replicate from "replicate";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 const WAN_I2V_MODEL = "wan-video/wan-2.2-i2v-fast";
@@ -24,9 +24,9 @@ async function cropAndResize(file: File): Promise<File> {
   return new File([bytes], "input.jpg", { type: "image/jpeg" });
 }
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("image-reconstructor-animate", async (request: NextRequest) => {
+export const POST = withCharge("image-reconstructor-animate", async (request) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { COMMENT_SYSTEM } from "@/app/projects/photo-commentator/lib/prompts";
 import { HARD_LIMITS } from "@/app/projects/photo-commentator/lib/defaults";
 
@@ -49,9 +49,9 @@ interface RawCaption {
   lines?: unknown;
 }
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("photo-commentator-comment", async (request: NextRequest) => {
+export const POST = withCharge("photo-commentator-comment", async (request) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("image-reconstructor-generate-prompt", async (request: NextRequest) => {
+export const POST = withCharge("image-reconstructor-generate-prompt", async (request) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

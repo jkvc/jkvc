@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { THEME_SYSTEM } from "@/app/projects/photo-commentator/lib/prompts";
 
 type Media = "image/jpeg" | "image/png" | "image/gif" | "image/webp";
@@ -11,9 +11,9 @@ const ALLOWED_MEDIA: Media[] = [
   "image/webp",
 ];
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("photo-commentator-theme", async (request: NextRequest) => {
+export const POST = withCharge("photo-commentator-theme", async (request) => {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

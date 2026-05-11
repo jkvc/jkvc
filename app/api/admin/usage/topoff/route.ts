@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/app/lib/server/admin-auth";
-import { topOff, getChargeState } from "@/app/lib/server/charge-engine";
-import { getPool } from "@/app/lib/server/charge-config";
+import { topOff, getChargeState } from "@/app/lib/server/charge";
+import { CHARGE_POOLS } from "@/app/lib/charge-pools";
 
 export async function POST(request: NextRequest) {
   const authed = await isAdminAuthenticated();
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { poolId } = body;
-  if (!poolId || !getPool(poolId)) {
+  if (!poolId || !CHARGE_POOLS.find((p) => p.id === poolId)) {
     return NextResponse.json(
       { error: "Invalid or missing poolId" },
       { status: 400 },

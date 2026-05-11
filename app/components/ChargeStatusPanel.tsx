@@ -7,7 +7,7 @@ import Pill from "./editorial/Pill";
 interface PoolState {
   id: string;
   label: string;
-  demo: string;
+  group: string;
   current: number;
   max: number;
   rechargeIntervalHours: number;
@@ -158,17 +158,17 @@ export default function ChargeStatusPanel({ showTopOff }: Props) {
   }
 
   const grouped = pools.reduce<Record<string, PoolState[]>>((acc, pool) => {
-    (acc[pool.demo] ??= []).push(pool);
+    (acc[pool.group] ??= []).push(pool);
     return acc;
   }, {});
 
   return (
     <div className="space-y-6">
-      {Object.entries(grouped).map(([demo, demoPools]) => (
-        <div key={demo}>
-          <LabeledDivider variant="full">{demo}</LabeledDivider>
+      {Object.entries(grouped).map(([groupName, groupPools]) => (
+        <div key={groupName}>
+          <LabeledDivider variant="full">{groupName}</LabeledDivider>
           <div className="divide-y divide-rule">
-            {demoPools.map((pool) => (
+            {groupPools.map((pool) => (
               <PoolRow
                 key={pool.id}
                 pool={pool}

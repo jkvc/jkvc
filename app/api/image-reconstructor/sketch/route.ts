@@ -1,5 +1,5 @@
 import Replicate from "replicate";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import sharp from "sharp";
 
 const FLUX_PRO_MODEL = "black-forest-labs/flux-2-pro";
@@ -27,9 +27,9 @@ async function cropAndResize(file: File): Promise<File> {
   return new File([bytes], "input.jpg", { type: "image/jpeg" });
 }
 
-import { withCharge } from "@/app/lib/server/with-charge";
+import { withCharge } from "@/app/lib/server/charge";
 
-export const POST = withCharge("image-reconstructor-sketch", async (request: NextRequest) => {
+export const POST = withCharge("image-reconstructor-sketch", async (request) => {
   const token = process.env.REPLICATE_TOKEN;
   if (!token) {
     return NextResponse.json(

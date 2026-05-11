@@ -13,7 +13,7 @@ Charges accumulate passively. A pool starts full and regenerates up to `maxCharg
 
 ## Configuration
 
-Pool definitions live in `app/lib/server/charge-config.ts`. To add a new metered endpoint: add an entry to `CHARGE_POOLS` with an `id`, `demo`, `label`, `route`, `maxCharges`, and `rechargeIntervalHours`, then wrap the route handler with `withCharge(poolId, handler)`.
+The charge system is powered by the `next-charge` npm package. Pool definitions live in `app/lib/server/charge.ts`. To add a new metered endpoint: add an entry to the `pools` array with an `id`, `group`, `label`, `maxCharges`, and `rechargeIntervalHours`, then wrap the route handler with `withCharge(poolId, handler)`.
 
 ## Redis key schema
 
