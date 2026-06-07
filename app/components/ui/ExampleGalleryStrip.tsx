@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import LabeledDivider from "@/app/components/editorial/LabeledDivider";
+import ConfirmDialog from "@/app/components/ui/ConfirmDialog";
 import StampShell from "@/app/components/ui/StampShell";
 
 export interface ExampleGalleryItem {
@@ -39,12 +41,26 @@ export default function ExampleGalleryStrip({
   showTitle = true,
   deleteInDevOnly = true,
 }: Props) {
-  if (items.length === 0) return null;
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const showDelete = !!onDelete && (!deleteInDevOnly || process.env.NODE_ENV === "development");
 
+  if (items.length === 0 && pendingDeleteId === null) return null;
+
   return (
     <div className={`flex flex-col gap-2 ${center ? "items-center" : ""} ${className}`}>
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Delete example?"
+        message="This removes the saved sample from the gallery."
+        confirmLabel="Delete"
+        onConfirm={() => {
+          const id = pendingDeleteId;
+          setPendingDeleteId(null);
+          if (id && onDelete) onDelete(id);
+        }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
       {showTitle && <LabeledDivider>{title}</LabeledDivider>}
       <div className={`flex flex-wrap gap-2 ${center ? "justify-center" : ""}`}>
         {items.map((item) => (
@@ -72,10 +88,13 @@ export default function ExampleGalleryStrip({
             </button>
             {showDelete && (
               <button
-                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-hot text-white hover:bg-ink text-[9px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-ink"
+                type="button"
+                aria-label="Delete example"
+                className="absolute -top-1.5 -right-1.5 z-10 w-4 h-4 bg-hot text-white hover:bg-ink text-[9px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity border border-ink"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
-                  onDelete(item.id);
+                  setPendingDeleteId(item.id);
                 }}
               >
                 <i className="fa-solid fa-xmark" aria-hidden />

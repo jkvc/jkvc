@@ -96,6 +96,15 @@ body>* {
     mask-image: radial-gradient(80% 60% at 50% 0%, #000 40%, transparent 100%);
 }
 
+/* Native confirm dialog — top-layer modal with ink backdrop. */
+dialog:open {
+    display: block;
+}
+
+dialog::backdrop {
+    background: color-mix(in srgb, var(--color-ink) 30%, transparent);
+}
+
 /* --- Utilities --- */
 
 /* Technical handbook label — 11px mono uppercase eyebrow with generous tracking. */

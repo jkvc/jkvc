@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import LabeledDivider from "./editorial/LabeledDivider";
 import Pill from "./editorial/Pill";
+import StampShell from "./ui/StampShell";
 
 interface PoolState {
   id: string;
@@ -68,7 +68,7 @@ function PoolRow({
 }) {
   const isFull = pool.current >= pool.max;
   return (
-    <div className="flex items-center gap-4 py-3">
+    <div className="flex items-center gap-4 py-1">
       <div className="w-20 shrink-0">
         <span className="caption-mono text-ink-muted">{pool.label}</span>
       </div>
@@ -163,11 +163,20 @@ export default function ChargeStatusPanel({ showTopOff }: Props) {
   }, {});
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       {Object.entries(grouped).map(([groupName, groupPools]) => (
-        <div key={groupName}>
-          <LabeledDivider variant="full">{groupName}</LabeledDivider>
-          <div className="divide-y divide-rule">
+        <StampShell
+          key={groupName}
+          variant="card"
+          bleed={false}
+          faceClassName="overflow-hidden"
+        >
+          <div className="px-5 pt-5 sm:pt-6">
+            <h2 className="font-sans text-2xl font-black uppercase leading-[1.05] tracking-tight text-ink sm:text-3xl">
+              {groupName}
+            </h2>
+          </div>
+          <div className="flex flex-col px-5 pb-5 pt-2 sm:pb-6">
             {groupPools.map((pool) => (
               <PoolRow
                 key={pool.id}
@@ -178,7 +187,7 @@ export default function ChargeStatusPanel({ showTopOff }: Props) {
               />
             ))}
           </div>
-        </div>
+        </StampShell>
       ))}
     </div>
   );

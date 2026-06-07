@@ -2,11 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import Link from "next/link";
 import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
 import LabeledDivider from "@/app/components/editorial/LabeledDivider";
 import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import Pill from "@/app/components/editorial/Pill";
-import { STAMP_FACE } from "@/app/lib/stamp";
+import StampShell from "@/app/components/ui/StampShell";
+import { STAMP_CONTROL_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import { twMerge } from "tailwind-merge";
 
 interface AdminLink {
@@ -45,33 +47,39 @@ export default function AdminPage() {
       <div className="mt-12">
         <LabeledDivider variant="full">Tools</LabeledDivider>
 
-        <div className="divide-y divide-rule">
+        <div className="mt-6 flex flex-col gap-4">
           {ADMIN_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="group -mx-4 flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-deep"
-            >
-              <span
-                className={twMerge(
-                  STAMP_FACE,
-                  "inline-flex h-7 w-7 shrink-0 items-center justify-center bg-surface text-ink group-hover:border-hot group-hover:text-hot",
-                )}
-                aria-hidden="true"
+            <Link key={link.href} href={link.href} className="group block">
+              <StampShell
+                variant="card"
+                interactive
+                bleed={false}
+                faceClassName="p-5 group-hover:border-hot"
               >
-                <i className={`fa-solid ${link.icon} text-[11px]`} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="caption-mono text-ink">{link.label}</div>
-                <div className="mt-0.5 text-[13px] leading-snug text-ink-faint">
-                  {link.description}
+                <div className="flex items-center gap-4">
+                  <span
+                    className={twMerge(
+                      STAMP_FACE,
+                      STAMP_CONTROL_SHADOW,
+                      "inline-flex h-9 w-9 shrink-0 items-center justify-center bg-surface text-ink transition-colors group-hover:border-hot group-hover:text-hot",
+                    )}
+                    aria-hidden="true"
+                  >
+                    <i className={`fa-solid ${link.icon} text-[13px]`} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="caption-mono text-ink">{link.label}</div>
+                    <p className="mt-1 text-[13px] leading-snug text-ink-faint">
+                      {link.description}
+                    </p>
+                  </div>
+                  <i
+                    className="fa-solid fa-chevron-right shrink-0 text-xs text-rule transition-colors group-hover:text-ink-muted"
+                    aria-hidden="true"
+                  />
                 </div>
-              </div>
-              <i
-                className="fa-solid fa-chevron-right text-xs text-rule transition-colors group-hover:text-ink-muted"
-                aria-hidden="true"
-              />
-            </a>
+              </StampShell>
+            </Link>
           ))}
         </div>
 
