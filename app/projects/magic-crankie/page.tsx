@@ -8,8 +8,9 @@ const project = projects.find((p) => p.slug === "magic-crankie")!;
 const meta = getProjectMeta("magic-crankie");
 
 export const metadata: Metadata = {
-  title: `${project.title} | jkvc`,
+  title: project.title,
   description: project.description,
+  robots: { index: false, follow: false },
 };
 
 export default function MagicCrankiePage() {

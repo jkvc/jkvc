@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import JsonLd from "./components/JsonLd";
 import { SITE } from "./lib/site";
+import { buildWebSiteJsonLd } from "./lib/json-ld";
 import Providers from "./components/Providers";
 import "./globals.css";
 
@@ -22,8 +24,26 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: SITE.name,
-  description: SITE.tagline,
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: SITE.name,
+    template: `%s | ${SITE.name}`,
+  },
+  description: SITE.description,
+  keywords: [...SITE.keywords],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE.url,
+    siteName: SITE.name,
+    title: SITE.name,
+    description: SITE.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.name,
+    description: SITE.description,
+  },
   icons: {
     icon: "/favicon.svg",
   },
@@ -39,6 +59,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
       >
+        <JsonLd data={buildWebSiteJsonLd()} />
         <Providers>{children}</Providers>
       </body>
     </html>

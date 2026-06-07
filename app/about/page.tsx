@@ -5,6 +5,8 @@ import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
 import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import StampShell from "@/app/components/ui/StampShell";
 import { STAMP_CONTROL_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
+import JsonLd from "@/app/components/JsonLd";
+import { buildPersonJsonLd } from "@/app/lib/json-ld";
 import { SITE } from "@/app/lib/site";
 import { renderInlineMarkdown } from "@/app/lib/inline-markdown";
 import { twMerge } from "tailwind-merge";
@@ -146,6 +148,7 @@ function TimelineRow({
 export default function About() {
     return (
         <InteriorPageShell>
+            <JsonLd data={buildPersonJsonLd()} />
             <PageStampHeader meta={{ eyebrow: "ABOUT" }}>
                 <div className="flex items-center gap-6 sm:gap-8">
                     <div className="min-w-0 flex-1">

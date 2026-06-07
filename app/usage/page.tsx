@@ -4,7 +4,7 @@ import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
 import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 
 export const metadata: Metadata = {
-  title: "Usage — jkvc",
+  title: "Usage",
   description: "Live charge levels for all interactive demos.",
 };
 
