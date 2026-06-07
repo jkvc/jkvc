@@ -54,18 +54,3 @@ Consciously taken shortcuts and known issues. **All tech debt taken on must be r
 
 **Fix:** Have the top-off-all handler call `fetchPools()` after all top-off requests complete. Requires either lifting `fetchPools` to a shared ref/callback or using a state management approach (e.g. SWR mutate).
 
----
-
-## Home page project list is client-rendered only
-
-**Added:** 2026-06-07
-**Files:** `app/page.tsx`, `app/components/HomeMasonryGrid.tsx`, `app/components/ProjectMasonryCard.tsx`
-
-**What:** The home page is a `"use client"` component. Project titles, descriptions, and `/projects/{slug}` links are not in the initial server HTML — crawlers and RAG fetchers that skip JS see a mostly empty shell. SEO metadata/sitemap/JSON-LD were added, but discoverable on-page content for the project index is still weak.
-
-**Why:** Deferred during the SEO pass — metadata, sitemap, robots, and JSON-LD were quick wins; the masonry layout depends on client-side filter state (`category`, `showDrafts`) and `ResizeObserver` lane balancing in `HomeMasonryGrid`.
-
-**Fix:** Split `app/page.tsx` into a server page that renders the hero stamp and a server-rendered project list (at least default view: all published projects, with real `<a href>` + text in HTML). Keep filter pills, draft toggle, and measured masonry rebalance as client islands (`HomeMasonryGrid` or a thinner wrapper). Preserve view-transition names and wide-layout behavior. Verify with view-source / `curl` that links appear without hydration.
-
----
-
