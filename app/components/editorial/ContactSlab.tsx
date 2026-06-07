@@ -14,19 +14,9 @@ interface ContactSlabProps {
 }
 
 const LOCATIONS = [
-    {
-        label: "SEATTLE",
-        center: 0.25,
-        blurb: "Seattle: tech hub in the pacific northwest; beautiful mountains, rains a lot",
-    },
-    {
-        label: "LILLE",
-        center: 0.75,
-        blurb: "Lille: college town in the French Flandres, bordering Belgium; also rains a lot",
-    },
+    { label: "SEATTLE", center: 0.35 },
+    { label: "LILLE", center: 0.85 },
 ] as const;
-
-const TOAST_DURATION_MS = 5000;
 
 const [EMAIL_USER, EMAIL_DOMAIN] = SITE.email.split("@");
 
@@ -35,7 +25,15 @@ const PANO_SOURCES = [
     "/contact-panos/sea-lil-4.webp",
 ] as const;
 
-const PANO_HEIGHT_CLASS = "h-40";
+const PANO_MARKERS = LOCATIONS.map((loc) => ({
+    t: loc.center,
+    label: loc.label,
+}));
+
+const PANO_HEIGHT_CLASS = "h-32";
+
+const MARKER_HOLD_MS = 2000;
+const MARKER_FADE_MS = 300;
 
 function EmailAction() {
     const [revealed, setRevealed] = useState(false);
@@ -64,6 +62,7 @@ function EmailAction() {
             icon="fa-envelope"
             title="Reveal email"
             size="xs"
+            shape="square"
             inverted
         />
     );
@@ -71,33 +70,49 @@ function EmailAction() {
 
 export default function ContactSlab({ className = "" }: ContactSlabProps) {
     const panoRef = useRef<ScrollingPanoHandle>(null);
-    const toastIdRef = useRef(0);
-    const [toast, setToast] = useState<{
-        id: number;
-        message: string;
-    } | null>(null);
-    const toastTimerRef = useRef<number | null>(null);
+    const markerTimersRef = useRef<number[]>([]);
+    const [markerOpacities, setMarkerOpacities] = useState<Record<string, number>>(
+        {},
+    );
 
     useEffect(() => {
         return () => {
-            if (toastTimerRef.current !== null) {
-                window.clearTimeout(toastTimerRef.current);
-            }
+            markerTimersRef.current.forEach((id) => window.clearTimeout(id));
         };
     }, []);
+
+    const clearMarkerTimers = () => {
+        markerTimersRef.current.forEach((id) => window.clearTimeout(id));
+        markerTimersRef.current = [];
+    };
+
+    const allMarkerLabels = LOCATIONS.map((loc) => loc.label);
+
+    const revealMarkers = () => {
+        clearMarkerTimers();
+        const hidden = Object.fromEntries(allMarkerLabels.map((label) => [label, 0]));
+        setMarkerOpacities(hidden);
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setMarkerOpacities(Object.fromEntries(allMarkerLabels.map((label) => [label, 1])));
+            });
+        });
+
+        const fadeOutId = window.setTimeout(() => {
+            setMarkerOpacities(Object.fromEntries(allMarkerLabels.map((label) => [label, 0])));
+        }, MARKER_HOLD_MS);
+
+        const clearId = window.setTimeout(() => {
+            setMarkerOpacities({});
+        }, MARKER_HOLD_MS + MARKER_FADE_MS);
+
+        markerTimersRef.current = [fadeOutId, clearId];
+    };
 
     const handleLocationClick = (loc: (typeof LOCATIONS)[number]) => {
         const started = panoRef.current?.seekToCenter(loc.center);
         if (!started) return;
-        if (toastTimerRef.current !== null) {
-            window.clearTimeout(toastTimerRef.current);
-        }
-        toastIdRef.current += 1;
-        setToast({ id: toastIdRef.current, message: loc.blurb });
-        toastTimerRef.current = window.setTimeout(() => {
-            setToast(null);
-            toastTimerRef.current = null;
-        }, TOAST_DURATION_MS);
+        revealMarkers();
     };
 
     return (
@@ -116,30 +131,20 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     src={PANO_SOURCES}
                     duration={60}
                     direction="rtl"
+                    markers={PANO_MARKERS}
+                    markerOpacities={markerOpacities}
                 />
             </div>
 
-            {/* Toast */}
-            {toast && (
-                <div
-                    key={toast.id}
-                    role="status"
-                    aria-live="polite"
-                    className="absolute top-4 left-1/2 -translate-x-1/2 px-4 h-7 bg-ink border-2 border-surface/30 text-surface text-[12px] flex items-center whitespace-nowrap max-w-[calc(100%-2rem)] pointer-events-none"
-                    style={{ animation: "contact-toast-fade 5s ease-in-out forwards" }}
-                >
-                    {toast.message}
-                </div>
-            )}
-
             {/* Bottom strip with controls and location pills */}
-            <div className="flex items-center gap-3 flex-wrap px-5 pt-2 pb-4">
+            <div className="flex flex-wrap items-center gap-3 px-5 py-5">
                 <IconCircleButton
                     href={SITE.social.linkedin}
                     icon="fa-linkedin"
                     iconFamily="fa-brands"
                     title="LinkedIn"
                     size="xs"
+                    shape="square"
                     inverted
                 />
                 <IconCircleButton
@@ -148,6 +153,7 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     iconFamily="fa-brands"
                     title="GitHub"
                     size="xs"
+                    shape="square"
                     inverted
                 />
                 <IconCircleButton
@@ -155,6 +161,7 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     icon="fa-graduation-cap"
                     title="Google Scholar"
                     size="xs"
+                    shape="square"
                     inverted
                 />
                 <EmailAction />

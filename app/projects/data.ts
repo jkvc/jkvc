@@ -11,15 +11,22 @@ export interface ProjectKindMeta {
     id: ProjectKind;
     /** All-caps display label shown in the filter pill row. */
     label: string;
-    /** Font Awesome class (sans family prefix), rendered next to the issue
-     *  number on home-row cards to signal the kind at a glance. */
+    /** Font Awesome class (sans family prefix), shown on masonry card kind stamps. */
     icon: string;
 }
 
 export const PROJECT_KINDS: ProjectKindMeta[] = [
-    { id: "playable", label: "PLAYABLE", icon: "fa-play" },
-    { id: "readable", label: "READABLE", icon: "fa-book-open" },
+    { id: "playable", label: "PLAYABLE", icon: "fa-flask" },
+    { id: "readable", label: "READABLE", icon: "fa-file-lines" },
 ];
+
+export function getProjectKindMeta(kind: ProjectKind): ProjectKindMeta {
+    const meta = PROJECT_KINDS.find((k) => k.id === kind);
+    if (!meta) {
+        throw new Error(`Unknown project kind: ${kind}`);
+    }
+    return meta;
+}
 
 /** Typed external reference attached to a project (e.g. its source repo).
  *  `kind` selects both the icon/family and the default human-readable label

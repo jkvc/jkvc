@@ -124,17 +124,29 @@ body>* {
     }
 }
 
-/* --- Keyframes --- */
-
-@keyframes contact-toast-fade {
-
-    0%,
-    100% {
-        opacity: 0;
+/* Home layout — morph hero, filters, masonry, and contact when crossing lg. */
+@media (prefers-reduced-motion: no-preference) {
+    ::view-transition-group(home-aside),
+    ::view-transition-group(home-hero),
+    ::view-transition-group(home-filters),
+    ::view-transition-group(home-masonry),
+    ::view-transition-group(home-contact) {
+        animation-duration: 0.55s;
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    20%,
-    80% {
-        opacity: 1;
+    ::view-transition-old(home-hero),
+    ::view-transition-new(home-hero),
+    ::view-transition-old(home-masonry),
+    ::view-transition-new(home-masonry) {
+        animation-duration: 0.55s;
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        mix-blend-mode: normal;
+    }
+
+    ::view-transition-old(home-contact),
+    ::view-transition-new(home-contact) {
+        animation-duration: 0.35s;
+        animation-timing-function: ease-out;
     }
 }

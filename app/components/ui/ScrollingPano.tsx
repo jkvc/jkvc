@@ -20,6 +20,12 @@ export interface ScrollingPanoProps {
   /** Scroll direction. `"rtl"` = image drifts left (default). */
   direction?: "rtl" | "ltr";
   /**
+   * Labels pinned to image-x positions (∈ [0, 1]) that scroll with the track.
+   */
+  markers?: readonly PanoMarker[];
+  /** Per-label opacity (0–1). Omitted labels default to 0. */
+  markerOpacities?: Readonly<Record<string, number>>;
+  /**
    * Pre-rendered image emitted on the server (and during the first client
    * paint). Use to avoid the brief empty frame when `src` is an array.
    */
@@ -31,6 +37,12 @@ export interface ScrollingPanoProps {
    */
   maxSeekDurationMs?: number;
   className?: string;
+}
+
+export interface PanoMarker {
+  /** Image-x position ∈ [0, 1]. */
+  t: number;
+  label: string;
 }
 
 /**
@@ -62,6 +74,25 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+function PanoMarkerPin({
+  t,
+  label,
+  opacity,
+}: PanoMarker & { opacity: number }) {
+  return (
+    <div
+      className="absolute top-2 z-10 -translate-x-1/2 pointer-events-none transition-opacity duration-300 ease-out"
+      style={{ left: `${t * 100}%`, opacity }}
+      aria-hidden={opacity === 0}
+    >
+      <div className="inline-flex items-center gap-1 border-2 border-ink bg-surface px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-ink shadow-sm whitespace-nowrap">
+        <i className="fa-solid fa-location-dot text-[8px] text-hot" aria-hidden="true" />
+        {label}
+      </div>
+    </div>
+  );
+}
+
 interface SeekState {
   tCenter: number;
   startPhase: number;
@@ -89,6 +120,8 @@ const ScrollingPano = forwardRef<ScrollingPanoHandle, ScrollingPanoProps>(
       duration = 60,
       direction = "rtl",
       initialSrc,
+      markers,
+      markerOpacities,
       maxSeekDurationMs = 2500,
       className = "",
     },
@@ -233,19 +266,37 @@ const ScrollingPano = forwardRef<ScrollingPanoHandle, ScrollingPanoProps>(
             {/* Two copies of the same image; translating by one image width
                 lands the second copy exactly where the first started, hiding
                 the seam. */}
-            <img
-              ref={imgRef}
-              src={resolved}
-              alt=""
-              className="h-full w-auto block select-none"
-              draggable={false}
-            />
-            <img
-              src={resolved}
-              alt=""
-              className="h-full w-auto block select-none"
-              draggable={false}
-            />
+            <div className="relative h-full shrink-0">
+              <img
+                ref={imgRef}
+                src={resolved}
+                alt=""
+                className="h-full w-auto block select-none"
+                draggable={false}
+              />
+              {markers?.map((marker) => (
+                <PanoMarkerPin
+                  key={`a-${marker.label}`}
+                  {...marker}
+                  opacity={markerOpacities?.[marker.label] ?? 0}
+                />
+              ))}
+            </div>
+            <div className="relative h-full shrink-0">
+              <img
+                src={resolved}
+                alt=""
+                className="h-full w-auto block select-none"
+                draggable={false}
+              />
+              {markers?.map((marker) => (
+                <PanoMarkerPin
+                  key={`b-${marker.label}`}
+                  {...marker}
+                  opacity={markerOpacities?.[marker.label] ?? 0}
+                />
+              ))}
+            </div>
           </div>
         ) : null}
       </div>
