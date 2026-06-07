@@ -38,6 +38,9 @@ export const STAMP_LIFT = STAMP_CONTROL_LIFT;
 /** Bleed room for a single isolated card (hero). Avoid on CSS-column masonry items. */
 export const STAMP_BLEED = "p-2 -m-2";
 
+/** Desktop-only variant of {@link STAMP_BLEED} — use when mobile inset comes from a parent `px-2`. */
+export const STAMP_BLEED_LG = "lg:p-2 lg:-m-2";
+
 /** Top-only bleed — matches hero face top in a `py-8` lane without horizontal `-m-2`. */
 export const STAMP_BLEED_TOP = "-mt-2 pt-2";
 

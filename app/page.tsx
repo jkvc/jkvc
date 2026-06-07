@@ -13,7 +13,7 @@ import ContactSlab from "./components/editorial/ContactSlab";
 import Pill from "./components/editorial/Pill";
 import IconCircleButton from "./components/ui/IconCircleButton";
 import StampShell from "./components/ui/StampShell";
-import { STAMP_BLEED, STAMP_BLEED_TOP } from "./lib/stamp";
+import { STAMP_BLEED, STAMP_BLEED_LG, STAMP_BLEED_TOP } from "./lib/stamp";
 import { PROJECT_KINDS, projects, type ProjectKind } from "./projects/data";
 import { SITE } from "./lib/site";
 import { renderInlineMarkdown } from "./lib/inline-markdown";
@@ -51,8 +51,13 @@ export default function Home() {
                     {/* Left lane — fixed on desktop; right column scrolls independently */}
                     <aside className="flex min-h-0 flex-col gap-8 lg:h-full lg:py-8">
                         <div className="flex flex-col gap-8 lg:shrink-0">
-                            <section className="overflow-visible">
-                                <StampShell variant="card" faceClassName="p-8 sm:p-10">
+                            <section className="overflow-visible px-2 lg:px-0">
+                                <StampShell
+                                    variant="card"
+                                    bleed={false}
+                                    className={STAMP_BLEED_LG}
+                                    faceClassName="p-8 sm:p-10"
+                                >
                                     <span className="font-mono text-[11px] font-bold tracking-wider text-hot inline-block border border-ink bg-surface-2 px-2.5 py-0.5 mb-5 normal-case">
                                         A DUMP OF STUFF, SUCH AS IT IS
                                     </span>
@@ -65,7 +70,7 @@ export default function Home() {
                                 </StampShell>
                             </section>
 
-                            <section>
+                            <section className="px-2 lg:px-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                     {CATEGORIES.map((cat) => (
                                         <Pill
@@ -117,7 +122,7 @@ export default function Home() {
                         </section>
                     </div>
 
-                    <div className="lg:hidden">
+                    <div className="px-2 lg:hidden">
                         <ContactSlab />
                     </div>
                 </div>
