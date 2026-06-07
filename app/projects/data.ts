@@ -113,6 +113,82 @@ export interface ProjectMeta {
     refs?: Ref[];
 }
 
+/** ISO date string for chronological sorting. Prefers `date`, then `year`. */
+export function projectChronoKey(
+    project: Pick<Project, "date" | "year">,
+): string {
+    if (project.date) return project.date;
+    if (project.year) return `${project.year}-01-01`;
+    return "0000-01-01";
+}
+
+/** Newest first — pair into masonry lanes with even/odd split. */
+export function compareProjectsNewestFirst(a: Project, b: Project): number {
+    const byDate = projectChronoKey(b).localeCompare(projectChronoKey(a));
+    if (byDate !== 0) return byDate;
+    return a.slug.localeCompare(b.slug);
+}
+
+/** Even indices → left lane, odd → right. */
+export function splitProjectsIntoMasonryLanes<T>(sorted: T[]): {
+    left: T[];
+    right: T[];
+} {
+    const left: T[] = [];
+    const right: T[] = [];
+    sorted.forEach((item, i) => {
+        if (i % 2 === 0) left.push(item);
+        else right.push(item);
+    });
+    return { left, right };
+}
+
+export interface BalancedMasonryOptions {
+    /** Vertical gap between cards in a lane (Tailwind `gap-4` = 16). */
+    gapPx?: number;
+    /** Used until a card has been measured client-side. */
+    fallbackHeight?: number;
+}
+
+/**
+ * Assign newest-first items to the currently shorter lane (by measured height).
+ * Preserves chrono order within each lane; avoids one tall column dangling while
+ * the other stays short.
+ */
+export function assignProjectsToBalancedLanes<T extends { slug: string }>(
+    sorted: T[],
+    heightBySlug: ReadonlyMap<string, number> | Record<string, number>,
+    options: BalancedMasonryOptions = {},
+): { left: T[]; right: T[] } {
+    const gapPx = options.gapPx ?? 16;
+    const fallbackHeight = options.fallbackHeight ?? 300;
+
+    const heightOf = (slug: string): number => {
+        if (heightBySlug instanceof Map) {
+            return heightBySlug.get(slug) ?? fallbackHeight;
+        }
+        return (heightBySlug as Record<string, number>)[slug] ?? fallbackHeight;
+    };
+
+    const left: T[] = [];
+    const right: T[] = [];
+    let leftH = 0;
+    let rightH = 0;
+
+    for (const item of sorted) {
+        const cardH = heightOf(item.slug);
+        if (leftH <= rightH) {
+            left.push(item);
+            leftH += cardH + (left.length > 1 ? gapPx : 0);
+        } else {
+            right.push(item);
+            rightH += cardH + (right.length > 1 ? gapPx : 0);
+        }
+    }
+
+    return { left, right };
+}
+
 /** Build an editorial meta block for a project. Issue number comes from the
  *  project's position in the canonical `projects` array (1-indexed, zero-padded). */
 export function getProjectMeta(slug: string): ProjectMeta | undefined {

@@ -183,7 +183,7 @@ Breakpoint driven by `useWideLayout` (`lg` / 1024px). Crossing the breakpoint wr
 **Desktop (`wide`)** — `max-w-5xl h-dvh px-8`, `grid grid-cols-[2fr_3fr] gap-10`:
 
 - Left lane (~40%): fixed height, `py-8`, `justify-between`. Wordmark stamp (`STAMP_BLEED`), filter pills + drafts toggle, `ContactSlab` pinned via `mt-auto` (`STAMP_BLEED`).
-- Right lane (~60%): sole scroll region (`h-dvh overflow-y-auto scrollbar-hidden py-8`). Two-column CSS masonry (`columns-2 gap-4 px-2`, `STAMP_BLEED_TOP`, `break-inside-avoid` on cards).
+- Right lane (~60%): sole scroll region (`h-dvh overflow-y-auto scrollbar-hidden py-8`). `HomeMasonryGrid` — two independent lanes (`grid grid-cols-2 gap-x-4`, each `flex flex-col gap-4`). Cards sort by `date` newest-first; `assignProjectsToBalancedLanes` places each next card on the shorter lane (measured via `ResizeObserver`) so chrono order holds within each column without one side dangling while the other is short.
 
 **Mobile / narrow** — `max-w-[35.4rem]`, single-column document scroll (`py-12 sm:py-20 px-2`). Hero and filters get `px-2` inset. Masonry stays two columns. `ContactSlab` below the grid.
 
@@ -203,5 +203,5 @@ Separate printable layout — US Letter sheet centered on a soft preview surface
 | Use `<Pill>`, `<IconCircleButton>`, `<StampShell>` | Build one-off control chrome |
 | Use `caption-mono` for eyebrows and meta | Re-type mono size/tracking/uppercase |
 | Use `InteriorPageShell` + `PageStampHeader` on new interior pages | Roll custom page padding/hero per route |
-| Set `bleed={false}` on masonry cards and multi-card grids | Apply `STAMP_BLEED` inside CSS columns (clips neighbors) |
+| Set `bleed={false}` on home grid cards and multi-card grids | Apply `STAMP_BLEED` inside packed column layouts (clips neighbors) |
 | Split readable posts on `---` for stamp sections | Wrap single-section posts in unnecessary shells |

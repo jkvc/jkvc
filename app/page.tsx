@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
-import ProjectMasonryCard from "./components/ProjectMasonryCard";
+import HomeMasonryGrid from "./components/HomeMasonryGrid";
 import {
     getShowDrafts,
     getShowDraftsServer,
@@ -15,8 +15,13 @@ import Pill from "./components/editorial/Pill";
 import IconCircleButton from "./components/ui/IconCircleButton";
 import StampShell from "./components/ui/StampShell";
 import { useWideLayout } from "./hooks/useWideLayout";
-import { STAMP_BLEED, STAMP_BLEED_TOP } from "./lib/stamp";
-import { PROJECT_KINDS, projects, type ProjectKind } from "./projects/data";
+import { STAMP_BLEED } from "./lib/stamp";
+import {
+    PROJECT_KINDS,
+    compareProjectsNewestFirst,
+    projects,
+    type ProjectKind,
+} from "./projects/data";
 import { SITE } from "./lib/site";
 import { renderInlineMarkdown } from "./lib/inline-markdown";
 
@@ -47,7 +52,7 @@ export default function Home() {
             if (category !== "all" && p.kind !== category) return false;
             return showDrafts || p.ready;
         })
-        .reverse();
+        .sort(compareProjectsNewestFirst);
 
     return (
         <div
@@ -154,16 +159,10 @@ export default function Home() {
                         )}
                     >
                         {visible.length > 0 ? (
-                            <div className={`columns-2 gap-4 px-2 ${STAMP_BLEED_TOP}`}>
-                                {visible.map((project) => (
-                                    <ProjectMasonryCard
-                                        key={project.slug}
-                                        {...project}
-                                        draft={showDrafts && !project.ready}
-                                        showStatus={showDrafts}
-                                    />
-                                ))}
-                            </div>
+                            <HomeMasonryGrid
+                                projects={visible}
+                                showDrafts={showDrafts}
+                            />
                         ) : (
                             <div className="py-10 text-center caption-mono text-ink-faint">
                                 Nothing here yet

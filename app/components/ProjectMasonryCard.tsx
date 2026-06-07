@@ -63,7 +63,7 @@ export default function ProjectMasonryCard({
     const iconClass = icon ?? "fa-asterisk";
 
     return (
-        <Link href={`/projects/${slug}`} className="group block break-inside-avoid mb-4">
+        <Link href={`/projects/${slug}`} className="group block min-w-0">
             <StampShell variant="card" interactive bleed={false} faceClassName="overflow-hidden">
                 <div className="relative overflow-hidden border-b-2 border-ink bg-surface-2">
                     <KindStamp
