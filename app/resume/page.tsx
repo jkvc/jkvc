@@ -15,10 +15,8 @@
 import Wordmark from "@/app/components/brand/Wordmark";
 import { SITE } from "@/app/lib/site";
 
-/** Public web address, displayed on the résumé. Hardcoded here (not in
- *  `SITE.url`) so the canonical site origin used by metadata can stay
- *  separate from the human-readable hostname people see on paper. */
-const WEB_ADDR = "jkvc.ai";
+/** Hostname shown on the résumé — derived from `SITE.url`. */
+const WEB_ADDR = SITE.url.replace(/^https?:\/\//, "");
 
 /** Email rendered with `[at]` so this static page is at least mildly
  *  hostile to scrapers when shared as a PDF or screenshot. The mailto

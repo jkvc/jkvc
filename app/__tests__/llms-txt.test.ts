@@ -17,7 +17,7 @@ function stub(overrides: Partial<Project> & Pick<Project, "slug">): Project {
 const miniSite = {
     name: "jkvc",
     description: "Test site description.",
-    url: "https://jkvc.com",
+    url: "https://jkvc.ai",
     social: SITE.social,
 } as const;
 
@@ -26,7 +26,7 @@ describe("buildLlmsTxt", () => {
         const body = buildLlmsTxt(miniSite, []);
         expect(body).toContain("# jkvc");
         expect(body).toContain("> Test site description.");
-        expect(body).toContain("- https://jkvc.com/about");
+        expect(body).toContain("- https://jkvc.ai/about");
     });
 
     it("lists published essays and demos separately, newest first", () => {

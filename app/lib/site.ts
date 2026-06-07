@@ -18,7 +18,7 @@ export const SITE = {
      *  the description prose doesn't silently break the OG card. */
     keywords: ["ML modeling", "inference", "interaction", "generative art"] as const,
     /** Canonical origin without trailing slash. */
-    url: "https://jkvc.com",
+    url: "https://jkvc.ai",
     /** Where I work / live, uppercase mono. */
     location: "SEATTLE & LILLE",
     /** Year the site was established. */
