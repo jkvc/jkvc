@@ -182,22 +182,15 @@ export default async function PostBody({ source }: Props) {
   const { content } = matter(source);
 
   // Split on lines that are exactly `---` (optional surrounding whitespace).
-  // Each resulting chunk becomes its own stamp card when there are multiple sections.
+  // Each chunk becomes its own stamp card — including a single-section post.
   const sections = content
     .split(/\n[ \t]*---[ \t]*\n/)
     .map((s) => s.trim())
     .filter(Boolean);
 
-  if (sections.length <= 1) {
-    // No separators — render as a plain article (preserves existing behaviour).
-    const rendered = await compileSection(sections[0] ?? content);
-    return (
-      <article className="prose-reset max-w-none">{rendered}</article>
-    );
-  }
-
-  // Multiple sections — compile in parallel, each gets its own stamp card.
-  const renderedSections = await Promise.all(sections.map(compileSection));
+  const renderedSections = await Promise.all(
+    (sections.length > 0 ? sections : [content]).map(compileSection),
+  );
 
   return (
     <div className="flex flex-col gap-6">

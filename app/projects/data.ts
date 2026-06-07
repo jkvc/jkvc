@@ -31,7 +31,7 @@ export function getProjectKindMeta(kind: ProjectKind): ProjectKindMeta {
 /** Typed external reference attached to a project (e.g. its source repo).
  *  `kind` selects both the icon/family and the default human-readable label
  *  via the `REF_KINDS` registry. The label can still be overridden per entry. */
-export type RefKind = "code" | "skills";
+export type RefKind = "code" | "skills" | "site";
 
 export interface RefKindMeta {
     id: RefKind;
@@ -45,6 +45,7 @@ export interface RefKindMeta {
 export const REF_KINDS: RefKindMeta[] = [
     { id: "code", label: "code", icon: "fa-github", iconFamily: "fa-brands" },
     { id: "skills", label: "skills", icon: "fa-github", iconFamily: "fa-brands" },
+    { id: "site", label: "site", icon: "fa-arrow-up-right-from-square", iconFamily: "fa-solid" },
 ];
 
 export interface Ref {
@@ -226,6 +227,29 @@ export const projects: Project[] = [
             {
                 kind: "code",
                 url: "https://github.com/jkvc/jkvc/tree/main/app/projects/photo-commentator",
+            },
+        ],
+    },
+    {
+        title: "Watchparty",
+        slug: "watchparty",
+        description: "YouTube, perfectly in sync.",
+        gradient: "linear-gradient(135deg, #1a1a2e 0%, #c0392b 100%)",
+        thumbnail: "/post-assets/watchparty/thumbnail.webp",
+        ready: true,
+        kind: "playable",
+        year: "2026",
+        date: "2026-06-07",
+        status: "PUBLISHED",
+        icon: "fa-play",
+        refs: [
+            {
+                kind: "site",
+                url: "https://watchparty.jkvc.ai",
+            },
+            {
+                kind: "code",
+                url: "https://github.com/jkvc/watchparty",
             },
         ],
     },

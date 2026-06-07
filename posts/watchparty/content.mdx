@@ -1,0 +1,25 @@
+I woke up this morning thinking — if I had a way to watch something like a YouTube video with Hannah while we're on opposite sides of the continent, that'd be nice.
+
+- Ideally we do this without screen-sharing so we get YouTube's native resolution.
+- It has to stay in sync despite network latency — if you're watching something funny, one person doesn't suddenly start laughing first.
+- It also has to be simple — as long as there's a browser and the internet.
+
+---
+
+[watchparty.jkvc.ai](https://watchparty.jkvc.ai/) — so here it is.
+
+<PostImage src="/post-assets/watchparty/room.webp" alt="A watchparty room — four-character code, synced YouTube player, native controls." columnWidth={1} />
+
+Go make a room and send someone a four-letter code or the link.
+
+---
+
+[`watchparty`](https://watchparty.jkvc.ai) — source is on GitHub. Redis for room state, Vercel for hosting
+
+Native YouTube controls only — so ads and Premium quirks are yours to deal with, but nobody had to reinvent a video player.
+
+---
+
+Built on the [`syncframe`](https://syncframe.jkvc.ai) anchor protocol: one scalar describes where playback is and how fast it's moving; every browser dead-reckons against a synced server clock. Play, pause, scrub — whatever anyone does, everyone follows. Stall on an ad and you snap back when you're ready; nobody else freezes.
+
+Phase 1 is complete. I'll make another post when phase 2 finishes.

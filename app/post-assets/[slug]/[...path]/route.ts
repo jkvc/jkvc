@@ -40,11 +40,21 @@ export async function GET(
   }
 
   try {
-    const data = await fs.readFile(resolved);
+    const [data, stat] = await Promise.all([
+      fs.readFile(resolved),
+      fs.stat(resolved),
+    ]);
+    const etag = `"${stat.mtimeMs.toString(36)}-${stat.size.toString(36)}"`;
+    const cacheControl =
+      process.env.NODE_ENV === "development"
+        ? "no-store"
+        : "public, max-age=3600, must-revalidate, s-maxage=86400";
+
     return new NextResponse(data, {
       headers: {
         "Content-Type": contentTypeForPath(resolved),
-        "Cache-Control": "public, max-age=3600, s-maxage=86400",
+        "Cache-Control": cacheControl,
+        ETag: etag,
       },
     });
   } catch (err) {

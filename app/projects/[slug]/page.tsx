@@ -22,11 +22,10 @@ export default async function ProjectPage({
 
   const meta = getProjectMeta(slug);
 
-  // Readable entries render from `posts/<slug>.mdx`. Playable entries
-  // without a dedicated `app/projects/<slug>/page.tsx` route fall through
-  // to the generic "Coming soon" placeholder.
-  const postSource =
-    project.kind === "readable" ? await readPostSource(slug) : null;
+  // Entries with `posts/<slug>/content.mdx` render as stamp-card prose.
+  // Playable entries without a post and without a dedicated route get
+  // the generic "Coming soon" placeholder.
+  const postSource = await readPostSource(slug);
 
   return (
     <ProjectPageFrame
