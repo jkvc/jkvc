@@ -4,8 +4,10 @@ import ContactSlab from "@/app/components/editorial/ContactSlab";
 import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
 import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import StampShell from "@/app/components/ui/StampShell";
+import { STAMP_CONTROL_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import { SITE } from "@/app/lib/site";
 import { renderInlineMarkdown } from "@/app/lib/inline-markdown";
+import { twMerge } from "tailwind-merge";
 
 interface TimelineEntry {
     dateRange: string;
@@ -158,7 +160,11 @@ export default function About() {
                     <img
                         src="/head.jpeg"
                         alt="Portrait of Junshen Kevin Chen"
-                        className="h-24 w-24 flex-shrink-0 border-2 border-ink object-cover sm:h-32 sm:w-32"
+                        className={twMerge(
+                            STAMP_FACE,
+                            STAMP_CONTROL_SHADOW,
+                            "h-24 w-24 flex-shrink-0 bg-surface object-cover sm:h-32 sm:w-32",
+                        )}
                     />
                 </div>
             </PageStampHeader>
