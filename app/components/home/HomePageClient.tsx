@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { twMerge } from "tailwind-merge";
 import HomeMasonryGrid from "@/app/components/HomeMasonryGrid";
@@ -97,22 +98,38 @@ export default function HomePageClient({ children }: HomePageClientProps) {
                                 !wide && "px-2",
                             )}
                         >
-                            <StampShell
-                                variant="card"
-                                bleed={false}
-                                className={wide ? STAMP_BLEED : undefined}
-                                faceClassName="p-8 sm:p-10"
+                            <Link
+                                href="/about"
+                                className="group block"
+                                aria-label="About jkvc"
                             >
-                                <span className="font-mono text-[11px] font-bold tracking-wider text-hot inline-block border border-ink bg-surface-2 px-2.5 py-0.5 mb-5 normal-case">
-                                    A DUMP OF STUFF, SUCH AS IT IS
-                                </span>
-                                <h1 className="text-[64px] sm:text-[80px] text-ink leading-none">
-                                    <Wordmark href="/about" interactive={false} />
-                                </h1>
-                                <p className="mt-6 text-sm leading-relaxed text-ink-muted">
-                                    {renderInlineMarkdown(SITE.tagline)}
-                                </p>
-                            </StampShell>
+                                <StampShell
+                                    variant="card"
+                                    interactive
+                                    bleed={false}
+                                    className={wide ? STAMP_BLEED : undefined}
+                                    faceClassName="relative p-8 sm:p-10"
+                                >
+                                    <span className="font-mono text-[11px] font-bold tracking-wider text-hot inline-block border border-ink bg-surface-2 px-2.5 py-0.5 mb-5 normal-case">
+                                        A DUMP OF STUFF, SUCH AS IT IS
+                                    </span>
+                                    <h1 className="text-[64px] sm:text-[80px] text-ink leading-none">
+                                        <Wordmark interactive={false} />
+                                    </h1>
+                                    <p className="mt-6 text-sm leading-relaxed text-ink-muted">
+                                        {renderInlineMarkdown(
+                                            SITE.tagline.replace(
+                                                "[jkvc](/about)",
+                                                "jkvc",
+                                            ),
+                                        )}
+                                    </p>
+                                    <i
+                                        className="fa-solid fa-arrow-right-long pointer-events-none absolute bottom-3 right-3 z-10 text-xs text-ink-muted transition-colors group-hover:text-hot"
+                                        aria-hidden="true"
+                                    />
+                                </StampShell>
+                            </Link>
                         </section>
 
                         <section

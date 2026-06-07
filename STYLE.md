@@ -105,7 +105,7 @@ Shared dimensions keep pills and icon buttons aligned at the same `size`:
 | `sm` | 36×36 (`w-9 h-9`) | `h-9` | `px-4` | 13px |
 | `md` | 40×40 (`w-10 h-10`) | `h-10` | `px-5` | 14px |
 
-Default pill size is `xs`. `ContactSlab` icon buttons use `xs` inverted.
+Default pill size is `xs`. `ContactSlab` icon buttons use `xs` inverted `shape="square"`.
 
 ## Structural components
 
@@ -137,7 +137,7 @@ Default pill size is `xs`. `ContactSlab` icon buttons use `xs` inverted.
 
 ### Footer & status
 
-- `ContactSlab` (`app/components/editorial/ContactSlab.tsx`) — inverted ink block. `STAMP_FACE` + `STAMP_CARD_SHADOW`, scrolling panorama band, row of inverted `IconCircleButton`s (LinkedIn, GitHub, Scholar, email reveal), location pills that seek the pano. One per page — pinned to the bottom of the home left lane on desktop, inline below masonry on mobile.
+- `ContactSlab` (`app/components/editorial/ContactSlab.tsx`) — inverted ink block. `STAMP_FACE` + `STAMP_CARD_SHADOW`, scrolling panorama band, row of inverted square `IconCircleButton`s (LinkedIn, GitHub, Scholar, email reveal), location pills that seek the pano. One per page — pinned to the bottom of the home left lane on desktop, inline below masonry on mobile.
 - `ChargeStatusPanel` (`app/components/ChargeStatusPanel.tsx`) — stamp card rows per charge pool with cell indicators (`bg-ink` filled, `bg-hot` critical, `bg-rule` empty).
 - `StatusPillRow` (`app/components/ui/StatusPillRow.tsx`) — pipeline step indicators (idle / running / complete / error) as stamped squares.
 - `ConfirmDialog` (`app/components/ui/ConfirmDialog.tsx`) — native `<dialog>` modal; ink backdrop, centered `StampShell` card, `Pill` confirm/cancel.
