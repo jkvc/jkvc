@@ -84,8 +84,8 @@ export default function PresentationView({
   // ---- Empty state: upload prompt ----
   if (!state.originalImageUrl) {
     return (
-      <StampShell variant="card" bleed={false} className="flex justify-center">
-        <div className="flex flex-col items-center gap-8 p-8 sm:p-12">
+      <StampShell variant="card" bleed={false} className="w-full" faceClassName="w-full">
+        <div className="flex w-full flex-col items-center gap-8 p-8 sm:p-12">
           <input
             ref={fileInputRef}
             type="file"
