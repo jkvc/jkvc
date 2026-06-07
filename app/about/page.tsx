@@ -51,17 +51,35 @@ function SectionHead({
     subhead?: string;
 }) {
     return (
-        <header className="mb-6">
-            <h2 className="font-sans font-black text-2xl leading-tight text-ink uppercase tracking-tight">
-                <span className="text-hot mr-2">#</span>
+        <header>
+            <h2 className="font-sans text-2xl font-black uppercase leading-[1.05] tracking-tight text-ink sm:text-3xl">
                 {title}
             </h2>
             {subhead && (
-                <p className="mt-1 text-[14px] leading-snug text-ink-muted">
+                <p className="mt-2 text-[14px] leading-snug text-ink-muted">
                     {subhead}
                 </p>
             )}
         </header>
+    );
+}
+
+function SectionCard({
+    title,
+    subhead,
+    children,
+}: {
+    title: string;
+    subhead?: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <StampShell variant="card" bleed={false} faceClassName="overflow-hidden">
+            <div className="px-5 pt-5 sm:pt-6">
+                <SectionHead title={title} subhead={subhead} />
+            </div>
+            <div className="px-5 pb-5 pt-2 sm:pb-6">{children}</div>
+        </StampShell>
     );
 }
 
@@ -126,45 +144,42 @@ function TimelineRow({
 export default function About() {
     return (
         <InteriorPageShell>
-                <PageStampHeader meta={{ eyebrow: "ABOUT" }}>
-                    <div className="flex items-center gap-6 sm:gap-8">
-                        <div className="min-w-0 flex-1">
-                            <h1 className="text-4xl leading-none text-ink sm:text-5xl">
-                                <Wordmark defaultExpanded interactive={false} />
-                            </h1>
-                            <p className="mt-4 text-sm leading-relaxed text-ink-muted">
-                                {renderInlineMarkdown(SITE.tagline)}
-                            </p>
-                        </div>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src="/head.jpeg"
-                            alt="Portrait of Junshen Kevin Chen"
-                            className="h-24 w-24 flex-shrink-0 border-2 border-ink object-cover sm:h-32 sm:w-32"
-                        />
+            <PageStampHeader meta={{ eyebrow: "ABOUT" }}>
+                <div className="flex items-center gap-6 sm:gap-8">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-4xl leading-none text-ink sm:text-5xl">
+                            <Wordmark defaultExpanded interactive={false} />
+                        </h1>
+                        <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+                            {renderInlineMarkdown(SITE.tagline)}
+                        </p>
                     </div>
-                </PageStampHeader>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                        src="/head.jpeg"
+                        alt="Portrait of Junshen Kevin Chen"
+                        className="h-24 w-24 flex-shrink-0 border-2 border-ink object-cover sm:h-32 sm:w-32"
+                    />
+                </div>
+            </PageStampHeader>
 
-                {/* Bio section */}
-                <section className="mb-14 mt-12">
-                    <SectionHead title="Hi" />
+            <div className="mt-12 flex flex-col gap-6">
+                <SectionCard title="Hi">
                     <p className="text-[15px] leading-relaxed text-ink-muted">
                         I&apos;m generally interested in building AI things.
                     </p>
-                    <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
+                    <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
                         Over time I&apos;ve found myself having worked on every part of the stack in an AI system, from training the model, to optimization, to inference algorithms, to large scale inference systems, to model orchestration, to the apps and the user interaction itself.
                     </p>
-                    <p className="text-[15px] leading-relaxed mt-3 text-ink-muted">
-                        This website is for experimenting, ranting, memeing. Like all things I&apos;ve built, it&apos;s built with AI, for humans.
+                    <p className="mt-3 text-[15px] leading-relaxed text-ink-muted">
+                        This website is for experimenting, ranting, memeing.
                     </p>
-                </section>
+                </SectionCard>
 
-                {/* Experience */}
-                <section className="mb-14">
-                    <SectionHead
-                        title="Experience"
-                        subhead="This is probably what you were looking for."
-                    />
+                <SectionCard
+                    title="Experience"
+                    subhead="This is probably what you were looking for."
+                >
                     <ol>
                         {EXPERIENCE.map((entry, i) => (
                             <TimelineRow
@@ -175,30 +190,29 @@ export default function About() {
                             />
                         ))}
                     </ol>
-                </section>
+                </SectionCard>
 
-                {/* Resume */}
-                <section className="mb-16">
-                    <SectionHead
-                        title="Resume"
-                        subhead="The most boring version possible."
-                    />
-                    <p className="text-[15px] leading-relaxed text-ink-muted">
-                        <Link href="/resume" className="group inline-flex">
-                            <StampShell
-                                variant="control"
-                                interactive
-                                inline
-                                faceClassName="items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-wider text-ink"
-                            >
-                                <span>View Resume</span>
-                                <i className="fa-solid fa-arrow-right text-[11px]" aria-hidden />
-                            </StampShell>
-                        </Link>
-                    </p>
-                </section>
+                <SectionCard
+                    title="Resume"
+                    subhead="The most boring version possible."
+                >
+                    <Link href="/resume" className="group inline-flex">
+                        <StampShell
+                            variant="control"
+                            interactive
+                            inline
+                            faceClassName="items-center gap-2 px-4 py-2 text-sm font-bold uppercase tracking-wider text-ink"
+                        >
+                            <span>View Resume</span>
+                            <i className="fa-solid fa-arrow-right text-[11px]" aria-hidden />
+                        </StampShell>
+                    </Link>
+                </SectionCard>
+            </div>
 
+            <div className="mt-16">
                 <ContactSlab />
+            </div>
         </InteriorPageShell>
     );
 }
