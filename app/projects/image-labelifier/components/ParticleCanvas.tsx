@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import type { SegmentResult } from "../lib/types";
 import type { Particle, LabelMap } from "../lib/particle-types";
 import { getShapeConfig } from "../lib/particle-types";
@@ -408,23 +410,31 @@ export default function ParticleCanvas({
       )}
 
       <div
+        className={twMerge(
+          STAMP_FACE,
+          STAMP_CARD_SHADOW,
+          "relative w-full overflow-hidden"
+        )}
         ref={containerRef}
-        className="relative w-full cursor-none"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={resetPointerPos}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
       >
-        <canvas
-          ref={canvasRef}
-          className="w-full h-auto rounded-2xl border border-[#E8E8E8]"
-        />
-        <img
-          src={originalUrl}
-          alt="Original"
-          className="absolute inset-0 w-full h-full rounded-2xl object-cover transition-opacity duration-500 pointer-events-none"
-          style={{ opacity: showOriginal ? 1 : 0 }}
-        />
+        <div
+          className="relative w-full cursor-none"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={resetPointerPos}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+        >
+          <canvas
+            ref={canvasRef}
+            className="w-full h-auto block"
+          />
+          <img
+            src={originalUrl}
+            alt="Original"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 pointer-events-none"
+            style={{ opacity: showOriginal ? 1 : 0 }}
+          />
+        </div>
       </div>
     </div>
   );

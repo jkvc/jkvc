@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 import type { MDXComponents } from "mdx/types";
 import type { ImgHTMLAttributes } from "react";
 import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
+import StampShell from "@/app/components/ui/StampShell";
 
 const postImgClass = twMerge(
   STAMP_FACE,
@@ -123,7 +124,6 @@ const MDX_COMPONENTS: MDXComponents = {
       {...props}
     />
   ),
-  hr: (props) => <hr className="my-8 hairline border-ink" {...props} />,
   code: (props) => (
     <code
       className="font-mono text-[13px] bg-surface-2 text-ink px-1.5 py-0.5 border border-ink"
@@ -158,23 +158,59 @@ const MDX_COMPONENTS: MDXComponents = {
   PostImage,
 };
 
+const MDX_OPTIONS = {
+  parseFrontmatter: false,
+  blockJS: false,
+  blockDangerousJS: true,
+} as const;
+
+/** Compile a single MDX string and return the rendered React node. */
+async function compileSection(source: string) {
+  const { content } = await compileMDX({
+    source,
+    components: MDX_COMPONENTS,
+    options: MDX_OPTIONS,
+  });
+  return content;
+}
+
 interface Props {
   source: string;
 }
 
 export default async function PostBody({ source }: Props) {
   const { content } = matter(source);
-  const { content: rendered } = await compileMDX({
-    source: content,
-    components: MDX_COMPONENTS,
-    options: {
-      parseFrontmatter: false,
-      blockJS: false,
-      blockDangerousJS: true,
-    },
-  });
+
+  // Split on lines that are exactly `---` (optional surrounding whitespace).
+  // Each resulting chunk becomes its own stamp card when there are multiple sections.
+  const sections = content
+    .split(/\n[ \t]*---[ \t]*\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (sections.length <= 1) {
+    // No separators — render as a plain article (preserves existing behaviour).
+    const rendered = await compileSection(sections[0] ?? content);
+    return (
+      <article className="prose-reset max-w-none">{rendered}</article>
+    );
+  }
+
+  // Multiple sections — compile in parallel, each gets its own stamp card.
+  const renderedSections = await Promise.all(sections.map(compileSection));
 
   return (
-    <article className="prose-reset max-w-none">{rendered}</article>
+    <div className="flex flex-col gap-6">
+      {renderedSections.map((rendered, i) => (
+        <StampShell
+          key={i}
+          variant="card"
+          bleed={false}
+          faceClassName="p-6 sm:p-8 [&>article>*:first-child]:mt-0"
+        >
+          <article className="prose-reset max-w-none">{rendered}</article>
+        </StampShell>
+      ))}
+    </div>
   );
 }

@@ -25,14 +25,13 @@ export default function MagicCrankieClient() {
           onRequestState={requestState}
         />
 
-        <div className="w-px h-5 bg-[#E0E0E0]" />
+        <div className="w-px h-5 bg-rule" />
 
         <IconCircleButton
           onClick={() => setShowDebug((d) => !d)}
           icon={showDebug ? "fa-eye" : "fa-eye-slash"}
           title="Toggle debug overlay"
           active={showDebug}
-          iconClassName="text-[12px]"
         />
       </div>
     </div>

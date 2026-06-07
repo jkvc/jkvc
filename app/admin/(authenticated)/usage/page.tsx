@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import ChargeStatusPanel from "@/app/components/ChargeStatusPanel";
-import RecipeHeader from "@/app/components/editorial/RecipeHeader";
+import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
+import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import Pill from "@/app/components/editorial/Pill";
 import { CHARGE_POOLS } from "@/app/lib/charge-pools";
 
@@ -29,35 +30,30 @@ export default function AdminUsagePage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen text-ink px-6 pt-16 pb-16 sm:px-8">
-      <div className="max-w-2xl mx-auto">
-        <RecipeHeader meta={{ issue: "ADMIN" }} backHref="/admin" />
-        <h1 className="mt-6 font-sans font-black text-5xl leading-[1.05] tracking-tight text-ink uppercase">
-          Charge Usage
-        </h1>
-        <div className="mt-4 flex items-center gap-3">
-          <p className="text-base leading-relaxed text-ink-muted max-w-xl flex-1">
-            Manage charge pools. Top off individual pools or all at once.
-          </p>
-          <Pill onClick={handleTopOffAll} icon="fa-bolt" size="xs" active>
-            top off all
-          </Pill>
-        </div>
+    <InteriorPageShell maxWidthClassName="max-w-2xl">
+      <PageStampHeader
+        meta={{ eyebrow: "ADMIN", icon: "fa-lock" }}
+        
+        title="Charge Usage"
+        subtitle="Manage charge pools. Top off individual pools or all at once."
+        trailing={
+          <div className="flex flex-wrap items-center gap-3">
+            <Pill onClick={handleTopOffAll} icon="fa-bolt" size="xs" active>
+              top off all
+            </Pill>
+          </div>
+        }
+      />
 
-        <div className="mt-12">
-          <ChargeStatusPanel showTopOff />
-        </div>
-
-        <div className="mt-16 flex justify-center">
-          <Pill
-            onClick={handleLogout}
-            icon="fa-right-from-bracket"
-            size="xs"
-          >
-            log out
-          </Pill>
-        </div>
+      <div className="mt-12">
+        <ChargeStatusPanel showTopOff />
       </div>
-    </div>
+
+      <div className="mt-16 flex justify-center">
+        <Pill onClick={handleLogout} icon="fa-right-from-bracket" size="xs">
+          log out
+        </Pill>
+      </div>
+    </InteriorPageShell>
   );
 }

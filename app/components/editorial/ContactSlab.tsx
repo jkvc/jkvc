@@ -62,7 +62,6 @@ function EmailAction() {
             icon="fa-envelope"
             title="Reveal email"
             size="xs"
-            shape="square"
             inverted
         />
     );
@@ -144,7 +143,6 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     iconFamily="fa-brands"
                     title="LinkedIn"
                     size="xs"
-                    shape="square"
                     inverted
                 />
                 <IconCircleButton
@@ -153,7 +151,6 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     iconFamily="fa-brands"
                     title="GitHub"
                     size="xs"
-                    shape="square"
                     inverted
                 />
                 <IconCircleButton
@@ -161,7 +158,6 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     icon="fa-graduation-cap"
                     title="Google Scholar"
                     size="xs"
-                    shape="square"
                     inverted
                 />
                 <EmailAction />

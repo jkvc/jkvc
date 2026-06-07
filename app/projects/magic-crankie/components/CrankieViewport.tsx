@@ -1,5 +1,7 @@
 "use client";
 
+import { twMerge } from "tailwind-merge";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import { type Segment, STATE_HEIGHT, VIEWPORT_WIDTH } from "../lib/state-machine";
 
 const SCALE = VIEWPORT_WIDTH / STATE_HEIGHT;
@@ -29,12 +31,14 @@ export default function CrankieViewport({
 
   return (
     <div
-      className="relative mx-auto overflow-hidden rounded-2xl"
+      className={twMerge(
+        STAMP_FACE,
+        STAMP_CARD_SHADOW,
+        "relative mx-auto overflow-hidden"
+      )}
       style={{
         width: VIEWPORT_WIDTH,
         height: VIEWPORT_WIDTH,
-        boxShadow:
-          "inset 12px 0 20px -10px rgba(0,0,0,0.4), inset -12px 0 20px -10px rgba(0,0,0,0.4)",
       }}
     >
       <div

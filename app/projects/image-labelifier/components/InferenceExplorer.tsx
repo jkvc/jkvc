@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import type { InferenceState } from "../ImageLabelifierClient";
 import type { GalleryItem } from "../lib/types";
 import type { ParticleConfig } from "../lib/particle-config";
@@ -10,6 +11,8 @@ import SaveToGallery from "./SaveToGallery";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
 import StatusPillRow from "@/app/components/ui/StatusPillRow";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import StampShell from "@/app/components/ui/StampShell";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
 interface Props {
   inference: InferenceState;
@@ -45,7 +48,6 @@ export default function InferenceExplorer({
           icon="fa-arrow-left"
           title="Back to Presentation"
         />
-
         <IconCircleButton
           onClick={onReset}
           icon="fa-rotate"
@@ -67,11 +69,11 @@ export default function InferenceExplorer({
         onDelete={onDeleteGalleryItem}
       />
 
-      {error && <div className="text-red-500 text-[13px]">{error}</div>}
+      {error && <div className="text-hot text-xs">{error}</div>}
 
-      {/* Loading state — keep the dashed box with pills inside */}
+      {/* Loading state */}
       {previewUrl && !ready && (
-        <div className="border border-dashed border-[#DDD] rounded-2xl p-10 text-center">
+        <StampShell variant="card" bleed={false} faceClassName="p-8 text-center">
           <StatusPillRow
             steps={[
               {
@@ -88,7 +90,7 @@ export default function InferenceExplorer({
               },
             ]}
           />
-        </div>
+        </StampShell>
       )}
 
       {/* Results */}
@@ -96,32 +98,32 @@ export default function InferenceExplorer({
         <>
           {/* Original */}
           <div>
-            <p className="caption-mono text-ink-faint mb-2">
-              Original
-            </p>
-            <img
-              src={previewUrl}
-              alt="Original"
-              className="w-full rounded-lg border border-[#E8E8E8]"
-            />
+            <p className="caption-mono text-ink-faint mb-2">Original</p>
+            <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="Original"
+                className="w-full h-auto block"
+              />
+            </div>
           </div>
 
           {/* Depth + Segmentation side by side */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <p className="caption-mono text-ink-faint mb-2">
-                Depth Map
-              </p>
-              <img
-                src={depthUrl}
-                alt="Depth map"
-                className="w-full rounded-lg border border-[#E8E8E8]"
-              />
+              <p className="caption-mono text-ink-faint mb-2">Depth Map</p>
+              <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={depthUrl}
+                  alt="Depth map"
+                  className="w-full h-auto block"
+                />
+              </div>
             </div>
             <div>
-              <p className="caption-mono text-ink-faint mb-2">
-                Segmentation
-              </p>
+              <p className="caption-mono text-ink-faint mb-2">Segmentation</p>
               <SegmentationMap originalUrl={previewUrl} segments={segments} />
             </div>
           </div>
@@ -136,7 +138,7 @@ export default function InferenceExplorer({
             initialConfig={viewingItem?.mode === "expert" ? viewingItem.config : undefined}
           />
 
-          {/* Save to Gallery — DevOnlyButton handles visibility internally */}
+          {/* Save to Gallery */}
           <SaveToGallery
             canvasRef={canvasRef}
             originalUrl={previewUrl}

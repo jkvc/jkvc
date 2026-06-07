@@ -2,6 +2,8 @@
 
 import { SHAPES, BACKGROUNDS, SAMPLINGS } from "../lib/particle-types";
 import type { ParticleConfig } from "../lib/particle-config";
+import Pill from "@/app/components/editorial/Pill";
+import RangeField from "@/app/components/ui/RangeField";
 export type { ParticleConfig } from "../lib/particle-config";
 
 interface Props {
@@ -22,21 +24,17 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
           {SHAPES.map((s) => {
             const disabled = !!(s.needsSegments && !hasSegments);
             return (
-              <button
+              <Pill
                 key={s.id}
                 onClick={() => !disabled && onChange({ shape: s.id })}
                 disabled={disabled}
-                className={`h-9 min-w-9 px-3 rounded-full text-[13px] transition-all ${
-                  disabled
-                    ? "border border-[#EBEBEB] text-[#DDD] cursor-not-allowed"
-                    : shape === s.id
-                      ? "border border-gold bg-gold text-white shadow-sm"
-                      : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
-                } ${s.fontClass ?? ""}`}
+                active={shape === s.id}
+                size="xs"
                 title={disabled ? `${s.title} (needs segmentation data)` : s.title}
+                className={s.fontClass ?? ""}
               >
                 {s.label}
-              </button>
+              </Pill>
             );
           })}
         </div>
@@ -47,17 +45,14 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
         <p className="caption-mono text-ink-faint">Background</p>
         <div className="flex flex-wrap gap-1.5">
           {BACKGROUNDS.map((bg) => (
-            <button
+            <Pill
               key={bg.id}
               onClick={() => onChange({ background: bg.id })}
-              className={`h-9 px-3.5 rounded-full text-[12px] transition-all ${
-                background === bg.id
-                  ? "border border-gold bg-gold text-white shadow-sm"
-                  : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
-              }`}
+              active={background === bg.id}
+              size="xs"
             >
               {bg.label}
-            </button>
+            </Pill>
           ))}
         </div>
       </div>
@@ -67,62 +62,45 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
         <p className="caption-mono text-ink-faint">Sampling</p>
         <div className="flex flex-wrap gap-1.5">
           {SAMPLINGS.map((s) => (
-            <button
+            <Pill
               key={s.id}
               onClick={() => onChange({ sampling: s.id })}
-              className={`h-9 px-3.5 rounded-full text-[12px] transition-all ${
-                sampling === s.id
-                  ? "border border-gold bg-gold text-white shadow-sm"
-                  : "border border-[#E0E0E0] text-[#AAA] hover:border-gold/50 hover:text-gold"
-              }`}
+              active={sampling === s.id}
+              size="xs"
             >
               {s.label}
-            </button>
+            </Pill>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-[#999] mt-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-1">
           {sampling === "grid" ? (
-            <label className="flex flex-col gap-1">
-              <span>Dots/edge: {dotsPerLongEdge}</span>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                step={1}
-                value={dotsPerLongEdge}
-                onChange={(e) => onChange({ dotsPerLongEdge: Number(e.target.value) })}
-                className="range range-xs"
-                style={{ accentColor: "#8A8578" }}
-              />
-            </label>
+            <RangeField
+              label="dots/edge"
+              value={dotsPerLongEdge}
+              min={10}
+              max={100}
+              step={1}
+              onChange={(n) => onChange({ dotsPerLongEdge: Math.round(n) })}
+            />
           ) : (
             <>
-              <label className="flex flex-col gap-1">
-                <span>Points: {totalPoints}</span>
-                <input
-                  type="range"
-                  min={200}
-                  max={3000}
-                  step={100}
-                  value={totalPoints}
-                  onChange={(e) => onChange({ totalPoints: Number(e.target.value) })}
-                  className="range range-xs"
-                  style={{ accentColor: "#8A8578" }}
-                />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span>Depth bias: {depthBias.toFixed(1)}</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={5}
-                  step={0.1}
-                  value={depthBias}
-                  onChange={(e) => onChange({ depthBias: Number(e.target.value) })}
-                  className="range range-xs"
-                  style={{ accentColor: "#8A8578" }}
-                />
-              </label>
+              <RangeField
+                label="points"
+                value={totalPoints}
+                min={200}
+                max={3000}
+                step={100}
+                onChange={(n) => onChange({ totalPoints: Math.round(n) })}
+              />
+              <RangeField
+                label="depth bias"
+                value={depthBias}
+                min={0}
+                max={5}
+                step={0.1}
+                format={(n) => n.toFixed(1)}
+                onChange={(n) => onChange({ depthBias: n })}
+              />
             </>
           )}
         </div>
@@ -131,46 +109,33 @@ export default function ParticleControls({ config, onChange, hasSegments }: Prop
       {/* Options */}
       <div className="flex flex-col gap-2">
         <p className="caption-mono text-ink-faint">Options</p>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-[#999]">
-          <label className="flex flex-col gap-1">
-            <span>Depth mul: {depthMul.toFixed(1)}</span>
-            <input
-              type="range"
-              min={0}
-              max={16}
-              step={0.1}
-              value={depthMul}
-              onChange={(e) => onChange({ depthMul: Number(e.target.value) })}
-              className="range range-xs"
-              style={{ accentColor: "#8A8578" }}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span>Parallax: {parallaxStrength}</span>
-            <input
-              type="range"
-              min={0}
-              max={150}
-              step={1}
-              value={parallaxStrength}
-              onChange={(e) => onChange({ parallaxStrength: Number(e.target.value) })}
-              className="range range-xs"
-              style={{ accentColor: "#8A8578" }}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span>Opacity: {opacity.toFixed(1)}</span>
-            <input
-              type="range"
-              min={0.1}
-              max={1}
-              step={0.1}
-              value={opacity}
-              onChange={(e) => onChange({ opacity: Number(e.target.value) })}
-              className="range range-xs"
-              style={{ accentColor: "#8A8578" }}
-            />
-          </label>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+          <RangeField
+            label="depth mul"
+            value={depthMul}
+            min={0}
+            max={16}
+            step={0.1}
+            format={(n) => n.toFixed(1)}
+            onChange={(n) => onChange({ depthMul: n })}
+          />
+          <RangeField
+            label="parallax"
+            value={parallaxStrength}
+            min={0}
+            max={150}
+            step={1}
+            onChange={(n) => onChange({ parallaxStrength: Math.round(n) })}
+          />
+          <RangeField
+            label="opacity"
+            value={opacity}
+            min={0.1}
+            max={1}
+            step={0.1}
+            format={(n) => n.toFixed(1)}
+            onChange={(n) => onChange({ opacity: n })}
+          />
         </div>
       </div>
     </>

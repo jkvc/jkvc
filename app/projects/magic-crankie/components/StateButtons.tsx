@@ -19,10 +19,10 @@ export default function StateButtons({
           <button
             key={state.id}
             onClick={() => onRequestState(state.id)}
-            className={`flex items-center justify-center w-9 h-9 rounded-full text-[12px] font-mono font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center w-9 h-9 rounded-full border-2 border-ink caption-mono transition-all duration-200 cursor-pointer ${
               isCurrent
-                ? "text-white shadow-sm"
-                : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-[#E8E4DD]"
+                ? "text-surface"
+                : "bg-surface-2 text-ink-faint hover:text-ink hover:bg-surface-sunken"
             }`}
             style={isCurrent ? { background: state.color } : undefined}
             title={`Go to ${state.id}`}

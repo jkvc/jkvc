@@ -1,6 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, type CSSProperties } from "react";
+import { twMerge } from "tailwind-merge";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import { PLAYBACK } from "../lib/playback-config";
 
 type Phase = "intro" | "color-in" | "video" | "reset" | "idle";
@@ -357,34 +359,36 @@ export default function PlaybackPlayer({
   const phaseInfo = PHASE_INFO[phase];
 
   return (
-    <div
-      className="relative w-full rounded-2xl overflow-hidden bg-black"
-      style={aspectStyle}
-    >
-      <canvas
-        ref={canvasRef}
-        width={dimensions.w || 768}
-        height={dimensions.h || 768}
-        className="absolute inset-0 w-full h-full object-contain"
-        style={{ display: showCanvas ? "block" : "none" }}
-      />
-      {videoUrl && (
-        <video
-          ref={videoRef}
-          src={videoUrl}
+    <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+      <div
+        className="relative w-full bg-black"
+        style={aspectStyle}
+      >
+        <canvas
+          ref={canvasRef}
+          width={dimensions.w || 768}
+          height={dimensions.h || 768}
           className="absolute inset-0 w-full h-full object-contain"
-          style={{ display: showVideo ? "block" : "none" }}
-          playsInline
-          muted
+          style={{ display: showCanvas ? "block" : "none" }}
         />
-      )}
+        {videoUrl && (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ display: showVideo ? "block" : "none" }}
+            playsInline
+            muted
+          />
+        )}
 
-      {showPhasePill && phaseInfo && (
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 text-white text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full">
-          <i className={`fa-solid ${phaseInfo.icon} text-[9px]`} />
-          {phaseInfo.label}
-        </div>
-      )}
+        {showPhasePill && phaseInfo && (
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-black/50 text-white caption-mono px-2.5 py-1 rounded-full">
+            <i className={`fa-solid ${phaseInfo.icon}`} />
+            {phaseInfo.label}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

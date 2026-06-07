@@ -11,8 +11,11 @@ import {
 
 type Shape = "circle" | "square";
 
-interface BaseProps {
-  icon: string;
+type ContentProps =
+  | { icon: string; label?: never; labelFont?: never }
+  | { label: string; icon?: never; labelFont?: string };
+
+type BaseProps = ContentProps & {
   title: string;
   size?: ControlSize;
   shape?: Shape;
@@ -22,7 +25,7 @@ interface BaseProps {
   active?: boolean;
   disabled?: boolean;
   inverted?: boolean;
-}
+};
 
 type ButtonProps = BaseProps & {
   onClick: () => void;
@@ -107,17 +110,33 @@ function StampControl({
   shape,
   iconFamily,
   icon,
+  label,
+  labelFont,
   iconClassName,
 }: {
   wrapClassName: string;
   faceClassName: string;
   shape: Shape;
   iconFamily: string;
-  icon: string;
+  icon?: string;
+  label?: string;
+  labelFont?: string;
   iconClassName: string;
 }) {
-  const iconEl = (
-    <i className={`${iconFamily} ${icon} ${iconClassName}`} />
+  const iconEl = label ? (
+    <span
+      className={iconClassName}
+      style={
+        labelFont
+          ? { fontFamily: labelFont, fontWeight: 900 }
+          : undefined
+      }
+      aria-hidden="true"
+    >
+      {label}
+    </span>
+  ) : (
+    <i className={`${iconFamily} ${icon} ${iconClassName}`} aria-hidden="true" />
   );
   if (!wrapClassName) {
     return <span className={faceClassName}>{iconEl}</span>;
@@ -174,6 +193,8 @@ export default function IconCircleButton(props: Props) {
             shape={shape}
             iconFamily={iconFamily}
             icon={props.icon}
+            label={props.label}
+            labelFont={props.labelFont}
             iconClassName={iconClassName}
           />
         </a>
@@ -193,6 +214,8 @@ export default function IconCircleButton(props: Props) {
           shape={shape}
           iconFamily={iconFamily}
           icon={props.icon}
+          label={props.label}
+          labelFont={props.labelFont}
           iconClassName={iconClassName}
         />
       </Link>
@@ -215,6 +238,8 @@ export default function IconCircleButton(props: Props) {
         shape={shape}
         iconFamily={iconFamily}
         icon={props.icon}
+        label={props.label}
+        labelFont={props.labelFont}
         iconClassName={iconClassName}
       />
     </button>

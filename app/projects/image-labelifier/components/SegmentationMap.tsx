@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { twMerge } from "tailwind-merge";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import type { SegmentResult } from "../lib/types";
 import { loadImage } from "../lib/image-utils";
 
@@ -157,9 +159,11 @@ export default function SegmentationMap({ originalUrl, segments }: Props) {
   }, [originalUrl, segments]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="w-full h-auto rounded-lg border border-base-300"
-    />
+    <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+      <canvas
+        ref={canvasRef}
+        className="w-full h-auto block"
+      />
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import type {
   GalleryItem,
   ProcessingState,
@@ -12,6 +13,7 @@ import SaveToGallery from "./SaveToGallery";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
 import Pill from "@/app/components/editorial/Pill";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
 interface Props {
   state: ProcessingState;
@@ -30,10 +32,10 @@ interface Props {
 }
 
 const STATUS_COLOR: Record<string, string> = {
-  idle: "text-[#BBB]",
+  idle: "text-ink-faint",
   running: "text-gold",
-  complete: "text-[#666]",
-  error: "text-red-500",
+  complete: "text-ink-muted",
+  error: "text-hot",
 };
 
 const STATUS_ICON: Record<string, string> = {
@@ -111,7 +113,7 @@ export default function DebugView({
 
       {state.originalImageUrl && (
         <>
-          {/* Full-width canvas on top — same prominence as presentation. */}
+          {/* Full-width canvas */}
           <PhotoCanvas
             imageUrl={state.originalImageUrl}
             boxes={state.boxes}
@@ -121,29 +123,38 @@ export default function DebugView({
           />
 
           {state.error && (
-            <p className="text-red-500 text-[12px]">{state.error}</p>
+            <p className="text-hot text-xs">{state.error}</p>
           )}
 
-          {/* Two-col controls below: theme + inspector + save (left), tunables (right). */}
+          {/* Two-col controls: inspector + save (left), tunables (right) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="flex flex-col gap-4 min-w-0">
+              {/* Theme */}
               <div>
-                <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-                  Theme
-                </p>
-                <p className="text-[11px] text-text-muted font-mono px-3 py-2 bg-[#F5F5F3] rounded-lg leading-relaxed">
+                <p className="caption-mono text-ink-faint mb-2">Theme</p>
+                <p
+                  className={twMerge(
+                    STAMP_FACE,
+                    "text-xs text-ink-muted font-mono px-3 py-2 bg-surface-sunken leading-relaxed"
+                  )}
+                >
                   {state.themeStatus === "running"
                     ? "…"
                     : state.theme || "(none yet)"}
                 </p>
               </div>
 
-              <p className="text-[10px] text-[#BBB] uppercase tracking-widest">
-                Inspector
-              </p>
-              <div className="flex flex-col divide-y divide-[#EEE] border border-[#EEE] rounded-md overflow-hidden">
+              {/* Inspector */}
+              <p className="caption-mono text-ink-faint">Inspector</p>
+              <div
+                className={twMerge(
+                  STAMP_FACE,
+                  STAMP_CARD_SHADOW,
+                  "flex flex-col divide-y divide-rule overflow-hidden"
+                )}
+              >
                 {state.boxes.length === 0 && (
-                  <p className="text-[11px] text-[#999] p-3">No boxes yet.</p>
+                  <p className="text-xs text-ink-faint p-3">No boxes yet.</p>
                 )}
                 {state.boxes.map((b, i) => {
                   const c = state.captions[b.id];
@@ -154,11 +165,11 @@ export default function DebugView({
                       key={b.id}
                       onMouseEnter={() => setHighlight(b.id)}
                       onMouseLeave={() => setHighlight(null)}
-                      className={`flex items-start gap-3 p-2 text-[11px] cursor-default ${
-                        isHover ? "bg-[#F8F4E8]" : "bg-white"
+                      className={`flex items-start gap-3 p-2 text-xs cursor-default transition-colors ${
+                        isHover ? "bg-surface-sunken" : "bg-surface"
                       }`}
                     >
-                      <span className="font-mono text-[10px] text-[#999] w-6 shrink-0 text-right">
+                      <span className="caption-mono text-ink-faint w-6 shrink-0 text-right">
                         {i.toString().padStart(2, "0")}
                       </span>
                       <span className={`${STATUS_COLOR[status]} w-4 shrink-0`}>
@@ -172,23 +183,22 @@ export default function DebugView({
                             {c.lines.map((line, li) => (
                               <span
                                 key={li}
-                                className="text-ink text-[12px] leading-snug"
+                                className="text-ink text-xs leading-snug"
                               >
                                 {line}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-[#BBB]">—</span>
+                          <span className="text-ink-faint">—</span>
                         )}
                       </div>
-                      <button
+                      <IconCircleButton
                         onClick={() => onRerunBox(b.id)}
-                        className="text-[10px] uppercase tracking-widest text-[#888] hover:text-ink border border-transparent hover:border-[#DDD] rounded-full px-2 py-0.5 transition-colors shrink-0"
-                        title="Re-run all captions (single-shot batch)"
-                      >
-                        <i className="fa-solid fa-rotate text-[10px]" />
-                      </button>
+                        icon="fa-rotate"
+                        title="Re-run caption"
+                        size="xs"
+                      />
                     </div>
                   );
                 })}

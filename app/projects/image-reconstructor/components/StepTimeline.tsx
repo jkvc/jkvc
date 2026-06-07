@@ -19,9 +19,7 @@ export default function StepTimeline({
   return (
     <div>
       <div className="mb-3">
-        <p className="text-[10px] text-[#BBB] uppercase tracking-widest">
-          Color-In Steps
-        </p>
+        <p className="caption-mono text-ink-faint">Color-In Steps</p>
       </div>
 
       <div>
@@ -32,9 +30,9 @@ export default function StepTimeline({
         {isRunning && (
           <div className="flex gap-3 items-center">
             <div className="flex items-center justify-center w-7 h-7 rounded-full border border-gold/40 text-gold shrink-0">
-              <i className="fa-solid fa-spinner fa-spin text-[11px]" />
+              <i className="fa-solid fa-spinner fa-spin" />
             </div>
-            <span className="text-[12px] text-text-muted">
+            <span className="text-xs text-ink-muted">
               {currentLabel || "Compositing..."}
             </span>
           </div>

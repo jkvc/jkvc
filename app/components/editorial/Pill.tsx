@@ -33,6 +33,7 @@ interface BaseProps {
 type ButtonVariant = BaseProps & {
     onClick?: () => void;
     type?: "button" | "submit" | "reset";
+    disabled?: boolean;
     href?: never;
     external?: never;
     target?: never;
@@ -162,13 +163,15 @@ export default function Pill(props: Props) {
     }
 
     const btn = props as ButtonVariant;
+    const disabled = btn.disabled ?? false;
     return (
         <button
             type={btn.type ?? "button"}
             onClick={btn.onClick}
+            disabled={disabled}
             title={btn.title}
             aria-pressed={btn.ariaPressed}
-            className={ROOT}
+            className={twMerge(ROOT, disabled && "cursor-not-allowed opacity-40")}
         >
             <StampPill wrapClassName={wrap} faceClassName={face}>
                 <Body icon={btn.icon} iconFamily={iconFamily}>

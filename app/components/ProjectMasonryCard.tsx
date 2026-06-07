@@ -1,5 +1,6 @@
 import Link from "next/link";
 import StampShell from "@/app/components/ui/StampShell";
+import KindStamp from "@/app/components/editorial/KindStamp";
 import {
     getProjectKindMeta,
     resolveRef,
@@ -65,13 +66,11 @@ export default function ProjectMasonryCard({
         <Link href={`/projects/${slug}`} className="group block break-inside-avoid mb-4">
             <StampShell variant="card" interactive bleed={false} faceClassName="overflow-hidden">
                 <div className="relative overflow-hidden border-b-2 border-ink bg-surface-2">
-                    <span className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 border border-ink bg-surface-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-hot">
-                        <i
-                            className={`fa-solid ${kindMeta.icon} text-[8px]`}
-                            aria-hidden="true"
-                        />
-                        {kindMeta.label}
-                    </span>
+                    <KindStamp
+                        label={kindMeta.label}
+                        icon={kindMeta.icon}
+                        className="absolute bottom-2 right-2 z-10"
+                    />
                     {thumbnail ? (
                         <img
                             src={thumbnail}

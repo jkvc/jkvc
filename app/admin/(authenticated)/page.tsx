@@ -2,9 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
-import RecipeHeader from "@/app/components/editorial/RecipeHeader";
+import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
 import LabeledDivider from "@/app/components/editorial/LabeledDivider";
+import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import Pill from "@/app/components/editorial/Pill";
+import { STAMP_FACE } from "@/app/lib/stamp";
+import { twMerge } from "tailwind-merge";
 
 interface AdminLink {
   href: string;
@@ -32,57 +35,52 @@ export default function AdminPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen text-ink px-6 pt-16 pb-16 sm:px-8">
-      <div className="max-w-2xl mx-auto">
-        <RecipeHeader meta={{ issue: "ADMIN", kindIcon: "fa-lock" }} />
-        <h1 className="mt-6 font-sans font-black text-5xl leading-[1.05] tracking-tight text-ink uppercase">
-          Admin
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-xl">
-          Site administration.
-        </p>
+    <InteriorPageShell maxWidthClassName="max-w-2xl">
+      <PageStampHeader
+        meta={{ eyebrow: "ADMIN", icon: "fa-lock" }}
+        title="Admin"
+        subtitle="Site administration."
+      />
 
-        <div className="mt-12">
-          <LabeledDivider variant="full">Tools</LabeledDivider>
+      <div className="mt-12">
+        <LabeledDivider variant="full">Tools</LabeledDivider>
 
-      <div className="divide-y divide-rule">
-        {ADMIN_LINKS.map((link) => (
-          <a
-            key={link.href}
-            href={link.href}
-            className="flex items-center gap-4 py-4 group transition-colors hover:bg-surface-deep -mx-4 px-4 rounded-lg"
-          >
-            <div className="w-10 h-10 rounded-full border border-rule flex items-center justify-center shrink-0 group-hover:border-ink transition-colors">
+        <div className="divide-y divide-rule">
+          {ADMIN_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="group -mx-4 flex items-center gap-4 px-4 py-4 transition-colors hover:bg-surface-deep"
+            >
+              <span
+                className={twMerge(
+                  STAMP_FACE,
+                  "inline-flex h-7 w-7 shrink-0 items-center justify-center bg-surface text-ink group-hover:border-hot group-hover:text-hot",
+                )}
+                aria-hidden="true"
+              >
+                <i className={`fa-solid ${link.icon} text-[11px]`} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="caption-mono text-ink">{link.label}</div>
+                <div className="mt-0.5 text-[13px] leading-snug text-ink-faint">
+                  {link.description}
+                </div>
+              </div>
               <i
-                className={`fa-solid ${link.icon} text-ink-muted group-hover:text-ink transition-colors`}
+                className="fa-solid fa-chevron-right text-xs text-rule transition-colors group-hover:text-ink-muted"
                 aria-hidden="true"
               />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="caption-mono text-ink">{link.label}</div>
-              <div className="text-[13px] text-ink-faint leading-snug mt-0.5">
-                {link.description}
-              </div>
-            </div>
-            <i
-              className="fa-solid fa-chevron-right text-rule group-hover:text-ink-muted transition-colors text-xs"
-              aria-hidden="true"
-            />
-          </a>
-        ))}
-      </div>
+            </a>
+          ))}
+        </div>
 
         <div className="mt-16 flex justify-center">
-          <Pill
-            onClick={handleLogout}
-            icon="fa-right-from-bracket"
-            size="xs"
-          >
+          <Pill onClick={handleLogout} icon="fa-right-from-bracket" size="xs">
             log out
           </Pill>
         </div>
-        </div>
       </div>
-    </div>
+    </InteriorPageShell>
   );
 }

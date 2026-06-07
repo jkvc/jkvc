@@ -12,7 +12,6 @@
  * a row, trim somewhere else.
  */
 
-import Link from "next/link";
 import Wordmark from "@/app/components/brand/Wordmark";
 import { SITE } from "@/app/lib/site";
 
@@ -268,13 +267,6 @@ export default function ResumePage() {
                 the rest of the site. ⌘P / Ctrl-P prints. */}
             <div className="resume-chrome fixed top-0 inset-x-0 z-50 bg-surface/95 backdrop-blur border-b border-rule">
                 <div className="max-w-[8.5in] mx-auto px-6 h-12 flex items-center justify-between">
-                    <Link
-                        href="/"
-                        aria-label="Back to home"
-                        className="text-ink-muted hover:text-ink inline-flex items-center justify-center w-8 h-8 -ml-2"
-                    >
-                        <i className="fa-solid fa-arrow-left text-[12px]" />
-                    </Link>
                     <span className="caption-mono text-ink-faint">
                         <span className="text-hot">⌘P</span>
                         <span> · </span>

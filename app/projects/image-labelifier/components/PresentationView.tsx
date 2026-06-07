@@ -11,6 +11,7 @@ import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
 import StatusPillRow from "@/app/components/ui/StatusPillRow";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import Pill from "@/app/components/editorial/Pill";
+import StampShell from "@/app/components/ui/StampShell";
 
 interface Props {
   inference: InferenceState;
@@ -48,58 +49,54 @@ export default function PresentationView({
 
   const ready = !!(depthUrl && segments && previewUrl && !isLoading);
 
-  // -------------------------------------------------------------------------
-  // Empty state — pill upload button with examples below
-  // -------------------------------------------------------------------------
-
+  // ---- Empty state ----
   if (!previewUrl) {
     return (
-      <div className="flex flex-col items-center gap-8">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onFile(f);
-          }}
-        />
+      <StampShell variant="card" bleed={false} className="flex justify-center">
+        <div className="flex flex-col items-center gap-8 p-8 sm:p-12">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) onFile(f);
+            }}
+          />
 
-        <Pill
-          onClick={() => fileInputRef.current?.click()}
-          icon="fa-arrow-up-from-bracket"
-        >
-          Upload image
-        </Pill>
+          <Pill
+            onClick={() => fileInputRef.current?.click()}
+            icon="fa-arrow-up-from-bracket"
+          >
+            Upload image
+          </Pill>
 
-        <ExampleGalleryStrip
-          items={galleryItems.map((item) => ({
-            id: item.id,
-            imageUrl: item.originalUrl,
-            alt: "Saved",
-          }))}
-          onSelect={(id) => {
-            const item = galleryItems.find((g) => g.id === id);
-            if (item) onSelectGalleryItem(item);
-          }}
-          onDelete={onDeleteGalleryItem}
-          title="Or choose from an example"
-          center
-          thumbnailSize="md"
-          className="items-center w-full"
-        />
-      </div>
+          <ExampleGalleryStrip
+            items={galleryItems.map((item) => ({
+              id: item.id,
+              imageUrl: item.originalUrl,
+              alt: "Saved",
+            }))}
+            onSelect={(id) => {
+              const item = galleryItems.find((g) => g.id === id);
+              if (item) onSelectGalleryItem(item);
+            }}
+            onDelete={onDeleteGalleryItem}
+            title="Or choose from an example"
+            center
+            thumbnailSize="md"
+            className="items-center w-full"
+          />
+        </div>
+      </StampShell>
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Loading state — keep the dashed box with pills inside
-  // -------------------------------------------------------------------------
-
+  // ---- Loading state ----
   if (!ready) {
     return (
-      <div className="border border-dashed border-[#DDD] rounded-2xl p-10 text-center">
+      <StampShell variant="card" bleed={false} faceClassName="p-8 text-center">
         <StatusPillRow
           steps={[
             {
@@ -116,40 +113,28 @@ export default function PresentationView({
             },
           ]}
         />
-        {error && <p className="text-red-500 text-xs mt-4">{error}</p>}
-      </div>
+        {error && <p className="text-hot text-xs mt-4">{error}</p>}
+      </StampShell>
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Ready — preset selector + particle canvas
-  // -------------------------------------------------------------------------
-
+  // ---- Ready ----
   return (
     <div className="flex flex-col gap-6">
       {/* Toolbar: preset selector (left) + actions (right) */}
       <div className="flex items-center justify-between">
-        {/* Preset circles — left aligned */}
-        <div className="flex gap-2">
-          {PRESETS.map((preset) => {
-            const isActive = preset.id === activePreset.id;
-            return (
-              <button
-                key={preset.id}
-                onClick={() => setActivePreset(preset)}
-                className={`flex items-center justify-center w-9 h-9 rounded-full text-[12px] transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? "bg-gold text-white shadow-sm"
-                    : "bg-[#F0EDE8] text-[#AAA] hover:text-gold hover:bg-[#E8E4DD]"
-                }`}
-                title={`${preset.labelEn} / ${preset.labelZh}`}
-              >
-                <span className="font-bold" style={preset.glyphFont ? { fontFamily: preset.glyphFont, fontWeight: 900 } : undefined}>
-                  {preset.glyph}
-                </span>
-              </button>
-            );
-          })}
+        {/* Preset pills — left aligned */}
+        <div className="flex gap-1.5">
+          {PRESETS.map((preset) => (
+            <IconCircleButton
+              key={preset.id}
+              onClick={() => setActivePreset(preset)}
+              active={preset.id === activePreset.id}
+              title={`${preset.labelEn} / ${preset.labelZh}`}
+              label={preset.glyph}
+              labelFont={preset.glyphFont}
+            />
+          ))}
         </div>
 
         {/* Action buttons — right aligned: expert · reset */}
@@ -159,7 +144,7 @@ export default function PresentationView({
             icon="fa-flask"
             title="Expert mode"
           />
-          <span className="text-[#DDD] text-xs select-none">&middot;</span>
+          <span className="text-rule text-xs select-none">&middot;</span>
           <IconCircleButton
             onClick={onReset}
             icon="fa-rotate"
@@ -179,7 +164,7 @@ export default function PresentationView({
         initialConfig={viewingItem?.mode === "presentation" ? viewingItem.config : undefined}
       />
 
-      {/* Save to Gallery — DevOnlyButton handles visibility internally */}
+      {/* Save to Gallery */}
       <SaveToGallery
         canvasRef={canvasRef}
         originalUrl={previewUrl}

@@ -150,7 +150,7 @@ export default function Home() {
                         className={twMerge(
                             "min-h-0 min-w-0",
                             wide &&
-                                "h-dvh overflow-y-auto overscroll-y-contain scrollbar-hidden py-8",
+                            "h-dvh overflow-y-auto overscroll-y-contain scrollbar-hidden py-8",
                         )}
                     >
                         {visible.length > 0 ? (

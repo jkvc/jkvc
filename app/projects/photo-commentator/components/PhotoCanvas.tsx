@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useImperativeHandle, useRef, forwardRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import type { Box, Caption, Tunables } from "../lib/types";
 import { loadImage } from "../lib/image-utils";
 import { renderPhotoCommentator } from "../lib/canvas-render";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
 interface Props {
   imageUrl: string;
@@ -91,15 +93,17 @@ const PhotoCanvas = forwardRef<PhotoCanvasHandle, Props>(function PhotoCanvas(
   // value) wipes its pixel buffer, which would erase the freshly-drawn
   // frame on the very next render after we call setDims.
   return (
-    <canvas
-      ref={canvasRef}
-      style={
-        dims
-          ? { aspectRatio: `${dims.w} / ${dims.h}` }
-          : undefined
-      }
-      className={`w-full h-auto rounded-lg border border-[#E8E8E8] block ${className}`}
-    />
+    <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden", className)}>
+      <canvas
+        ref={canvasRef}
+        style={
+          dims
+            ? { aspectRatio: `${dims.w} / ${dims.h}` }
+            : undefined
+        }
+        className="w-full h-auto block"
+      />
+    </div>
   );
 });
 

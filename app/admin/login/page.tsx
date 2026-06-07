@@ -2,6 +2,9 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, useCallback, Suspense } from "react";
+import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
+import PageStampHeader from "@/app/components/editorial/PageStampHeader";
+import Pill from "@/app/components/editorial/Pill";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -41,46 +44,36 @@ function LoginForm() {
   );
 
   return (
-    <div className="min-h-screen text-ink px-6 pt-16 pb-16 sm:px-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="mt-6 font-sans font-black text-5xl leading-[1.05] tracking-tight text-ink uppercase">
-          Admin
-        </h1>
-        <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-xl">
-          Say the magic word.
-        </p>
+    <InteriorPageShell maxWidthClassName="max-w-2xl">
+      <PageStampHeader
+        meta={{ eyebrow: "ADMIN", icon: "fa-lock" }}
+        title="Admin"
+        subtitle="Say the magic word."
+      />
 
-        <form onSubmit={handleSubmit} className="mt-12 max-w-xs">
-          <input
-            id="magic-word"
-            type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="···"
-            autoFocus
-            autoComplete="off"
-            className="w-full bg-transparent border-b border-rule text-[15px] text-ink py-2 outline-none focus:border-ink transition-colors placeholder:text-rule"
-          />
-          {error && (
-            <p className="caption-mono text-hot mt-3">{error}</p>
-          )}
-          <button
-            type="submit"
-            disabled={loading || !token.trim()}
-            className="mt-6 caption-mono rounded-full border border-rule text-ink-muted hover:border-ink hover:text-ink transition-colors h-8 px-5 disabled:opacity-30 disabled:cursor-not-allowed"
-          >
+      <form onSubmit={handleSubmit} className="mt-12 max-w-xs">
+        <input
+          id="magic-word"
+          type="password"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          placeholder="···"
+          autoFocus
+          autoComplete="off"
+          className="w-full border-b border-rule bg-transparent py-2 text-[15px] text-ink outline-none transition-colors placeholder:text-rule focus:border-ink"
+        />
+        {error && <p className="caption-mono mt-3 text-hot">{error}</p>}
+        <div className="mt-6">
+          <Pill type="submit" disabled={loading || !token.trim()} size="xs">
             {loading ? (
-              <i
-                className="fa-solid fa-spinner animate-spin"
-                aria-hidden="true"
-              />
+              <i className="fa-solid fa-spinner animate-spin" aria-hidden="true" />
             ) : (
               "enter"
             )}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Pill>
+        </div>
+      </form>
+    </InteriorPageShell>
   );
 }
 

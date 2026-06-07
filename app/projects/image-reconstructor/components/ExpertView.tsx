@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { twMerge } from "tailwind-merge";
 import type { ProcessingState, GalleryItem } from "../lib/types";
 import StepTimeline from "./StepTimeline";
 import PlaybackPlayer from "./PlaybackPlayer";
@@ -8,6 +9,7 @@ import SaveToGallery from "./SaveToGallery";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import ExampleGalleryStrip from "@/app/components/ui/ExampleGalleryStrip";
 import Pill from "@/app/components/editorial/Pill";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
 interface Props {
   state: ProcessingState;
@@ -47,7 +49,6 @@ export default function ExpertView({
           icon="fa-arrow-left"
           title="Back to Presentation"
         />
-
         <IconCircleButton
           onClick={onReset}
           icon="fa-rotate"
@@ -91,38 +92,40 @@ export default function ExpertView({
         </div>
       )}
 
-      {/* Row 1: Original (full width) */}
+      {/* Row 1: Original */}
       {state.originalImageUrl && (
         <div>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-            Original
-          </p>
-          <img
-            src={state.originalImageUrl}
-            alt="Original"
-            className="w-full rounded-lg border border-[#E8E8E8] aspect-square object-cover"
-          />
+          <p className="caption-mono text-ink-faint mb-2">Original</p>
+          <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={state.originalImageUrl}
+              alt="Original"
+              className="w-full h-auto block aspect-square object-cover"
+            />
+          </div>
         </div>
       )}
 
       {/* Row 2: Sketch */}
       {state.originalImageUrl && (
         <div>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-            Sketch
-          </p>
+          <p className="caption-mono text-ink-faint mb-2">Sketch</p>
           {state.sketchUrl ? (
-            <img
-              src={state.sketchUrl}
-              alt="Sketch"
-              className="w-full rounded-lg border border-[#E8E8E8] aspect-square object-cover"
-            />
+            <div className={twMerge(STAMP_FACE, STAMP_CARD_SHADOW, "overflow-hidden")}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={state.sketchUrl}
+                alt="Sketch"
+                className="w-full h-auto block aspect-square object-cover"
+              />
+            </div>
           ) : (
-            <div className="w-full rounded-lg border border-dashed border-[#DDD] aspect-square flex items-center justify-center">
+            <div className="w-full border border-dashed border-rule aspect-square flex items-center justify-center">
               {state.sketchStatus === "running" ? (
-                <i className="fa-solid fa-spinner fa-spin text-gold text-[16px]" />
+                <i className="fa-solid fa-spinner fa-spin text-gold text-base" />
               ) : (
-                <span className="text-[#CCC] text-[12px]">Waiting</span>
+                <span className="text-ink-faint text-xs">Waiting</span>
               )}
             </div>
           )}
@@ -131,7 +134,7 @@ export default function ExpertView({
 
       {/* Error */}
       {state.error && (
-        <div className="text-red-500 text-[13px]">{state.error}</div>
+        <div className="text-hot text-xs">{state.error}</div>
       )}
 
       {/* Color-in steps timeline */}
@@ -146,31 +149,27 @@ export default function ExpertView({
       {/* Animation prompt + status */}
       {state.promptStatus !== "idle" && (
         <div>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-            Animation
-          </p>
+          <p className="caption-mono text-ink-faint mb-2">Animation</p>
           {state.animationPrompt && (
-            <p className="text-[11px] text-text-muted font-mono px-3 py-2 bg-[#F5F5F3] rounded-lg mb-2 leading-relaxed">
+            <p className={twMerge(STAMP_FACE, "text-xs text-ink-muted font-mono px-3 py-2 bg-surface-sunken mb-2 leading-relaxed")}>
               {state.animationPrompt}
             </p>
           )}
-          <div className="flex items-center gap-2 px-3 py-2 bg-[#F5F5F3] rounded-xl">
+          <div className={twMerge(STAMP_FACE, "flex items-center gap-2 px-3 py-2 bg-surface-sunken")}>
             <span
-              className={`flex items-center justify-center w-7 h-7 rounded-full border ${
-                state.animationStatus === "running" ||
-                state.promptStatus === "running"
+              className={`flex items-center justify-center w-7 h-7 border ${
+                state.animationStatus === "running" || state.promptStatus === "running"
                   ? "border-gold/40 text-gold"
-                  : "border-[#D0D0D0] text-[#AAA]"
+                  : "border-rule text-ink-faint"
               }`}
             >
-              {state.animationStatus === "running" ||
-              state.promptStatus === "running" ? (
-                <i className="fa-solid fa-film text-[11px] animate-spin" />
+              {state.animationStatus === "running" || state.promptStatus === "running" ? (
+                <i className="fa-solid fa-film text-xs animate-spin" />
               ) : (
-                <i className="fa-solid fa-check text-[11px]" />
+                <i className="fa-solid fa-check text-xs" />
               )}
             </span>
-            <span className="text-[12px] text-text-muted">
+            <span className="text-xs text-ink-muted">
               {state.promptStatus === "running"
                 ? "Generating prompt..."
                 : state.animationStatus === "running"
@@ -186,9 +185,7 @@ export default function ExpertView({
       {/* Playback */}
       {isComplete && frameUrls.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#BBB] uppercase tracking-widest mb-2">
-            Playback
-          </p>
+          <p className="caption-mono text-ink-faint mb-2">Playback</p>
           <PlaybackPlayer
             stepImageUrls={frameUrls}
             videoUrl={state.videoUrl}

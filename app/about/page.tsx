@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Wordmark from "@/app/components/brand/Wordmark";
 import ContactSlab from "@/app/components/editorial/ContactSlab";
-import RecipeHeader from "@/app/components/editorial/RecipeHeader";
+import InteriorPageShell from "@/app/components/editorial/InteriorPageShell";
+import PageStampHeader from "@/app/components/editorial/PageStampHeader";
 import StampShell from "@/app/components/ui/StampShell";
 import { SITE } from "@/app/lib/site";
 import { renderInlineMarkdown } from "@/app/lib/inline-markdown";
@@ -124,18 +125,11 @@ function TimelineRow({
 
 export default function About() {
     return (
-        <div className="min-h-screen text-ink px-5 sm:px-8 pt-8 pb-16 relative">
-            <div className="relative max-w-3xl mx-auto">
-                <RecipeHeader meta={{ issue: "ABOUT" }} />
-
-                {/* Hero card — name badge, headshot, tagline */}
-                <section className="mt-8 mb-14">
-                    <StampShell
-                        variant="card"
-                        faceClassName="flex items-center gap-6 p-6 sm:gap-8 sm:p-8"
-                    >
+        <InteriorPageShell>
+                <PageStampHeader meta={{ eyebrow: "ABOUT" }}>
+                    <div className="flex items-center gap-6 sm:gap-8">
                         <div className="min-w-0 flex-1">
-                            <h1 className="text-4xl sm:text-5xl text-ink leading-none">
+                            <h1 className="text-4xl leading-none text-ink sm:text-5xl">
                                 <Wordmark defaultExpanded interactive={false} />
                             </h1>
                             <p className="mt-4 text-sm leading-relaxed text-ink-muted">
@@ -148,11 +142,11 @@ export default function About() {
                             alt="Portrait of Junshen Kevin Chen"
                             className="h-24 w-24 flex-shrink-0 border-2 border-ink object-cover sm:h-32 sm:w-32"
                         />
-                    </StampShell>
-                </section>
+                    </div>
+                </PageStampHeader>
 
                 {/* Bio section */}
-                <section className="mb-14">
+                <section className="mb-14 mt-12">
                     <SectionHead title="Hi" />
                     <p className="text-[15px] leading-relaxed text-ink-muted">
                         I&apos;m generally interested in building AI things.
@@ -205,7 +199,6 @@ export default function About() {
                 </section>
 
                 <ContactSlab />
-            </div>
-        </div>
+        </InteriorPageShell>
     );
 }

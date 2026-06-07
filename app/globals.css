@@ -114,6 +114,44 @@ body>* {
     border-top-color: var(--color-rule);
 }
 
+/* Neo-brutalist range input — square thumb, ink border, stamped shadow. */
+@utility stamp-range {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: var(--color-surface-sunken);
+    border: 2px solid var(--color-ink);
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 18px;
+        margin-top: -7px;
+        background: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+        cursor: pointer;
+    }
+
+    &::-moz-range-track {
+        height: 8px;
+        background: var(--color-surface-sunken);
+        border: 2px solid var(--color-ink);
+    }
+
+    &::-moz-range-thumb {
+        width: 14px;
+        height: 18px;
+        background: var(--color-surface);
+        border: 2px solid var(--color-ink);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+        border-radius: 0;
+        cursor: pointer;
+    }
+}
+
 /* Scrollable region without a visible scrollbar (trackpad/wheel still works). */
 @utility scrollbar-hidden {
     scrollbar-width: none;
