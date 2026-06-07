@@ -29,10 +29,10 @@ export default function AdminUsagePage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
+    <div className="min-h-screen text-ink px-6 pt-16 pb-16 sm:px-8">
       <div className="max-w-2xl mx-auto">
         <RecipeHeader meta={{ issue: "ADMIN" }} backHref="/admin" />
-        <h1 className="mt-6 font-serif italic text-5xl leading-[1.05] tracking-[-0.02em] text-ink">
+        <h1 className="mt-6 font-sans font-black text-5xl leading-[1.05] tracking-tight text-ink uppercase">
           Charge Usage
         </h1>
         <div className="mt-4 flex items-center gap-3">

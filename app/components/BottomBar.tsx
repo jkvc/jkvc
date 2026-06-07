@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
+import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
+import { twMerge } from "tailwind-merge";
 
 const STORAGE_KEY = "jkvc:show-drafts";
 const DRAFTS_CHANGE_EVENT = "jkvc:drafts-changed";
@@ -58,9 +60,15 @@ function EmailButton() {
 
   if (revealed) {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-gold/50 text-gold text-[12px]">
-        <span className="font-mono">{EMAIL_USER}</span>
-        <i className="fa-brands fa-google text-[12px]" />
+      <div
+        className={twMerge(
+          STAMP_FACE,
+          STAMP_CONTROL_WRAP_IDLE,
+          "flex items-center gap-1.5 bg-surface px-3 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-ink",
+        )}
+      >
+        <span>{EMAIL_USER}</span>
+        <i className="fa-brands fa-google text-[11px]" />
       </div>
     );
   }

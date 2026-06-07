@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { twMerge } from "tailwind-merge";
 import { CONTROL_SIZE, type ControlSize } from "./controlSize";
+import {
+  STAMP_CONTROL_LIFT,
+  STAMP_CONTROL_SHADOW,
+  STAMP_FACE,
+} from "@/app/lib/stamp";
 
 interface BaseProps {
   icon: string;
@@ -12,7 +18,6 @@ interface BaseProps {
   className?: string;
   active?: boolean;
   disabled?: boolean;
-  /** Inverted variant for use on dark surfaces (e.g. ContactSlab). */
   inverted?: boolean;
 }
 
@@ -35,7 +40,14 @@ type LinkProps = BaseProps & {
 
 type Props = ButtonProps | LinkProps;
 
-function getClasses({
+const ROOT = "group inline-flex cursor-pointer";
+
+function wrapClasses(active: boolean, disabled: boolean, inverted: boolean): string {
+  if (disabled || (inverted && !active)) return "";
+  return "inline-flex rounded-full";
+}
+
+function faceClasses({
   size,
   active,
   disabled,
@@ -47,25 +59,58 @@ function getClasses({
   disabled: boolean;
   inverted: boolean;
   className?: string;
-}) {
+}): string {
   let stateClasses: string;
   if (inverted) {
     stateClasses = active
-      ? "border-hot text-hot"
-      : "border-surface/25 text-surface/60 hover:border-hot hover:text-hot";
+      ? "border-hot text-hot bg-surface/10"
+      : "border-surface/30 text-surface/60 hover:border-hot hover:text-hot bg-transparent";
   } else {
     stateClasses = active
-      ? "border-ink text-ink"
-      : "border-rule text-ink-faint hover:border-ink hover:text-ink";
+      ? "border-ink bg-ink text-surface"
+      : "border-ink bg-surface text-ink";
   }
 
-  const disabledClasses = disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer";
+  const lift = !active && !disabled && !inverted ? STAMP_CONTROL_LIFT : "";
+  const shadow = !inverted ? STAMP_CONTROL_SHADOW : "";
+  const disabledClasses = disabled ? "opacity-40 cursor-not-allowed" : "";
 
-  // inline-flex so the button can be placed mid-paragraph (e.g. the inline
-  // About affordance in the home hero) without breaking the text line.
-  return `inline-flex items-center justify-center rounded-full border transition-all ${CONTROL_SIZE[size].square} ${stateClasses} ${disabledClasses} ${
-    className ?? ""
-  }`;
+  return twMerge(
+    STAMP_FACE,
+    shadow,
+    lift,
+    "inline-flex items-center justify-center rounded-full",
+    CONTROL_SIZE[size].square,
+    stateClasses,
+    disabledClasses,
+    className,
+  );
+}
+
+function StampControl({
+  wrapClassName,
+  faceClassName,
+  iconFamily,
+  icon,
+  iconClassName,
+}: {
+  wrapClassName: string;
+  faceClassName: string;
+  iconFamily: string;
+  icon: string;
+  iconClassName: string;
+}) {
+  const iconEl = (
+    <i className={`${iconFamily} ${icon} ${iconClassName}`} />
+  );
+  if (!wrapClassName) {
+    return <span className={faceClassName}>{iconEl}</span>;
+  }
+  return (
+    <span className={twMerge(wrapClassName, "inline-flex rounded-full")}>
+      <span className={faceClassName}>{iconEl}</span>
+    </span>
+  );
 }
 
 export default function IconCircleButton(props: Props) {
@@ -75,7 +120,9 @@ export default function IconCircleButton(props: Props) {
   const inverted = props.inverted ?? false;
   const iconFamily = props.iconFamily ?? "fa-solid";
   const iconClassName = props.iconClassName ?? CONTROL_SIZE[size].circleIcon;
-  const classes = getClasses({ size, active, disabled, inverted, className: props.className });
+  const wrap = wrapClasses(active, disabled, inverted);
+  const face = faceClasses({ size, active, disabled, inverted, className: props.className });
+  const rootClass = twMerge(ROOT, disabled && "cursor-not-allowed");
 
   const href = "href" in props ? props.href : undefined;
   if (typeof href === "string") {
@@ -87,11 +134,17 @@ export default function IconCircleButton(props: Props) {
           href={href}
           target={props.target ?? "_blank"}
           rel={props.rel ?? "noopener noreferrer"}
-          className={classes}
+          className={rootClass}
           title={props.title}
           aria-label={props.title}
         >
-          <i className={`${iconFamily} ${props.icon} ${iconClassName}`} />
+          <StampControl
+            wrapClassName={wrap}
+            faceClassName={face}
+            iconFamily={iconFamily}
+            icon={props.icon}
+            iconClassName={iconClassName}
+          />
         </a>
       );
     }
@@ -99,11 +152,17 @@ export default function IconCircleButton(props: Props) {
     return (
       <Link
         href={href}
-        className={classes}
+        className={rootClass}
         title={props.title}
         aria-label={props.title}
       >
-        <i className={`${iconFamily} ${props.icon} ${iconClassName}`} />
+        <StampControl
+          wrapClassName={wrap}
+          faceClassName={face}
+          iconFamily={iconFamily}
+          icon={props.icon}
+          iconClassName={iconClassName}
+        />
       </Link>
     );
   }
@@ -114,11 +173,17 @@ export default function IconCircleButton(props: Props) {
       onClick={buttonProps.onClick}
       type={buttonProps.type ?? "button"}
       disabled={disabled}
-      className={classes}
+      className={rootClass}
       title={props.title}
       aria-label={props.title}
     >
-      <i className={`${iconFamily} ${props.icon} ${iconClassName}`} />
+      <StampControl
+        wrapClassName={wrap}
+        faceClassName={face}
+        iconFamily={iconFamily}
+        icon={props.icon}
+        iconClassName={iconClassName}
+      />
     </button>
   );
 }

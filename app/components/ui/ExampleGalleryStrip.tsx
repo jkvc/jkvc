@@ -1,6 +1,7 @@
 "use client";
 
 import LabeledDivider from "@/app/components/editorial/LabeledDivider";
+import StampShell from "@/app/components/ui/StampShell";
 
 export interface ExampleGalleryItem {
   id: string;
@@ -53,24 +54,31 @@ export default function ExampleGalleryStrip({
                 e.stopPropagation();
                 onSelect(item.id);
               }}
-              className={`rounded-full overflow-hidden border border-rule hover:border-ink transition-colors ${SIZE_MAP[thumbnailSize]} p-0 cursor-pointer`}
+              className="group cursor-pointer p-0"
             >
-              <img
-                src={item.imageUrl}
-                alt={item.alt ?? "Example"}
-                className="w-full h-full object-cover"
-              />
+              <StampShell
+                variant="control"
+                interactive
+                inline
+                bleed={false}
+                faceClassName={`overflow-hidden p-0 hover:border-hot ${SIZE_MAP[thumbnailSize]}`}
+              >
+                <img
+                  src={item.imageUrl}
+                  alt={item.alt ?? "Example"}
+                  className="h-full w-full object-cover"
+                />
+              </StampShell>
             </button>
             {showDelete && (
               <button
-                className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#E0E0E0] text-[#999] hover:bg-red-400 hover:text-white text-[9px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-hot text-white hover:bg-ink text-[9px] leading-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-ink"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(item.id);
                 }}
-                title="Delete"
               >
-                &times;
+                <i className="fa-solid fa-xmark" aria-hidden />
               </button>
             )}
           </div>

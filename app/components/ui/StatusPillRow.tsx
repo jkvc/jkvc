@@ -1,5 +1,8 @@
 "use client";
 
+import { twMerge } from "tailwind-merge";
+import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
+
 export type PipelineStatus = "idle" | "running" | "complete" | "error";
 
 export interface StatusPillStep {
@@ -18,19 +21,23 @@ export default function StatusPillRow({ steps, className = "" }: Props) {
   return (
     <div className={`flex justify-center gap-3 ${className}`}>
       {steps.map(({ id, icon, status, title }) => {
-        const stateClasses =
+        const stateClasses = twMerge(
+          STAMP_FACE,
+          STAMP_CONTROL_WRAP_IDLE,
+          "flex h-10 w-10 items-center justify-center",
           status === "running"
-            ? "border-gold/40 text-gold"
+            ? "border-hot bg-surface text-hot"
             : status === "complete"
-              ? "border-[#D0D0D0] text-[#AAA]"
+              ? "border-ink bg-ink text-surface"
               : status === "error"
-                ? "border-red-300 text-red-500"
-                : "border-[#E8E8E8] text-[#CCC]";
+                ? "border-hot bg-hot/10 text-hot"
+                : "border-ink bg-surface text-ink",
+        );
 
         return (
           <span
             key={id}
-            className={`flex items-center justify-center w-10 h-10 rounded-full border ${stateClasses}`}
+            className={stateClasses}
             title={title}
           >
             {status === "running" ? (

@@ -2,75 +2,139 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 @plugin "daisyui";
 
-html, body {
-  background-color: #F0EEE6;
-}
-
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+    --font-sans: var(--font-geist-sans), "Helvetica Neue", Helvetica, Arial, "Segoe UI", system-ui, sans-serif;
+    --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
-  /* Anthropic-inspired editorial palette — cool cream paper, warm-black ink,
-     and Claude coral as the single hot accent. */
-  --color-surface: #F0EEE6;
-  --color-surface-deep: #E8E6DC;
-  --color-ink: #141413;
-  --color-ink-muted: #3D3D3A;
-  --color-ink-faint: #87867F;
-  --color-rule: #D4D2C9;
-  --color-hot: #C0392B;
-  --color-hot-deep: #8E2A20;
+    /* Neo-brutalist technical handbook palette. Cool neutral page bg (handbook
+     #f4f4f3), white surfaces, spot red accent. */
+    --color-paper: #f4f4f3;
+    --color-surface: #ffffff;
+    --color-surface-2: #e9e9e8;
+    --color-surface-sunken: #f1f1f0;
+    --color-ink: #15140f;
+    --color-ink-muted: #4a4740;
+    --color-ink-faint: #97938a;
+    --color-rule: #d4d4d3;
+    --color-hot: #C0392B;
+    --color-hot-deep: #8E2A20;
 
-  /* Legacy aliases — kept pointing at editorial tokens during migration.
-     Delete once all call sites use the editorial names directly. */
-  --color-gold: #141413;
-  --color-gold-dark: #000000;
-  --color-gold-light: #3D3D3A;
-  --color-text: #141413;
-  --color-text-heading: #141413;
-  --color-text-muted: #3D3D3A;
-  --color-text-faint: #87867F;
-  --color-border: #D4D2C9;
-  --color-border-dashed: #D4D2C9;
+    /* Stamped offset shadows — flat, hard, in ink color */
+    --shadow-sm: 2px 2px 0 0 var(--color-ink);
+    --shadow-md: 4px 4px 0 0 var(--color-ink);
+    --shadow-lg: 6px 6px 0 0 var(--color-ink);
+
+    /* Sharp corners everywhere */
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
+    --radius-xl: 0px;
+    --radius-full: 9999px;
+
+    /* Legacy aliases — kept pointing at handbook tokens during migration. */
+    --color-gold: #15140f;
+    --color-gold-dark: #000000;
+    --color-gold-light: #4a4740;
+    --color-text: #15140f;
+    --color-text-heading: #15140f;
+    --color-text-muted: #4a4740;
+    --color-text-faint: #97938a;
+    --color-border: #d4d4d3;
+    --color-border-dashed: #d4d4d3;
+    --color-surface-deep: #e9e9e8;
+    --color-hot-coral: #C0392B;
 }
 
-/* -----------------------------------------------------------------------------
-   Editorial primitives — see STYLE.md for the full design-language doc.
-   These are hand-written utilities (Tailwind v4 @utility) so they can be
-   composed in JSX alongside normal Tailwind classes.
------------------------------------------------------------------------------ */
+/* --- Base --- */
 
-/* The mono-eyebrow caption used everywhere: filter pills, meta strips, status
-   labels, tag runs, issue numbers. Centralized so the tracking, size and case
-   treatment can be tweaked from one place. */
+html,
+body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+}
+
+body {
+    position: relative;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizelegibility;
+}
+
+/* Graph-paper grid on every page — fixed behind content. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image:
+        linear-gradient(90deg, rgba(20, 18, 16, 0.06) 1px, transparent 1px),
+        linear-gradient(rgba(20, 18, 16, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+body>* {
+    position: relative;
+    z-index: 1;
+}
+
+::selection {
+    background: var(--color-hot);
+    color: var(--color-surface);
+}
+
+/* --- Graph paper background --- */
+
+.handbook-grid {
+    background-image:
+        linear-gradient(90deg, rgba(20, 18, 16, 0.06) 1px, transparent 1px),
+        linear-gradient(rgba(20, 18, 16, 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* --- Utilities --- */
+
+/* Technical handbook label — 11px mono uppercase eyebrow with generous tracking. */
 @utility caption-mono {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.22em;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
 }
 
-/* One-pixel editorial hairline in the `rule` token. Used as section dividers
-   and as the short stubs flanking labeled dividers. */
+/* Two-pixel architectural rule in warm ink tone. */
 @utility hairline {
-  border-top-width: 1px;
-  border-top-style: solid;
-  border-top-color: var(--color-rule);
+    border-top-width: 2px;
+    border-top-style: solid;
+    border-top-color: var(--color-rule);
 }
 
-/* Wordmark honors reduced-motion by disabling its inline transitions. */
-@media (prefers-reduced-motion: reduce) {
-  .wordmark * {
-    transition: none !important;
-  }
+/* Scrollable region without a visible scrollbar (trackpad/wheel still works). */
+@utility scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
-/* ContactSlab seek-toast: 1s fade-in, 3s hold, 1s fade-out — 5s total. The
-   toast pill is positioned with translateX(-50%) for centering, so this
-   keyframe touches opacity only to avoid clobbering the transform. */
+/* --- Keyframes --- */
+
 @keyframes contact-toast-fade {
-  0%, 100%  { opacity: 0; }
-  20%, 80%  { opacity: 1; }
-}
 
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    20%,
+    80% {
+        opacity: 1;
+    }
+}

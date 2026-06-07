@@ -1,25 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import IconCircleButton from "@/app/components/ui/IconCircleButton";
 import ScrollingPano, {
     type ScrollingPanoHandle,
 } from "@/app/components/ui/ScrollingPano";
+import { STAMP_CARD_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 import { SITE } from "@/app/lib/site";
 
 interface ContactSlabProps {
     className?: string;
 }
 
-/**
- * Place names rendered in the bottom strip, paired with the image-x position
- * each prompt was concentrated at during pano generation. Clicking a label
- * seeks the panorama so that prompt's region centers in the viewport, and
- * surfaces the matching `blurb` as a 5-second toast at the top of the slab.
- *
- * SITE.location ("SEATTLE & LILLE") is left as the canonical string for the
- * OG card; this structured pair is the source of truth for the slab UI.
- */
 const LOCATIONS = [
     {
         label: "SEATTLE",
@@ -33,20 +26,16 @@ const LOCATIONS = [
     },
 ] as const;
 
-/** Total visible duration of the click-toast (matches the keyframe in CSS). */
 const TOAST_DURATION_MS = 5000;
 
 const [EMAIL_USER, EMAIL_DOMAIN] = SITE.email.split("@");
 
-/** Panorama assets used as the slab's top band. They wrap horizontally so the
- *  scroll loop is seamless. One is selected at random per page load. */
 const PANO_SOURCES = [
     "/contact-panos/sea-lil-1.webp",
     "/contact-panos/sea-lil-4.webp",
 ] as const;
 
-/** Height of the panorama band — preserved from the previous overlay design. */
-const PANO_HEIGHT_CLASS = "h-40"; // 160px
+const PANO_HEIGHT_CLASS = "h-40";
 
 function EmailAction() {
     const [revealed, setRevealed] = useState(false);
@@ -61,7 +50,7 @@ function EmailAction() {
         return (
             <a
                 href={`mailto:${EMAIL_USER}@${EMAIL_DOMAIN}`}
-                className="flex items-center gap-1.5 px-3 h-7 rounded-full border border-hot/60 text-hot text-[11px] font-mono"
+                className="flex items-center gap-1.5 px-3 h-7 border-2 border-hot text-hot bg-surface text-[11px] font-mono font-bold uppercase tracking-wider"
             >
                 <span>{EMAIL_USER}</span>
                 <i className="fa-brands fa-google text-[11px]" />
@@ -80,23 +69,8 @@ function EmailAction() {
     );
 }
 
-/**
- * Two-band inverted contact slab:
- *
- *   [ scrolling panorama band              ]
- *   [ buttons …                  loc pills ]
- *
- * The bottom band is a solid `bg-ink` strip; both bands sit inside one
- * rounded-2xl clip so the corners stay continuous. Clicking a location label
- * smoothly seeks the panorama to that prompt-region's center.
- */
 export default function ContactSlab({ className = "" }: ContactSlabProps) {
     const panoRef = useRef<ScrollingPanoHandle>(null);
-    // Each toast carries a unique `id` so re-clicking the same location
-    // restarts the CSS animation (React reuses the DOM node across renders;
-    // a fresh key on the toast forces a remount → animation replays). The
-    // counter ref is used instead of Date.now so the React Compiler purity
-    // lint doesn't flag the click handler.
     const toastIdRef = useRef(0);
     const [toast, setToast] = useState<{
         id: number;
@@ -114,8 +88,6 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
 
     const handleLocationClick = (loc: (typeof LOCATIONS)[number]) => {
         const started = panoRef.current?.seekToCenter(loc.center);
-        // Only flash a toast when actual movement begins — clicks ignored
-        // because a seek is already in flight produce no toast.
         if (!started) return;
         if (toastTimerRef.current !== null) {
             window.clearTimeout(toastTimerRef.current);
@@ -130,13 +102,14 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
 
     return (
         <div
-            className={`relative overflow-hidden rounded-2xl bg-ink text-surface ${className}`}
+            className={twMerge(
+                STAMP_FACE,
+                STAMP_CARD_SHADOW,
+                "relative overflow-hidden bg-ink text-surface",
+                className,
+            )}
         >
-            {/* Top band: panorama only. Its own relative wrapper anchors the
-          ScrollingPano (which positions itself absolute inset-0). A short
-          ink-tinted gradient at the bottom edge softens the seam between the
-          pano and the opaque strip below — the hard horizontal boundary read
-          as a band cut, this melts it into a haze. */}
+            {/* Panorama band */}
             <div className={`relative w-full ${PANO_HEIGHT_CLASS}`}>
                 <ScrollingPano
                     ref={panoRef}
@@ -144,30 +117,22 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                     duration={60}
                     direction="rtl"
                 />
-                <div
-                    aria-hidden="true"
-                    className="absolute inset-x-0 bottom-0 h-3 bg-gradient-to-b from-transparent to-ink pointer-events-none"
-                />
             </div>
 
-            {/* Click-toast: pill near the top of the slab, dark background so
-                it stays legible over the panorama. `key` keys the animation
-                to the toast id, so a fresh click restarts the fade in/out. */}
+            {/* Toast */}
             {toast && (
                 <div
                     key={toast.id}
                     role="status"
                     aria-live="polite"
-                    className="absolute top-4 left-1/2 -translate-x-1/2 px-4 h-7 rounded-full bg-ink/90 border border-surface/15 text-surface/90 text-[12px] flex items-center whitespace-nowrap max-w-[calc(100%-2rem)] pointer-events-none"
-                    style={{
-                        animation: "contact-toast-fade 5s ease-in-out forwards",
-                    }}
+                    className="absolute top-4 left-1/2 -translate-x-1/2 px-4 h-7 bg-ink border-2 border-surface/30 text-surface text-[12px] flex items-center whitespace-nowrap max-w-[calc(100%-2rem)] pointer-events-none"
+                    style={{ animation: "contact-toast-fade 5s ease-in-out forwards" }}
                 >
                     {toast.message}
                 </div>
             )}
 
-            {/* Bottom band: opaque ink strip with controls and location pills. */}
+            {/* Bottom strip with controls and location pills */}
             <div className="flex items-center gap-3 flex-wrap px-5 pt-2 pb-4">
                 <IconCircleButton
                     href={SITE.social.linkedin}
@@ -194,11 +159,6 @@ export default function ContactSlab({ className = "" }: ContactSlabProps) {
                 />
                 <EmailAction />
 
-                {/* Location: caption-mono text with a leading icon. Each place
-            name is a real button that seeks the panorama so its associated
-            prompt-region centers in the viewport. Hover state stays live
-            even mid-seek (clicks are silently ignored while a seek is in
-            flight — see ScrollingPano). */}
                 <div className="ml-auto flex items-center gap-2 caption-mono text-surface/60">
                     <i className="fa-solid fa-bed text-[10px]" aria-hidden="true" />
                     {LOCATIONS.map((loc, i) => (

@@ -6,42 +6,34 @@ import { useLayoutEffect, useRef, useState } from "react";
 interface WordmarkProps {
   className?: string;
   tabbable?: boolean;
-  /** When set, renders the wordmark as a Next.js `<Link>` to this href so the
-   *  whole brand mark — both compact and expanded states — is one click
-   *  target. The hover/focus animation is unchanged. */
   href?: string;
-  /** Reverse the default state: render the expanded full name on first paint
-   *  and contract to the compact wordmark on hover/focus. Useful on the About
-   *  page where the full name is the canonical hero, but the brand mark is
-   *  still discoverable as a Easter-egg-style hover. */
+  // Render the expanded full name on first paint and contract to compact on
+  // hover/focus. Used on the About page where the canonical hero is the
+  // full identity. Default false (show compact, expand on hover).
   defaultExpanded?: boolean;
-  /** When false, hover/focus does not toggle the state — the wordmark is
-   *  pinned to whichever state `defaultExpanded` selects. Default true. */
+  // Toggle state on hover/focus. When false, the wordmark is pinned to
+  // whichever state `defaultExpanded` selects. Default true.
   interactive?: boolean;
 }
 
 interface SegmentProps {
   compact: string;
   full: string;
-  red?: boolean;
+  accent?: boolean;
   expanded: boolean;
 }
 
-/**
- * Padding on all four sides of each segment that extends the `overflow: hidden`
- * clip box so italic Fraunces glyphs with long ascenders / descenders (the J
- * tail in particular swings down-left past `left: 0`) aren't truncated.
- * Negated via matching negative margin so in-flow layout metrics are unchanged.
- */
+// Padding on all four sides of each segment that extends the `overflow: hidden`
+// clip box so italic Fraunces glyphs with long ascenders/descenders aren't
+// truncated. Negated via matching negative margin so in-flow layout is intact.
 const CLIP_OVERHANG = "0.25em";
 
 /**
- * Segment renders two versions of a letter-group (compact upright, full italic)
- * stacked at the same origin. The outer box has a measured pixel width that
- * transitions between the two states while the children cross-fade.
- * Baseline is established by an invisible upright copy of the compact text.
+ * Segment renders two versions of a letter-group (compact upright Fraunces,
+ * full italic Fraunces) stacked at the same origin. The outer box transitions
+ * between the two widths while the children cross-fade.
  */
-function Segment({ compact, full, red, expanded }: SegmentProps) {
+function Segment({ compact, full, accent, expanded }: SegmentProps) {
   const compactRef = useRef<HTMLSpanElement>(null);
   const fullRef = useRef<HTMLSpanElement>(null);
   const [widths, setWidths] = useState<{ compact: number; full: number }>({
@@ -67,15 +59,12 @@ function Segment({ compact, full, red, expanded }: SegmentProps) {
 
   const hasMeasured = widths.compact > 0 && widths.full > 0;
   const targetWidth = expanded ? widths.full : widths.compact;
-  const color = red ? "text-hot" : "text-ink";
+  const color = accent ? "text-hot" : "text-ink";
 
   return (
     <span
       className={`relative inline-block align-baseline ${color}`}
       style={{
-        // Tailwind preflight sets box-sizing: border-box globally, which makes
-        // `width` include padding. We want `width` to be the *text* width, then
-        // padding strictly expands the clip box outward. Force content-box.
         boxSizing: "content-box",
         width: hasMeasured ? `${targetWidth}px` : "auto",
         transition: "width 500ms cubic-bezier(0.22, 1, 0.36, 1)",
@@ -84,12 +73,9 @@ function Segment({ compact, full, red, expanded }: SegmentProps) {
         margin: `calc(-1 * ${CLIP_OVERHANG})`,
       }}
     >
-      {/* Baseline holder — inline, visually invisible, sets the line-box. */}
       <span className="invisible whitespace-nowrap" aria-hidden="true">
         {compact}
       </span>
-
-      {/* Compact state — upright. Visible when not expanded. */}
       <span
         ref={compactRef}
         aria-hidden="true"
@@ -103,8 +89,6 @@ function Segment({ compact, full, red, expanded }: SegmentProps) {
       >
         {compact}
       </span>
-
-      {/* Full state — italic. Visible when expanded. */}
       <span
         ref={fullRef}
         aria-hidden="true"
@@ -122,6 +106,7 @@ function Segment({ compact, full, red, expanded }: SegmentProps) {
   );
 }
 
+// `kv` is the accent pair (the hot-colored letters). `j` and `c` stay ink.
 export default function Wordmark({
   className = "",
   tabbable = true,
@@ -130,10 +115,6 @@ export default function Wordmark({
   interactive = true,
 }: WordmarkProps) {
   const [hovered, setHovered] = useState(false);
-  // Default direction is compact → expand on hover. With `defaultExpanded`
-  // the polarity is flipped, so the same single hover-state drives the
-  // animation either way. When `interactive=false`, hover state is ignored
-  // and the wordmark is pinned to whichever state `defaultExpanded` selects.
   const expanded = interactive
     ? defaultExpanded
       ? !hovered
@@ -151,14 +132,12 @@ export default function Wordmark({
   const segments = (
     <>
       <Segment compact="j" full={"Junshen\u00A0"} expanded={expanded} />
-      <Segment compact="kv" full={"Kevin\u00A0"} red expanded={expanded} />
+      <Segment compact="kv" full={"Kevin\u00A0"} accent expanded={expanded} />
       <Segment compact="c" full="Chen" expanded={expanded} />
     </>
   );
 
   if (href) {
-    // Anchor variant — natively focusable, so we drop the manual tabIndex and
-    // role="img" (the link semantics already announce the wordmark text).
     return (
       <Link href={href} className={cls} aria-label="jkvc — Junshen Kevin Chen" {...handlers}>
         {segments}

@@ -1,15 +1,11 @@
 /**
- * LabeledDivider — the `── LABEL ──` motif used throughout the editorial UI.
+ * LabeledDivider — handbook-style section divider.
  *
  * Two modes:
- *   - `stub` (default): fixed short lines (32px) flanking a centered caption.
- *     Reads as a typographic flourish — use around small content like the
- *     examples strip or a between-sections interjection.
- *   - `full`: flex-expanding lines on both sides. Use when the label wants to
- *     separate two regions (e.g. settings groups).
+ *   - `stub` (default): short 32px 2px lines flanking a monospaced label.
+ *   - `full`: flex-expanding lines on both sides.
  *
- * Caption uses the `caption-mono` utility and `text-ink-faint`. Hairlines use
- * the `hairline` utility.
+ * Uses the 2px `hairline` utility and `caption-mono` label.
  */
 interface Props {
   children: React.ReactNode;

@@ -2,14 +2,9 @@ import RecipeHeader, {
   type RecipeMeta,
 } from "@/app/components/editorial/RecipeHeader";
 import Pill from "@/app/components/editorial/Pill";
+import StampShell from "@/app/components/ui/StampShell";
 import { resolveRef, type ProjectKind, type Ref } from "@/app/projects/data";
 
-/**
- * Copy + glyph for the draft indicator pill, keyed by project kind. Playables
- * read as unfinished builds ("under construction"); readables as unfinished
- * writing ("draft"). Falls back to the generic playable-flavoured copy when
- * kind is absent.
- */
 const DRAFT_BADGE: Record<ProjectKind, { icon: string; label: string }> = {
   playable: { icon: "fa-hammer", label: "Under construction" },
   readable: { icon: "fa-pen-nib", label: "Draft" },
@@ -19,14 +14,9 @@ interface Props {
   title: string;
   description: string;
   meta?: RecipeMeta;
-  /** When true, render the draft indicator pill above the recipe header. */
   draft?: boolean;
-  /** Drives which draft-badge copy/glyph gets shown. */
   kind?: ProjectKind;
-  /** Extra node slotted above the draft badge — reserved for one-off banners. */
   headerAddon?: React.ReactNode;
-  /** Optional list of typed external references. Rendered as a row of clickable
-   *  pills under the description, above the content area. */
   refs?: Ref[];
   children: React.ReactNode;
   contentTopClassName?: string;
@@ -46,18 +36,24 @@ export default function ProjectPageFrame({
   const badge = draft ? DRAFT_BADGE[kind ?? "playable"] : null;
 
   return (
-    <div className="min-h-screen bg-surface text-ink px-6 pt-16 pb-16 sm:px-8">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen text-ink px-6 pt-8 pb-16 sm:px-8">
+      <div className="max-w-3xl mx-auto">
         <div>
           {headerAddon}
           {badge && (
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-hot/40 caption-mono text-hot px-3 py-1 mb-3">
+            <StampShell
+              variant="control"
+              inline
+              bleed={false}
+              className="mb-3"
+              faceClassName="caption-mono items-center gap-1.5 px-3 py-1 text-hot"
+            >
               <i className={`fa-solid ${badge.icon} text-[8px]`} />
               <span>{badge.label}</span>
-            </div>
+            </StampShell>
           )}
           {meta && <RecipeHeader meta={meta} />}
-          <h1 className="mt-6 font-serif italic text-5xl leading-[1.05] tracking-[-0.02em] text-ink">
+          <h1 className="mt-8 font-sans font-black text-5xl leading-[1.05] tracking-tight text-ink uppercase">
             {title}
           </h1>
           <p className="mt-4 text-base leading-relaxed text-ink-muted max-w-xl">

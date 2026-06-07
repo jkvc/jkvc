@@ -1,158 +1,180 @@
 "use client";
 
 import Link from "next/link";
+import { twMerge } from "tailwind-merge";
 import { CONTROL_SIZE, type ControlSize } from "../ui/controlSize";
+import {
+    STAMP_CONTROL_LIFT,
+    STAMP_CONTROL_SHADOW,
+    STAMP_FACE,
+} from "@/app/lib/stamp";
 
 /**
- * Pill — the universal editorial pill button.
+ * Handbook-style pill — sharp corners, 2px border, stamped shadow with
+ * physical press/lift animation. Two states:
  *
- * Shape and typography are standardized: rounded-full, hairline border, mono
- * caption type (`caption-mono` utility), slight horizontal padding. Two states:
- *
- *   - inactive: `border-rule text-ink-muted`, hover flips to full-contrast ink.
- *   - active:   inverted — `bg-ink text-surface border-ink`.
- *
- * Renders as `<button>` by default, as `<Link>` when `href` is provided, as
- * plain `<a target>` when `external` is true. Icon prefix is optional and sits
- * at caption scale (10px) to match the text.
- *
- * Sizing shares the `ControlSize` token with `IconCircleButton`: at any given
- * `size` a pill and a circle render at the same height (the pill's width is
- * still intrinsic to its content). Default is `"xs"` to match the historical
- * caption-pill metrics.
- *
- * Do NOT restyle pills inline — if a variant is needed (e.g. pressed, inverted
- * for dark surfaces), add it here.
+ *   - inactive: white surface, ink border, small shadow; hover lifts face, stamp stays fixed.
+ *   - active:   inverted — ink bg, surface text, shadow on wrap only.
+ *   - inverted: for dark surfaces — dim chrome, accent hover.
  */
 
 interface BaseProps {
-  children: React.ReactNode;
-  active?: boolean;
-  /** Shared with `IconCircleButton`. Default `"xs"`. */
-  size?: ControlSize;
-  /** Font Awesome class (without family prefix), e.g. "fa-eye". */
-  icon?: string;
-  iconFamily?: "fa-solid" | "fa-regular" | "fa-brands";
-  title?: string;
-  className?: string;
-  /** Accessibility toggle state for button variant (e.g. drafts toggle). */
-  ariaPressed?: boolean;
-  /** Inverted variant for dark surfaces (mirrors `IconCircleButton.inverted`). */
-  inverted?: boolean;
+    children: React.ReactNode;
+    active?: boolean;
+    size?: ControlSize;
+    icon?: string;
+    iconFamily?: "fa-solid" | "fa-regular" | "fa-brands";
+    title?: string;
+    className?: string;
+    ariaPressed?: boolean;
+    inverted?: boolean;
 }
 
 type ButtonVariant = BaseProps & {
-  onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  href?: never;
-  external?: never;
-  target?: never;
-  rel?: never;
+    onClick?: () => void;
+    type?: "button" | "submit" | "reset";
+    href?: never;
+    external?: never;
+    target?: never;
+    rel?: never;
 };
 
 type LinkVariant = BaseProps & {
-  href: string;
-  external?: boolean;
-  target?: string;
-  rel?: string;
-  onClick?: never;
-  type?: never;
+    href: string;
+    external?: boolean;
+    target?: string;
+    rel?: string;
+    onClick?: never;
+    type?: never;
 };
 
 type Props = ButtonVariant | LinkVariant;
 
-const BASE =
-  "caption-mono rounded-full border transition-colors inline-flex items-center gap-1.5 cursor-pointer";
+const ROOT = "group caption-mono inline-flex cursor-pointer";
 
-function classes({
-  active,
-  size,
-  inverted,
-  extra,
+function faceClasses({
+    active,
+    size,
+    inverted,
+    extra,
 }: {
-  active: boolean;
-  size: ControlSize;
-  inverted: boolean;
-  extra?: string;
+    active: boolean;
+    size: ControlSize;
+    inverted: boolean;
+    extra?: string;
 }): string {
-  let state: string;
-  if (inverted) {
-    // Mirrors IconCircleButton.inverted: dim surface chrome, hot-coral hover.
-    // Active inverted lifts to a filled cream chip on dark.
-    state = active
-      ? "bg-surface text-ink border-surface"
-      : "border-surface/25 text-surface/60 hover:border-hot hover:text-hot";
-  } else {
-    state = active
-      ? "bg-ink text-surface border-ink"
-      : "border-rule text-ink-muted hover:border-ink hover:text-ink";
-  }
-  const dims = `${CONTROL_SIZE[size].height} ${CONTROL_SIZE[size].pillPaddingX}`;
-  return `${BASE} ${dims} ${state} ${extra ?? ""}`;
+    let state: string;
+    if (inverted) {
+        state = active
+            ? "bg-surface text-ink border-surface"
+            : "border-surface/30 text-surface/60 hover:border-hot hover:text-hot bg-transparent";
+    } else {
+        state = active
+            ? "bg-ink text-surface border-ink"
+            : "bg-surface border-ink text-ink-muted";
+    }
+    const shadow = !inverted ? STAMP_CONTROL_SHADOW : "";
+    const lift = !active && !inverted ? STAMP_CONTROL_LIFT : "";
+    const dims = `${CONTROL_SIZE[size].height} ${CONTROL_SIZE[size].pillPaddingX}`;
+    return twMerge(
+        STAMP_FACE,
+        shadow,
+        lift,
+        "inline-flex items-center gap-1.5",
+        state,
+        dims,
+        extra,
+    );
 }
 
 function Body({
-  icon,
-  iconFamily,
-  children,
+    icon,
+    iconFamily,
+    children,
 }: {
-  icon?: string;
-  iconFamily: "fa-solid" | "fa-regular" | "fa-brands";
-  children: React.ReactNode;
+    icon?: string;
+    iconFamily: "fa-solid" | "fa-regular" | "fa-brands";
+    children: React.ReactNode;
 }) {
-  return (
-    <>
-      {icon && <i className={`${iconFamily} ${icon} text-[10px]`} aria-hidden="true" />}
-      <span>{children}</span>
-    </>
-  );
+    return (
+        <>
+            {icon && <i className={`${iconFamily} ${icon} text-[10px]`} aria-hidden="true" />}
+            <span>{children}</span>
+        </>
+    );
+}
+
+function StampPill({
+    wrapClassName,
+    faceClassName,
+    children,
+}: {
+    wrapClassName: string;
+    faceClassName: string;
+    children: React.ReactNode;
+}) {
+    if (!wrapClassName) {
+        return <span className={faceClassName}>{children}</span>;
+    }
+    return (
+        <span className={twMerge(wrapClassName, "inline-flex")}>
+            <span className={faceClassName}>{children}</span>
+        </span>
+    );
 }
 
 export default function Pill(props: Props) {
-  const active = props.active ?? false;
-  const size = props.size ?? "xs";
-  const inverted = props.inverted ?? false;
-  const iconFamily = props.iconFamily ?? "fa-solid";
-  const cls = classes({ active, size, inverted, extra: props.className });
+    const active = props.active ?? false;
+    const size = props.size ?? "xs";
+    const inverted = props.inverted ?? false;
+    const iconFamily = props.iconFamily ?? "fa-solid";
+    const wrap = inverted && !active ? "" : "inline-flex";
+    const face = faceClasses({ active, size, inverted, extra: props.className });
 
-  if ("href" in props && typeof props.href === "string") {
-    const isExternal = props.external ?? /^https?:\/\//.test(props.href);
-    if (isExternal) {
-      return (
-        <a
-          href={props.href}
-          target={props.target ?? "_blank"}
-          rel={props.rel ?? "noopener noreferrer"}
-          title={props.title}
-          className={cls}
-        >
-          <Body icon={props.icon} iconFamily={iconFamily}>
-            {props.children}
-          </Body>
-        </a>
-      );
+    if ("href" in props && typeof props.href === "string") {
+        const isExternal = props.external ?? /^https?:\/\//.test(props.href);
+        if (isExternal) {
+            return (
+                <a
+                    href={props.href}
+                    target={props.target ?? "_blank"}
+                    rel={props.rel ?? "noopener noreferrer"}
+                    title={props.title}
+                    className={ROOT}
+                >
+                    <StampPill wrapClassName={wrap} faceClassName={face}>
+                        <Body icon={props.icon} iconFamily={iconFamily}>
+                            {props.children}
+                        </Body>
+                    </StampPill>
+                </a>
+            );
+        }
+        return (
+            <Link href={props.href} title={props.title} className={ROOT}>
+                <StampPill wrapClassName={wrap} faceClassName={face}>
+                    <Body icon={props.icon} iconFamily={iconFamily}>
+                        {props.children}
+                    </Body>
+                </StampPill>
+            </Link>
+        );
     }
-    return (
-      <Link href={props.href} title={props.title} className={cls}>
-        <Body icon={props.icon} iconFamily={iconFamily}>
-          {props.children}
-        </Body>
-      </Link>
-    );
-  }
 
-  const btn = props as ButtonVariant;
-  return (
-    <button
-      type={btn.type ?? "button"}
-      onClick={btn.onClick}
-      title={btn.title}
-      aria-pressed={btn.ariaPressed}
-      className={cls}
-    >
-      <Body icon={btn.icon} iconFamily={iconFamily}>
-        {btn.children}
-      </Body>
-    </button>
-  );
+    const btn = props as ButtonVariant;
+    return (
+        <button
+            type={btn.type ?? "button"}
+            onClick={btn.onClick}
+            title={btn.title}
+            aria-pressed={btn.ariaPressed}
+            className={ROOT}
+        >
+            <StampPill wrapClassName={wrap} faceClassName={face}>
+                <Body icon={btn.icon} iconFamily={iconFamily}>
+                    {btn.children}
+                </Body>
+            </StampPill>
+        </button>
+    );
 }

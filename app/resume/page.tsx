@@ -157,8 +157,8 @@ function RoleBlock({ r }: { r: Role }) {
     return (
         <div className="pt-4 first:pt-0 break-inside-avoid">
             <div className="flex items-baseline gap-2">
-                <h3 className="font-serif text-[13.5px] leading-tight text-ink">
-                    <span className="italic">{r.title}</span>
+                <h3 className="font-sans font-bold text-[13.5px] leading-tight text-ink">
+                    <span>{r.title}</span>
                     <span className="text-ink-faint"> · </span>
                     <span>{r.org}</span>
                 </h3>
@@ -283,7 +283,7 @@ export default function ResumePage() {
                 </div>
             </div>
 
-            <div className="min-h-screen bg-surface-deep py-16 px-4 print:p-0 print:bg-white">
+            <div className="min-h-screen py-16 px-4 print:p-0 print:bg-white">
                 {/* The "sheet" — sized to US Letter (8.5in × 11in). On
                     screen we add a soft shadow so it reads as a sheet of
                     paper laid on the page; in print we strip the shadow
