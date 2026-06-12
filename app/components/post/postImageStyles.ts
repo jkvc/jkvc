@@ -5,7 +5,7 @@ import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
 export const postImgClass = twMerge(
   STAMP_FACE,
   STAMP_CONTROL_WRAP_IDLE,
-  "h-auto w-full max-w-xl bg-surface",
+  "mx-auto mt-4 block h-auto w-full max-w-xl bg-surface",
 );
 
 export const POST_IMAGE_MAX = {
@@ -46,8 +46,6 @@ export function resolvePostImageLayout({
 }: Pick<PostImageProps, "className" | "maxWidth" | "columnWidth" | "style">): {
   imgClassName: string;
   imgStyle: CSSProperties | undefined;
-  wrapperClassName: string | undefined;
-  wrapperStyle: CSSProperties | undefined;
 } {
   const fraction =
     typeof columnWidth === "number" &&
@@ -69,15 +67,11 @@ export function resolvePostImageLayout({
     return {
       imgClassName,
       imgStyle: { width: `${fraction * 100}%`, ...style },
-      wrapperClassName: undefined,
-      wrapperStyle: undefined,
     };
   }
 
   return {
     imgClassName,
     imgStyle: style,
-    wrapperClassName: undefined,
-    wrapperStyle: undefined,
   };
 }

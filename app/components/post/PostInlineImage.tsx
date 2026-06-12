@@ -19,8 +19,12 @@ export default function PostInlineImage({
   const { openLightbox } = usePostLightbox();
   const label = typeof alt === "string" && alt ? alt : "image";
 
-  const { imgClassName, imgStyle, wrapperClassName, wrapperStyle } =
-    resolvePostImageLayout({ className, maxWidth, columnWidth, style });
+  const { imgClassName, imgStyle } = resolvePostImageLayout({
+    className,
+    maxWidth,
+    columnWidth,
+    style,
+  });
 
   const handleOpen = () => {
     if (typeof src !== "string" || !src) return;
@@ -30,17 +34,13 @@ export default function PostInlineImage({
   return (
     <button
       type="button"
-      className={twMerge(
-        "mx-auto mt-4 block cursor-zoom-in border-0 bg-transparent p-0",
-        wrapperClassName,
-      )}
-      style={wrapperStyle}
+      className="contents border-0 bg-transparent p-0"
       onClick={handleOpen}
       aria-label={`View full size: ${label}`}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        className={imgClassName}
+        className={twMerge(imgClassName, "cursor-zoom-in")}
         alt={typeof alt === "string" ? alt : ""}
         src={src}
         {...rest}
