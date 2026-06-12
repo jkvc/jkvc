@@ -1,4 +1,4 @@
-import ProjectMasonryCard from "@/app/components/ProjectMasonryCard";
+import ProjectMasonryCardDeferred from "@/app/components/ProjectMasonryCardDeferred";
 import { STAMP_BLEED_TOP } from "@/app/lib/stamp";
 import type { MasonryProject } from "@/app/lib/home-projects";
 import { splitProjectsIntoMasonryLanes } from "@/app/projects/data";
@@ -25,7 +25,7 @@ export default function HomeMasonryStatic({
                 <div key={laneIdx} className="flex min-w-0 flex-col gap-4">
                     {lane.map((project) => (
                         <div key={project.slug}>
-                            <ProjectMasonryCard
+                            <ProjectMasonryCardDeferred
                                 {...project}
                                 draft={showDrafts && !project.ready}
                                 showStatus={showDrafts}
