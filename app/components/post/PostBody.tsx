@@ -5,77 +5,13 @@ import type { MDXComponents } from "mdx/types";
 import type { ImgHTMLAttributes } from "react";
 import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
 import StampShell from "@/app/components/ui/StampShell";
+import PostInlineImage from "@/app/components/post/PostInlineImage";
+import { PostLightboxProvider } from "@/app/components/post/PostLightboxProvider";
 
-const postImgClass = twMerge(
-  STAMP_FACE,
-  STAMP_CONTROL_WRAP_IDLE,
-  "mx-auto mt-4 block h-auto w-full max-w-xl bg-surface",
-);
-
-function mergeImgClass(...extra: (string | undefined)[]) {
-  return twMerge(postImgClass, ...extra);
-}
-
-const POST_IMAGE_MAX = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-  xl: "max-w-xl",
-  "2xl": "max-w-2xl",
-  "3xl": "max-w-3xl",
-  "4xl": "max-w-4xl",
-  "5xl": "max-w-5xl",
-  "6xl": "max-w-6xl",
-  "7xl": "max-w-7xl",
-  full: "max-w-full",
-  none: "max-w-none",
-  prose: "max-w-prose",
-} as const;
-
-export type PostImageMaxWidth = keyof typeof POST_IMAGE_MAX;
-
-export type PostImageProps = Omit<
-  ImgHTMLAttributes<HTMLImageElement>,
-  "maxWidth"
-> & {
-  maxWidth?: PostImageMaxWidth;
-  columnWidth?: number;
-};
-
-function PostImage({
-  className,
-  alt,
-  maxWidth,
-  columnWidth,
-  style,
-  ...rest
-}: PostImageProps) {
-  const fraction =
-    typeof columnWidth === "number" &&
-    Number.isFinite(columnWidth) &&
-    columnWidth > 0
-      ? Math.min(1, columnWidth)
-      : null;
-  const override =
-    fraction != null
-      ? "w-auto max-w-none"
-      : maxWidth
-        ? POST_IMAGE_MAX[maxWidth]
-        : undefined;
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      className={mergeImgClass(override, className)}
-      alt={alt ?? ""}
-      {...rest}
-      style={
-        fraction != null
-          ? { width: `${fraction * 100}%`, ...style }
-          : style
-      }
-    />
-  );
-}
+export type {
+  PostImageMaxWidth,
+  PostImageProps,
+} from "@/app/components/post/postImageStyles";
 
 const MDX_COMPONENTS: MDXComponents = {
   h1: (props) => (
@@ -144,18 +80,10 @@ const MDX_COMPONENTS: MDXComponents = {
   strong: (props) => (
     <strong className="font-bold text-ink" {...props} />
   ),
-  img: (props: ImgHTMLAttributes<HTMLImageElement>) => {
-    const { className, alt, ...rest } = props;
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        className={mergeImgClass(className)}
-        alt={typeof alt === "string" ? alt : ""}
-        {...rest}
-      />
-    );
-  },
-  PostImage,
+  img: (props: ImgHTMLAttributes<HTMLImageElement>) => (
+    <PostInlineImage {...props} />
+  ),
+  PostImage: PostInlineImage,
 };
 
 const MDX_OPTIONS = {
@@ -193,17 +121,19 @@ export default async function PostBody({ source }: Props) {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      {renderedSections.map((rendered, i) => (
-        <StampShell
-          key={i}
-          variant="card"
-          bleed={false}
-          faceClassName="p-6 sm:p-8 [&>article>*:first-child]:mt-0"
-        >
-          <article className="prose-reset max-w-none">{rendered}</article>
-        </StampShell>
-      ))}
-    </div>
+    <PostLightboxProvider>
+      <div className="flex flex-col gap-6">
+        {renderedSections.map((rendered, i) => (
+          <StampShell
+            key={i}
+            variant="card"
+            bleed={false}
+            faceClassName="p-6 sm:p-8 [&>article>*:first-child]:mt-0"
+          >
+            <article className="prose-reset max-w-none">{rendered}</article>
+          </StampShell>
+        ))}
+      </div>
+    </PostLightboxProvider>
   );
 }

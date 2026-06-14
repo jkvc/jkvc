@@ -3,7 +3,7 @@
 import { useState } from "react";
 import LabeledDivider from "@/app/components/editorial/LabeledDivider";
 import ConfirmDialog from "@/app/components/ui/ConfirmDialog";
-import StampShell from "@/app/components/ui/StampShell";
+import StampImageButton from "@/app/components/ui/StampImageButton";
 
 export interface ExampleGalleryItem {
   id: string;
@@ -65,27 +65,21 @@ export default function ExampleGalleryStrip({
       <div className={`flex flex-wrap gap-2 ${center ? "justify-center" : ""}`}>
         {items.map((item) => (
           <div key={item.id} className="relative group">
-            <button
+            <StampImageButton
               onClick={(e) => {
                 e.stopPropagation();
                 onSelect(item.id);
               }}
-              className="group cursor-pointer p-0"
+              aria-label={item.alt ?? "Example"}
+              inline
+              faceClassName={`hover:border-hot ${SIZE_MAP[thumbnailSize]}`}
             >
-              <StampShell
-                variant="control"
-                interactive
-                inline
-                bleed={false}
-                faceClassName={`overflow-hidden p-0 hover:border-hot ${SIZE_MAP[thumbnailSize]}`}
-              >
-                <img
-                  src={item.imageUrl}
-                  alt={item.alt ?? "Example"}
-                  className="h-full w-full object-cover"
-                />
-              </StampShell>
-            </button>
+              <img
+                src={item.imageUrl}
+                alt={item.alt ?? "Example"}
+                className="h-full w-full object-cover"
+              />
+            </StampImageButton>
             {showDelete && (
               <button
                 type="button"
