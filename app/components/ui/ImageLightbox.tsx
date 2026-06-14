@@ -42,7 +42,7 @@ export default function ImageLightbox({ open, src, alt, onClose }: Props) {
       }}
     >
       <div
-        className="flex h-full w-full cursor-zoom-out items-center justify-center px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12"
+        className="flex h-full w-full cursor-default items-center justify-center px-5 py-8 sm:px-10 sm:py-10 lg:px-16 lg:py-12"
         onClick={onClose}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

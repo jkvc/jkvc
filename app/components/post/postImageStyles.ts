@@ -1,12 +1,8 @@
 import { twMerge } from "tailwind-merge";
 import type { CSSProperties, ImgHTMLAttributes } from "react";
-import { STAMP_CONTROL_WRAP_IDLE, STAMP_FACE } from "@/app/lib/stamp";
 
-export const postImgClass = twMerge(
-  STAMP_FACE,
-  STAMP_CONTROL_WRAP_IDLE,
-  "mx-auto mt-4 block h-auto w-full max-w-xl bg-surface",
-);
+/** Layout classes for images inside {@link StampImageButton} (stamp chrome lives on the shell). */
+export const POST_IMG_LAYOUT = "block h-auto w-full max-w-xl";
 
 export const POST_IMAGE_MAX = {
   sm: "max-w-sm",
@@ -35,8 +31,10 @@ export type PostImageProps = Omit<
 };
 
 export function mergeImgClass(...extra: (string | undefined)[]) {
-  return twMerge(postImgClass, ...extra);
+  return twMerge(POST_IMG_LAYOUT, ...extra);
 }
+
+const WRAPPER_BASE = "mx-auto mt-4 block max-w-full";
 
 export function resolvePostImageLayout({
   className,
@@ -46,6 +44,8 @@ export function resolvePostImageLayout({
 }: Pick<PostImageProps, "className" | "maxWidth" | "columnWidth" | "style">): {
   imgClassName: string;
   imgStyle: CSSProperties | undefined;
+  wrapperClassName: string;
+  wrapperStyle: CSSProperties | undefined;
 } {
   const fraction =
     typeof columnWidth === "number" &&
@@ -54,11 +54,13 @@ export function resolvePostImageLayout({
       ? Math.min(1, columnWidth)
       : null;
 
+  const maxWClass = maxWidth ? POST_IMAGE_MAX[maxWidth] : undefined;
+
   const override =
     fraction != null
-      ? "w-auto max-w-none"
-      : maxWidth
-        ? POST_IMAGE_MAX[maxWidth]
+      ? "w-full max-w-none"
+      : maxWClass
+        ? "w-full max-w-none"
         : undefined;
 
   const imgClassName = mergeImgClass(override, className);
@@ -66,12 +68,16 @@ export function resolvePostImageLayout({
   if (fraction != null) {
     return {
       imgClassName,
-      imgStyle: { width: `${fraction * 100}%`, ...style },
+      imgStyle: style,
+      wrapperClassName: WRAPPER_BASE,
+      wrapperStyle: { width: `${fraction * 100}%` },
     };
   }
 
   return {
     imgClassName,
     imgStyle: style,
+    wrapperClassName: twMerge(WRAPPER_BASE, "w-fit", maxWClass),
+    wrapperStyle: undefined,
   };
 }

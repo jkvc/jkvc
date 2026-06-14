@@ -1,6 +1,6 @@
 "use client";
 
-import { twMerge } from "tailwind-merge";
+import StampImageButton from "@/app/components/ui/StampImageButton";
 import { usePostLightbox } from "@/app/components/post/PostLightboxProvider";
 import {
   resolvePostImageLayout,
@@ -19,12 +19,13 @@ export default function PostInlineImage({
   const { openLightbox } = usePostLightbox();
   const label = typeof alt === "string" && alt ? alt : "image";
 
-  const { imgClassName, imgStyle } = resolvePostImageLayout({
-    className,
-    maxWidth,
-    columnWidth,
-    style,
-  });
+  const { imgClassName, imgStyle, wrapperClassName, wrapperStyle } =
+    resolvePostImageLayout({
+      className,
+      maxWidth,
+      columnWidth,
+      style,
+    });
 
   const handleOpen = () => {
     if (typeof src !== "string" || !src) return;
@@ -32,20 +33,20 @@ export default function PostInlineImage({
   };
 
   return (
-    <button
-      type="button"
-      className="contents border-0 bg-transparent p-0"
+    <StampImageButton
       onClick={handleOpen}
       aria-label={`View full size: ${label}`}
+      className={wrapperClassName}
+      style={wrapperStyle}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        className={twMerge(imgClassName, "cursor-zoom-in")}
+        className={imgClassName}
         alt={typeof alt === "string" ? alt : ""}
         src={src}
         {...rest}
         style={imgStyle}
       />
-    </button>
+    </StampImageButton>
   );
 }
