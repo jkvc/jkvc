@@ -7,15 +7,15 @@
  * beside a short one; variable card heights pack tightly (not CSS grid rows).
  *
  * Approach: two flex lanes + assignProjectsToBalancedLanes — each next card
- * goes on the shorter lane (ResizeObserver heights). Cards may shift lanes once
- * after images load; fallback height until measured.
+ * goes on the shorter lane (ResizeObserver heights). Cards mount only after
+ * thumbnails load; fallback height until measured.
  *
  * If this misbehaves, check: lane rebalance on resize, thumbnail aspect ratios,
  * or swap to a measured masonry lib / stricter even-odd pairing (data.ts).
  */
 
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
-import ProjectMasonryCard from "@/app/components/ProjectMasonryCard";
+import ProjectMasonryCardDeferred from "@/app/components/ProjectMasonryCardDeferred";
 import { STAMP_BLEED_TOP } from "@/app/lib/stamp";
 import {
     assignProjectsToBalancedLanes,
@@ -56,7 +56,7 @@ function MeasuredMasonryCard({
 
     return (
         <div ref={ref}>
-            <ProjectMasonryCard
+            <ProjectMasonryCardDeferred
                 {...project}
                 draft={showDrafts && !project.ready}
                 showStatus={showDrafts}
