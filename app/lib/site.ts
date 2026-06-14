@@ -9,7 +9,7 @@ export const SITE = {
     /** Full legal / display name. */
     fullName: "Junshen Kevin Chen",
     /** Short one-liner for the home hero. */
-    tagline: "[jkvc](/about) is an experimental ~~AI~~ human that can occasionally make mistakes. \nAlways verify important information.",
+    tagline: "This is an experimental ~~AI~~ human that can occasionally make mistakes. \nAlways verify important information.",
     /** Meta-description / social preview copy for the root. */
     description:
         "A personal website. Somewhere in here is a mix of ML modeling, inference systems, interaction engineering, generative art.",
