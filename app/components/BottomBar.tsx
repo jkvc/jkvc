@@ -20,15 +20,13 @@ export function subscribeToStorage(cb: () => void) {
   };
 }
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
 export function getShowDrafts() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored !== null) return stored === "1";
-    return IS_DEV;
+    return false;
   } catch {
-    return IS_DEV;
+    return false;
   }
 }
 
