@@ -34,6 +34,10 @@ Body: `{ token: string }`. Verifies against Redis `admin:token` key, sets `HttpO
 
 Clears the admin cookie (logout).
 
+### `POST /api/admin/demos/klein/stream`
+
+Proxies Klein 9B inference to the Modal SSE stream endpoint. Requires valid admin cookie. Body: `{ prompt: string, seed?: number, resolution?: [number, number], condImages?: string[] }` where `condImages` are raw base64 strings (no data-URL prefix). Returns `text/event-stream` with `progress` and `result` events. Stream URL is hardcoded; proxy tokens (`MODAL_KEY`, `MODAL_SECRET`) are server-side env only.
+
 ## Authentication
 
 Redis-backed token auth. A secret token is stored at Redis key `admin:token`. The admin login page accepts the token, which is verified against Redis and stored as an `HttpOnly` cookie. No third-party auth provider needed.
