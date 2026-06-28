@@ -1,4 +1,4 @@
-import { KLEIN_DEMO_RESOLUTION } from "@/app/lib/klein-demo";
+import { KLEIN_DEMO_NUM_STEPS, KLEIN_DEMO_RESOLUTION } from "@/app/lib/klein-demo";
 
 const MODAL_KLEIN_STREAM_URL =
   "https://kevinehc--lunas-courageous-adventure-stream.modal.run";
@@ -12,6 +12,7 @@ export interface KleinStreamRequest {
   prompt: string;
   seed?: number;
   resolution?: [number, number];
+  numSteps?: number;
   condImages?: string[];
 }
 
@@ -38,11 +39,13 @@ export function buildKleinStreamPayload(body: KleinStreamRequest): Record<string
 
   const resolution = body.resolution ?? KLEIN_DEMO_RESOLUTION;
   const seed = body.seed ?? Math.floor(Math.random() * 2 ** 31);
+  const numSteps = body.numSteps ?? KLEIN_DEMO_NUM_STEPS;
 
   const inputs: Record<string, unknown> = {
     prompt,
     seed,
     resolution,
+    num_steps: numSteps,
   };
 
   const payload: Record<string, unknown> = {

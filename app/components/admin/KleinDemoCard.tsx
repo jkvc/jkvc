@@ -9,7 +9,7 @@ import StreamLogPanel, { type StreamLogEntry } from "@/app/components/ui/StreamL
 import { consumeSseJson } from "@/app/lib/client/sse";
 import { base64ToDataUrl, filesToBase64 } from "@/app/lib/client/image-base64";
 import { resizeFilesToLongestEdge } from "@/app/lib/client/image-resize";
-import { KLEIN_DEMO_RESOLUTION, KLEIN_DEMO_SIZE } from "@/app/lib/klein-demo";
+import { KLEIN_DEMO_NUM_STEPS, KLEIN_DEMO_RESOLUTION, KLEIN_DEMO_SIZE } from "@/app/lib/klein-demo";
 import { STAMP_CONTROL_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
 type KleinStreamEvent =
@@ -109,6 +109,7 @@ export default function KleinDemoCard({
         body: JSON.stringify({
           prompt: trimmed,
           resolution: KLEIN_DEMO_RESOLUTION,
+          numSteps: KLEIN_DEMO_NUM_STEPS,
           condImages,
         }),
       });
