@@ -12,10 +12,30 @@ import { resizeFilesToLongestEdge } from "@/app/lib/client/image-resize";
 import { KLEIN_DEMO_NUM_STEPS, KLEIN_DEMO_RESOLUTION, KLEIN_DEMO_SIZE } from "@/app/lib/klein-demo";
 import { STAMP_CONTROL_SHADOW, STAMP_FACE } from "@/app/lib/stamp";
 
-type KleinStreamEvent =
-  | { kind: "progress"; message: string }
-  | { kind: "result"; result: { image: string }; metadata?: Record<string, unknown> }
-  | { kind: "error"; message?: string };
+function summarizeForStreamLog(value: unknown): unknown {
+  if (typeof value === "string" && value.length > 120) {
+    const sample = value.slice(0, 64);
+    if (/^[A-Za-z0-9+/=\n]+$/.test(sample)) {
+      return `<base64, ${value.length} chars>`;
+    }
+  }
+  if (Array.isArray(value)) {
+    return value.map(summarizeForStreamLog);
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+        key,
+        summarizeForStreamLog(nested),
+      ]),
+    );
+  }
+  return value;
+}
+
+function formatStreamLogJson(payload: unknown): string {
+  return JSON.stringify(summarizeForStreamLog(payload), null, 2);
+}
 
 interface Props {
   demoName: string;
@@ -48,6 +68,13 @@ export default function KleinDemoCard({
     const offsetMs = performance.now() - genStartRef.current;
     setStatusLines((prev) => [...prev, { offsetMs, message }]);
   }, []);
+
+  const appendLogJson = useCallback(
+    (payload: unknown) => {
+      appendLog(formatStreamLogJson(payload));
+    },
+    [appendLog],
+  );
 
   const resetRun = useCallback(() => {
     setStatusLines([]);
@@ -122,19 +149,26 @@ export default function KleinDemoCard({
       }
 
       let gotResult = false;
-      await consumeSseJson<KleinStreamEvent>(response, (event) => {
-        if (event.kind === "progress") {
-          appendLog(event.message);
-          return;
-        }
+      await consumeSseJson<Record<string, unknown>>(response, (event) => {
+        appendLogJson(event);
+
         if (event.kind === "result") {
-          gotResult = true;
-          setOutputUrl(base64ToDataUrl(event.result.image));
-          appendLog("Done.");
+          const result = event.result;
+          if (
+            result &&
+            typeof result === "object" &&
+            "image" in result &&
+            typeof result.image === "string"
+          ) {
+            gotResult = true;
+            setOutputUrl(base64ToDataUrl(result.image));
+          }
           return;
         }
         if (event.kind === "error") {
-          throw new Error(event.message ?? "Generation failed");
+          throw new Error(
+            typeof event.message === "string" ? event.message : "Generation failed",
+          );
         }
       });
 
@@ -146,7 +180,7 @@ export default function KleinDemoCard({
     } finally {
       setRunning(false);
     }
-  }, [appendLog, condFiles, mode, prompt, resetRun]);
+  }, [appendLogJson, condFiles, mode, prompt, resetRun]);
 
   return (
     <StampShell variant="card" bleed={false} faceClassName="p-5 sm:p-6">
